@@ -1,0 +1,65 @@
+%% Glycaemic digital twin: architecture. Render with any Mermaid viewer (e.g. GitHub, mermaid.live).
+%% docs/architecture.png is drawn from the same structure by scripts/make_architecture_diagram.py.
+flowchart LR
+    subgraph DATA["1. Synthetic data (simulated, not real patients)"]
+        EHR["Synthetic EHR cohort<br/>300 patients: age, BMI, HbA1c, eGFR,<br/>medications, comorbidities, ICD-10"]
+        SIM["Mechanistic simulator<br/>Indian meals, insulin / SU PK, titration,<br/>sleep, activity, dawn & night effects"]
+        WEAR["Wearable stream (device_id)<br/>CGM 5-min with lag, noise, dropouts;<br/>steps, heart rate, sleep stages"]
+        ENR["Enrollment log<br/>patient_id to device_id<br/>(synthetic linkage)"]
+        EHR -- "traits drive dynamics (by design)" --> SIM
+        SIM --> WEAR
+    end
+
+    subgraph FEAT["2. Linking & features"]
+        LINK["linker.py<br/>1:1 enrollment join, validated"]
+        WIN["Rolling windows<br/>6 h history to 2 h horizon<br/>hyper > 180, hypo < 70, onset, nocturnal"]
+        STAT["Static vector<br/>encoded EHR, scaled on train only"]
+        SPLIT["Patient-level split 65/15/20<br/>stratified by drug class, leakage guard"]
+    end
+
+    subgraph MOD["3. Models"]
+        PERS["Persistence<br/>trend extrapolation"]
+        LGB["LightGBM per target<br/>CGM / + wearables / + EHR"]
+        FUS["Fusion net (PyTorch)<br/>static MLP + GRU or 1D-CNN<br/>shared layer, hyper & hypo heads"]
+    end
+
+    subgraph EVAL["4. Evaluation"]
+        MET["metrics.py<br/>AUPRC (headline for hypo), AUROC,<br/>sens @ FAR, lead time, calibration,<br/>patient-bootstrap CIs"]
+        ABL["ablation.py<br/>paired EHR-value test, tables, figures"]
+    end
+
+    subgraph TWIN["5. Digital twin & dashboard"]
+        STATE["PatientTwin (state.py)<br/>profile, 6 h history, both risks,<br/>alerts set on validation patients"]
+        EXP["explain.py<br/>TreeSHAP drivers"]
+        WHAT["whatif.py<br/>exact simulator replay + edits,<br/>ML re-prediction"]
+        APP["Streamlit dashboard<br/>timeline, drivers, what-if, overview"]
+    end
+
+    EHR --> LINK
+    WEAR --> LINK
+    ENR --> LINK
+    LINK --> WIN
+    EHR --> STAT
+    WIN --> SPLIT
+    STAT --> SPLIT
+    SPLIT --> PERS
+    SPLIT --> LGB
+    SPLIT --> FUS
+    PERS --> MET
+    LGB --> MET
+    FUS --> MET
+    MET --> ABL
+    LGB -- "deployed: CGM + wearables + EHR" --> STATE
+    STATE --> EXP
+    SIM -. "replay" .-> WHAT
+    STATE --> WHAT
+    STATE --> APP
+    EXP --> APP
+    WHAT --> APP
+
+    classDef ehr fill:#fdebe3,stroke:#eb6834,color:#0b0b0b
+    classDef sensor fill:#e3eefb,stroke:#2a78d6,color:#0b0b0b
+    classDef neutral fill:#f3f2ee,stroke:#8a8984,color:#0b0b0b
+    class EHR,STAT ehr
+    class WEAR,WIN sensor
+    class SIM,ENR,LINK,SPLIT,PERS,LGB,FUS,MET,ABL,STATE,EXP,WHAT,APP neutral

@@ -68,8 +68,9 @@ Calibration knobs live in `config.yaml -> simulation.calibration`. Achieved rate
 raises `PatientLeakageError` if any patient appears in two splits, and a test checks it. Windows are
 sliced from `series.npz` on demand (`extract_windows` -> `encode_sequences`) instead of being stored.
 
-Hypoglycaemia is concentrated in a minority of patients (about 1 in 3 ever has a hypo window), so
-test-set hypo metrics rest on roughly 20 patients and should be read with patient-level bootstrap CIs.
+Hypoglycaemia is concentrated in a minority of patients: in the test set only 17 of 60 patients ever have
+a hypo window and 7 of them account for 80% of hypo windows, so hypo metrics should be read with their
+patient-level bootstrap CIs.
 
 ## Optional external sources (checked, not used)
 
