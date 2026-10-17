@@ -335,10 +335,15 @@ def _chain_step(q: np.ndarray, inp: np.ndarray, k: np.ndarray) -> np.ndarray:
 
 def simulate_glucose(params: pd.DataFrame, carbs: np.ndarray, doses: np.ndarray, steps: np.ndarray,
                      ir_mult: np.ndarray, tod_hours: np.ndarray, dt: int, cal: dict[str, float],
-                     rng: np.random.Generator | None, noise: np.ndarray | None = None) -> np.ndarray:
+                     rng: np.random.Generator | None, noise: np.ndarray | None = None,
+                     obs: np.ndarray | None = None, obs_gain: float = 0.0,
+                     corrections: np.ndarray | None = None) -> np.ndarray:
     """Integrate true glucose for P patients. carbs (3,P,T), doses (4,P,T), steps/ir_mult (P,T).
 
     `noise` (T, P) can be passed in to replay a run exactly (used by the what-if engine).
+    `obs` (P, T), NaN where missing, turns on a simple state observer for the personalised twin: each
+    step is nudged by `obs_gain` * (obs - predicted). The nudges are written to `corrections` (T, P) so
+    an edited schedule can be replayed with the same nudges passed as `noise`.
     """
     n_p, n_t = steps.shape
     gb = params.g_basal.to_numpy()
@@ -381,6 +386,12 @@ def simulate_glucose(params: pd.DataFrame, carbs: np.ndarray, doses: np.ndarray,
         cr_t = cr * (1 - 0.5 * night_curve[t])
         dg = (-p1 * (g - gb_eff) - x_drug * g - x_ex * np.maximum(g - 75, 0)
               + gain * irm * ra + cr_t * np.maximum(75 - g, 0) + noise[t])
+        if obs is not None:
+            o = obs[:, t]
+            c = np.where(np.isnan(o), 0.0, obs_gain * (o - (g + dg)))
+            dg = dg + c
+            if corrections is not None:
+                corrections[t] = c
         g = np.clip(g + dg, 30, 500)
         out[:, t] = g
     return out

@@ -6,20 +6,23 @@ cd /d "%~dp0.."
 set "PY=python"
 if exist ".venv\Scripts\python.exe" set "PY=.venv\Scripts\python.exe"
 
-echo [1/5] Generating synthetic EHR + wearable data
+echo [1/6] Generating synthetic EHR + wearable data
 "%PY%" -m src.data.synthetic_gen --config config.yaml || goto :fail
 
-echo [2/5] Linking streams, patient-level split, windows + static features
+echo [2/6] Linking streams, patient-level split, windows + static features
 "%PY%" -m src.data.build_dataset --config config.yaml || goto :fail
 
-echo [3/5] Baselines: persistence + LightGBM (CGM / +wearables / +EHR)
+echo [3/6] Baselines: persistence + LightGBM (CGM / +wearables / +EHR)
 "%PY%" -m src.models.baselines --config config.yaml || goto :fail
 
-echo [4/5] Fusion model: GRU with EHR branch + sequence-only twin
+echo [4/6] Fusion model: GRU with EHR branch + sequence-only twin
 "%PY%" -m src.models.train --config config.yaml --variants fusion_gru,seqonly_gru || goto :fail
 
-echo [5/5] Ablation report: tables + figures in docs/
+echo [5/6] Ablation report: tables + figures in docs/
 "%PY%" -m src.eval.ablation --config config.yaml || goto :fail
+
+echo [6/6] Personalised twin: fit test patients, held-out validation report
+"%PY%" -m src.eval.twin_validation --config config.yaml || goto :fail
 
 echo Done.
 exit /b 0

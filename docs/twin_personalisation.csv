@@ -1,0 +1,12 @@
+params,cgm_mae,cgm_mae_ci,bias,tir_abs_err_pp,tar_abs_err_pp,tbr_abs_err_pp,hyper_agree,hyper_sens,hyper_spec,hyper_kappa,hyper_obs_rate,hyper_sim_rate,hypo_agree,hypo_sens,hypo_spec,hypo_kappa,hypo_obs_rate,hypo_sim_rate,table,method,mae_30,mae_60,mae_120,mae_all,param,n,ehr_med_rel_err,fit_med_rel_err,ehr_spearman,fit_spearman
+EHR default,12.1427,10.25-13.86,0.0357,6.0895,6.1223,0.8347,0.909,0.8372,0.9425,0.7881,0.3188,0.306,0.9761,0.4212,0.9965,0.5448,0.0355,0.0183,open_loop,,,,,,,,,,,
+Fitted (personalised),5.884,5.62-6.14,0.2744,1.6487,1.4475,0.3405,0.9584,0.9134,0.9794,0.903,0.3188,0.3052,0.9822,0.5201,0.9992,0.6664,0.0355,0.0192,open_loop,,,,,,,,,,,
+Oracle (hidden truth),7.5413,6.91-8.21,-0.376,3.5829,3.2786,0.6155,0.9446,0.8983,0.9663,0.8714,0.3188,0.3093,0.983,0.5989,0.9971,0.7055,0.0355,0.024,open_loop,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,forecast_2h,CGM persistence,10.7236,19.1026,29.7252,18.4712,,,,,,
+,,,,,,,,,,,,,,,,,,,forecast_2h,EHR default,7.977,9.5896,10.9248,9.1903,,,,,,
+,,,,,,,,,,,,,,,,,,,forecast_2h,Fitted (personalised),4.9086,5.3839,5.7822,5.2173,,,,,,
+,,,,,,,,,,,,,,,,,,,forecast_2h,Oracle (hidden truth),5.3771,6.1581,6.9464,5.949,,,,,,
+,,,,,,,,,,,,,,,,,,,parameter_recovery,,,,,,g_basal,60.0,0.027,0.0241,0.986,0.9842
+,,,,,,,,,,,,,,,,,,,parameter_recovery,,,,,,meal_gain,60.0,0.0769,0.0364,0.9057,0.9722
+,,,,,,,,,,,,,,,,,,,parameter_recovery,,,,,,tau_clear_min,60.0,0.0227,0.0332,0.9057,0.746
+,,,,,,,,,,,,,,,,,,,parameter_recovery,,,,,,drug_sens,25.0,0.1678,0.044,0.8362,0.9815
