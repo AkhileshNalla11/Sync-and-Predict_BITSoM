@@ -31,7 +31,8 @@ def _radio(at, label: str):
 
 def test_renders_all_views_with_banner(app) -> None:
     assert not app.exception, [e.value for e in app.exception]
-    assert any("SYNTHETIC DATA" in w.value and "not for clinical use" in w.value for w in app.warning)
+    banner = [m.value for m in app.markdown if 'class="gt-banner"' in m.value]
+    assert banner and "SYNTHETIC DATA" in banner[0] and "not for clinical use" in banner[0]
     assert [t.label for t in app.tabs] == ["Glucose timeline", "Alert drivers", "What-if", "Patient overview"]
     assert any("Hypoglycaemia risk" in m.value for m in app.markdown)
 
