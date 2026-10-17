@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.ipynb_checkpoints/
+
+# Data: everything is regenerated from config.yaml + seed, so never commit it.
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# External datasets (Synthea / CGMacros) if downloaded locally
+data/external/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

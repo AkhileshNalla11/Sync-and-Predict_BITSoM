@@ -1,0 +1,44 @@
+# Single source of truth for the pipeline. All randomness derives from `seed`.
+seed: 42
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  models_dir: data/processed/models
+  docs_dir: docs
+
+sampling:
+  interval_minutes: 5          # CGM / wearable resolution
+
+windows:
+  history_hours: 6             # model sees the previous 6 h ...
+  horizon_hours: 2             # ... to predict events in the next 2 h
+  stride_minutes: 30           # spacing between consecutive prediction times
+  min_history_coverage: 0.5    # drop windows with < 50 % observed CGM in history
+  min_horizon_coverage: 0.5    # drop windows with < 50 % observed CGM in horizon (label unreliable)
+
+thresholds:
+  hyper_mgdl: 180              # label = any CGM reading > 180 mg/dL in the horizon
+  hypo_mgdl: 70                # label = any CGM reading < 70 mg/dL in the horizon
+  nocturnal_start: "22:00"     # nocturnal subset = prediction time in [22:00, 06:00)
+  nocturnal_end: "06:00"
+
+simulation:
+  n_patients: 300
+  n_days: 14
+  warmup_days: 1               # simulated then discarded so drug/gut states reach steady state
+  start_date: "2026-01-05"
+  # Calibration knobs, tuned once so window-level event rates land in the targets below.
+  calibration:
+    meal_gain: 2.1             # mg/dL rise per gram of absorbed carbohydrate (scaled by insulin resistance)
+    drug_effect_scale: 3.0     # multiplies insulin / sulfonylurea glucose-lowering effect
+    exercise_scale: 0.010      # direct glucose uptake per 5 min at brisk walking pace
+    exercise_drug_boost: 0.8   # post-exercise amplification of drug effect
+    process_noise_sd: 1.2      # mg/dL per 5 min of unmodelled physiological variability
+  target_rates:
+    hyper: [0.20, 0.40]
+    hypo: [0.03, 0.08]
+
+split:
+  test_fraction: 0.20          # by patient, never by row
+  val_fraction: 0.15
