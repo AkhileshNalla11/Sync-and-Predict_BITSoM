@@ -72,9 +72,9 @@ Hypoglycaemia is concentrated in a minority of patients: in the test set only 17
 a hypo window and 7 of them account for 80% of hypo windows, so hypo metrics should be read with their
 patient-level bootstrap CIs.
 
-## Optional external sources (checked, not used)
+## Optional external sources
 
-| Source | Status | Why not used (for now) |
+| Source | Status | Why not used for training |
 |---|---|---|
-| [CGMacros v1.0.0 (PhysioNet)](https://physionet.org/content/cgmacros/) | Open access, **CC BY-NC-SA 4.0** (non-commercial, share-alike, attribution) | 45 participants, only 14 with T2D, 10 days; US cohort with no medication-driven lows; 628 MB. Usable for a non-commercial student challenge, e.g. to sanity-check meal-response shapes, but too small for training. |
+| [CGMacros v1.0.0 (PhysioNet)](https://physionet.org/content/cgmacros/) | Open access, **CC BY-NC-SA 4.0** (non-commercial, share-alike, attribution). **Used for the external sanity check only** ([docs/external_validation.md](../docs/external_validation.md)); downloaded to the git-ignored `data/external/cgmacros/`, never committed | Not used for training: 45 participants, only 14 with T2D, ~10 days; US cohort with no medication-driven lows. |
 | [Synthea](https://github.com/synthetichealth/synthea) | Apache 2.0 | Needs Java 17+, which is not installed here; generates US-centric EHR without CGM. Our generated EHR covers the needed fields directly. |
