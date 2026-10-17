@@ -178,7 +178,8 @@ when `data/processed` is absent, so the cloud never runs the pipeline. `src/app/
 the dashboard's dependencies (no PyTorch or SHAP), and `packages.txt` adds `libgomp1` for LightGBM.
 1. Sign in at [share.streamlit.io](https://share.streamlit.io) with GitHub (allow private-repo access if the repo is private).
 2. **Create app** -> repository `AkhileshNalla11/glycaemic-digital-twin`, branch `main`, main file `src/app/dashboard.py`.
-3. **Advanced settings** -> Python **3.12** -> **Deploy**.
+3. **Deploy**. The default Python works: the dashboard's pins have pre-built wheels for 3.12-3.14 (tested on both;
+   risk scores are identical to the training environment's).
 
 After re-running the pipeline, refresh the bundle with `python scripts/make_demo_bundle.py` and commit it.
 Vercel is not suitable: Streamlit needs a long-running server with WebSockets, which serverless functions don't provide.
