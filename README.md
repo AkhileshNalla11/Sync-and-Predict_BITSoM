@@ -30,18 +30,27 @@ _TODO (Stages 3-5): persistence baseline, CGM-only LightGBM, PyTorch multi-task 
 _TODO (Stage 5): ablation table for both targets (AUPRC is the headline metric for hypoglycaemia). Current results: [docs/ablation_results.md](docs/ablation_results.md)._
 
 ## How to run
+
+Python 3.10+. The full pipeline takes about 25 min on a laptop CPU (most of it is training the GRU models).
+The dashboard opens at http://localhost:8501.
+
+**Windows (PowerShell or Command Prompt)**
+```powershell
+python -m venv .venv
+.venv\Scripts\pip install -r requirements.txt
+scripts\run_pipeline.cmd        # generate data, train and evaluate everything
+scripts\demo.cmd                # launch the dashboard
+.venv\Scripts\python -m pytest  # tests
+```
+On Windows on ARM, create the environment with an x64 Python (LightGBM, SHAP and PyTorch have no native
+ARM64 wheels), e.g. `uv venv --python cpython-3.12-windows-x86_64-none .venv`.
+
+**Linux / macOS (or Git Bash on Windows)**
 ```bash
-# 1. Environment (Python 3.10+). On Windows ARM64, use an x64 Python, e.g. `uv venv --python cpython-3.12-windows-x86_64-none`
-python -m venv .venv && .venv/Scripts/pip install -r requirements.txt   # or .venv/bin/pip on Linux/macOS
-
-# 2. Full pipeline (currently: data generation -> linking, split, windows -> baselines), ~3 min on CPU
+python -m venv .venv && .venv/bin/pip install -r requirements.txt
 bash scripts/run_pipeline.sh
-
-# 3. Clinician dashboard (http://localhost:8501)
 bash scripts/demo.sh
-
-# Tests
-.venv/Scripts/python -m pytest
+.venv/bin/python -m pytest
 ```
 
 ## Repository layout
@@ -54,7 +63,7 @@ src/eval/             metrics, ablation
 src/twin/             state, explain, whatif
 src/app/dashboard.py  Streamlit app
 docs/                 reports, figures, architecture diagram, video script
-scripts/              run_pipeline.sh, demo.sh
+scripts/              run_pipeline.{sh,cmd}, demo.{sh,cmd}
 tests/                pytest suite
 ```
 
