@@ -178,6 +178,36 @@ def event_onsets(cgm: np.ndarray, threshold: float, below: bool, clear_samples: 
     return out
 
 
+def event_episodes(cgm: np.ndarray, threshold: float, below: bool, min_samples: int, clear_samples: int) -> list[np.ndarray]:
+    """Per patient: start indices of consensus-style episodes.
+
+    An episode starts at the first of >= `min_samples` consecutive readings past the threshold and ends
+    once >= `clear_samples` consecutive readings are not past it (international consensus on CGM
+    metrics: >= 15 min below 70 mg/dL, ended by >= 15 min at or above it). Missing readings carry the
+    last value forward, as in `event_onsets`.
+    """
+    out = []
+    for row in cgm:
+        x = pd.Series(row).ffill().to_numpy()
+        past = ((x < threshold) if below else (x > threshold)) & ~np.isnan(x)
+        n = len(past)
+        # run[t] = number of consecutive readings with the same past-state starting at t
+        run = np.ones(n, int)
+        for t in range(n - 2, -1, -1):
+            if past[t] == past[t + 1]:
+                run[t] = run[t + 1] + 1
+        onsets, in_ep, t = [], False, 0
+        while t < n:
+            if not in_ep and past[t] and run[t] >= min_samples:
+                onsets.append(t)
+                in_ep = True
+            elif in_ep and not past[t] and run[t] >= clear_samples:
+                in_ep = False
+            t += run[t]                                  # jump to the next state change
+        out.append(np.asarray(onsets, dtype=int))
+    return out
+
+
 def lead_time_stats(onsets: list[np.ndarray], windows: pd.DataFrame, scores: np.ndarray, threshold: float,
                     in_event_col: str, horizon: int, dt_min: int) -> dict[str, float]:
     """Detection rate and lead time of alerts before each event onset.

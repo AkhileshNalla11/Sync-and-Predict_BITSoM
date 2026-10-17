@@ -3,6 +3,7 @@
     streamlit run src/app/dashboard.py        # or: scripts\\demo.cmd / bash scripts/demo.sh
 
 Views: glucose timeline with both risks and alerts, alert drivers, what-if panel, patient overview.
+Alerts follow the alert policy (src/twin/alerts.py, docs/alert_policy.md): one alert per risk episode.
 SYNTHETIC DATA. Research prototype, NOT FOR CLINICAL USE. Styling lives in src/app/theme.py.
 """
 from __future__ import annotations
@@ -24,6 +25,7 @@ from plotly.subplots import make_subplots           # noqa: E402
 from src.app import theme as T                      # noqa: E402
 from src.config import load_config                  # noqa: E402
 from src.twin.explain import driver_sentences, explain, group_contributions   # noqa: E402
+from src.twin.alerts import policy_far              # noqa: E402
 from src.twin.state import PatientTwin, TwinContext  # noqa: E402
 from src.twin.personalise import FIT_PARAMS        # noqa: E402
 from src.twin.whatif import (MAIN_MEALS, MEAL_CATALOGUE, AddActivity, AddMeal, DelayMeal, ExtraDose,  # noqa: E402
@@ -97,6 +99,25 @@ def regimen_label(regimen: str) -> str:
     return regimen.replace("+", " + ").replace("sulfonylurea", "sulfonylurea").capitalize()
 
 
+def alert_state(tl: pd.DataFrame, anchor_idx: int, target: str) -> tuple[str, str]:
+    """Alert-policy state at this prediction time: (alert | active | ok, one-line explanation)."""
+    upto = tl[tl.anchor_idx <= anchor_idx]
+    row = upto.iloc[-1]
+    prev = upto[upto[f"{target}_alert"]]
+    last = f"last alert {fmt_time(prev.timestamp.iloc[-1])}" if len(prev) else "no earlier alert"
+    if row[f"{target}_alert"]:
+        return "alert", "The alert policy raises an alert at this prediction time."
+    if row[f"{target}_above"]:
+        if row[f"in_event_{target}"]:
+            return "active", "CGM already reads past the threshold: the CGM's own alarm applies, no predictive alert."
+        return "active", f"Repeat suppressed by the alert policy ({last})."
+    return "ok", f"No alert now ({last})."
+
+
+def far_label(ctx: TwinContext, target: str) -> str:
+    return f"{policy_far(ctx.cfg)[target] * 100:g}% false-alert rate on validation patients"
+
+
 def cgm_summary(series: pd.DataFrame) -> dict[str, float]:
     g = series.cgm_mgdl.dropna()
     return {"mean": g.mean(), "gmi": 3.31 + 0.02392 * g.mean(), "tir": ((g >= 70) & (g <= 180)).mean(),
@@ -127,10 +148,18 @@ def timeline_figure(series: pd.DataFrame, tl: pd.DataFrame, now: pd.Timestamp, h
 
     for t, sym, y in (("hyper", "triangle-up", 385), ("hypo", "triangle-down", 47)):
         a = r[r[f"{t}_alert"]]
+        quiet = r[r[f"{t}_above"] & ~r[f"{t}_alert"]]
         color = T.TARGET_COLOR[t]
-        fig.add_trace(go.Scatter(x=a.timestamp, y=np.full(len(a), y), mode="markers", name=f"{TARGET_NAME[t]} alert",
-                                 marker=dict(symbol=sym, size=11, color=color, line=dict(color=T.CARD, width=1.5)),
-                                 hovertemplate=f"{TARGET_NAME[t]} alert<extra></extra>"), 1, 1)
+        fig.add_trace(go.Scatter(x=quiet.timestamp, y=np.full(len(quiet), y), mode="markers",
+                                 name=f"{TARGET_NAME[t]}: above threshold, repeat suppressed",
+                                 marker=dict(symbol=f"{sym}-open", size=8, color=color, line=dict(width=1.2)),
+                                 customdata=quiet[f"{t}_risk"],
+                                 hovertemplate="Above threshold (risk %{customdata:.0%}), no new alert: "
+                                               "suppressed by the alert policy<extra></extra>"), 1, 1)
+        fig.add_trace(go.Scatter(x=a.timestamp, y=np.full(len(a), y), mode="markers", name=f"{TARGET_NAME[t]} alert raised",
+                                 marker=dict(symbol=sym, size=12, color=color, line=dict(color=T.CARD, width=1.5)),
+                                 customdata=a[f"{t}_risk"],
+                                 hovertemplate=TARGET_NAME[t] + " alert raised (risk %{customdata:.0%})<extra></extra>"), 1, 1)
         rgb = tuple(int(color[i:i + 2], 16) for i in (1, 3, 5))
         fig.add_trace(go.Scatter(x=r.timestamp, y=r[f"{t}_risk"], mode="lines", name=f"{TARGET_NAME[t]} risk",
                                  line=dict(color=color, width=2.4, shape="spline", smoothing=0.4),
@@ -250,10 +279,13 @@ def view_overview(ctx: TwinContext, twin: PatientTwin, series: pd.DataFrame, tl:
         c[0].metric("Mean", f"{s['mean']:.0f}", help="Mean CGM glucose, mg/dL")
         c[1].metric("GMI", f"{s['gmi']:.1f}%", help="Glucose management indicator: CGM-estimated HbA1c")
         c[2].metric("Variability", f"{s['cv']:.0%}", help="Coefficient of variation. Stable: <= 36%")
-        html(T.section_html("Alerts over the record", "Alerting 30-minute prediction windows, not separate episodes"))
+        days = len(tl) * ctx.cfg["windows"]["stride_minutes"] / (60 * 24)
+        html(T.section_html("Alerts over the record", "Raised by the alert policy: one per risk episode, repeats suppressed"))
         c = st.columns(2)
-        c[0].metric("Hypo alerts", int(tl.hypo_alert.sum()))
-        c[1].metric("Hyper alerts", int(tl.hyper_alert.sum()))
+        for col, t, name in ((c[0], "hypo", "Hypo alerts"), (c[1], "hyper", "Hyper alerts")):
+            n, above = int(tl[f"{t}_alert"].sum()), int(tl[f"{t}_above"].sum())
+            col.metric(name, n, help=f"{n / max(days, 1e-9):.1f} per day over {days:.0f} monitored days. Without the policy, "
+                                    f"{above} prediction windows were above the threshold.")
 
 
 def view_timeline(ctx: TwinContext, twin: PatientTwin, series: pd.DataFrame, tl: pd.DataFrame) -> None:
@@ -266,18 +298,22 @@ def view_timeline(ctx: TwinContext, twin: PatientTwin, series: pd.DataFrame, tl:
             html('<div style="margin-top:28px">' + T.chips_html([("What actually happened ·", "synthetic ground truth")] + items)
                  + "</div>")
     st.plotly_chart(timeline_figure(series, tl, twin.time, hours, ctx.thresholds), use_container_width=True, config=T.PLOTLY_CONFIG)
-    st.caption("Shaded bands mark high (> 180 mg/dL) and low (< 70 mg/dL) glucose. Triangles are alerts (risk at or above "
-               "the dashed threshold). The dotted trace after NOW is what actually happened; the model had not seen it.")
+    st.caption("Shaded bands mark high (> 180 mg/dL) and low (< 70 mg/dL) glucose. Filled triangles are alerts raised by "
+               "the alert policy; open triangles are times when risk was still at or above the dashed threshold but no "
+               "new alert was raised. The dotted trace after NOW is what actually happened; the model had not seen it.")
+    html(T.chips_html([("Alert policy ·", "chosen on validation patients, see docs/alert_policy.md")]
+                      + [(f"{TARGET_NAME[t]} ·", ctx.policies[t].describe()) for t in ("hypo", "hyper")]))
 
 
-def view_drivers(ctx: TwinContext, twin: PatientTwin) -> None:
+def view_drivers(ctx: TwinContext, twin: PatientTwin, tl: pd.DataFrame) -> None:
     html(T.section_html("Why the model raised (or did not raise) each risk",
                         "TreeSHAP contributions in log-odds. They explain the model, not the physiology."))
     cols = st.columns(2, gap="large")
     for col, target in zip(cols, ("hypo", "hyper")):
         with col:
-            pill = (T.pill_html("ALERT", "alert", "▼" if target == "hypo" else "▲") if twin.alert[target]
-                    else T.pill_html("Below threshold", "ok", "✓"))
+            state, _ = alert_state(tl, twin.anchor_idx, target)
+            label, kind = T.ALERT_STATES[state]
+            pill = T.pill_html(label, kind, ("▼" if target == "hypo" else "▲") if state != "ok" else "✓")
             html(f'<div style="display:flex;align-items:center;gap:10px;margin:6px 0 8px">'
                  f'<span style="font-family:{T.HEAD_FONT};font-weight:800;font-size:1.25rem;color:{T.INK}">'
                  f'{TARGET_NAME[target]} · {twin.risk[target]:.0%}</span>{pill}</div>')
@@ -470,7 +506,7 @@ def main() -> None:
     series = get_series(pid)
     st.sidebar.markdown("---")
     st.sidebar.caption(f"Model: LightGBM on CGM + wearables + EHR. Test patients only ({len(pts)}); none were used "
-                       "for training, model selection or alert thresholds.")
+                       "for training, model selection, alert thresholds or the alert policy.")
     if str(ctx.cfg["paths"]["raw_dir"]).startswith("demo_bundle"):
         st.sidebar.caption("Running from the committed demo bundle (precomputed synthetic data and model).")
 
@@ -481,13 +517,15 @@ def main() -> None:
     c1, c2 = st.columns(2, gap="large")
     for col, t in zip((c1, c2), ("hypo", "hyper")):
         with col:
-            html(T.risk_card_html(t, TARGET_NAME[t], TARGET_RULE[t], twin.risk[t], ctx.thresholds[t], twin.alert[t]))
+            state, status = alert_state(tl, twin.anchor_idx, t)
+            html(T.risk_card_html(t, TARGET_NAME[t], TARGET_RULE[t], twin.risk[t], ctx.thresholds[t], state, status,
+                                  far_label(ctx, t)))
 
     tabs = st.tabs(["Glucose timeline", "Alert drivers", "What-if", "Patient overview"])
     with tabs[0]:
         view_timeline(ctx, twin, series, tl)
     with tabs[1]:
-        view_drivers(ctx, twin)
+        view_drivers(ctx, twin, tl)
     with tabs[2]:
         view_whatif(ctx, twin)
     with tabs[3]:

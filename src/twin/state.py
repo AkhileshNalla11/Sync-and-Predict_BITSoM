@@ -3,11 +3,13 @@
     ctx = TwinContext.load(cfg)          # loads data, model and alert thresholds once
     twin = ctx.twin("P0042")             # latest prediction time for that patient
     twin = ctx.twin("P0042", at="2026-01-10 21:00")
-    ctx.risk_timeline("P0042")           # risk at every prediction time (for the dashboard)
+    ctx.risk_timeline("P0042")           # risk and policy alerts at every prediction time (for the dashboard)
 
 The predictor is the LightGBM model named in config `twin.model` (CGM + wearables + EHR by default:
 best hypo AUPRC in the ablation and well calibrated). Alert thresholds come from VALIDATION patients
-so the test patients shown in the dashboard stay untouched. SYNTHETIC DATA, NOT FOR CLINICAL USE.
+so the test patients shown in the dashboard stay untouched. Over time, alerts follow the alert policy
+in config `twin.alert_policy` (src/twin/alerts.py): one alert per risk episode, not one per window.
+SYNTHETIC DATA, NOT FOR CLINICAL USE.
 """
 from __future__ import annotations
 
@@ -26,6 +28,7 @@ from src.data.ehr_features import StaticEncoder, encode_static
 from src.data.wearable_features import SERIES_CHANNELS, extract_windows, handcrafted_features, window_sizes
 from src.eval.metrics import threshold_at_far
 from src.models.baselines import FEATURE_SETS, feature_matrix, load_or_build_features
+from src.twin.alerts import AlertPolicy, policy_alerts, policy_far, policy_from_spec
 
 TARGETS = ("hyper", "hypo")
 SLEEP_NAMES = {0: "awake", 1: "light", 2: "deep", 3: "rem"}
@@ -43,7 +46,7 @@ class PatientTwin:
     history: pd.DataFrame                # last 6 h of sensor data
     features: pd.DataFrame               # one-row model input (handcrafted window features + scaled static)
     risk: dict[str, float]               # predicted probabilities for the next 2 h
-    alert: dict[str, bool]               # risk >= alert threshold
+    alert: dict[str, bool]               # risk >= alert threshold (snapshot; the timeline applies the alert policy)
     outcome: dict[str, bool] | None = field(default=None)   # what actually happened (synthetic ground truth)
 
 
@@ -77,6 +80,8 @@ class TwinContext:
             raise ValueError("saved model features do not match FEATURE_SETS; re-run the baselines")
         self._window_feats = load_or_build_features(ds, cfg)
         self.thresholds = self._alert_thresholds(models_dir)
+        self.policies: dict[str, AlertPolicy] = {t: policy_from_spec(cfg["twin"]["alert_policy"][t], self.thresholds[t])
+                                                 for t in TARGETS}
 
     @classmethod
     def load(cls, cfg: dict[str, Any] | None = None) -> "TwinContext":
@@ -91,20 +96,25 @@ class TwinContext:
     def predict(self, X: pd.DataFrame) -> dict[str, np.ndarray]:
         return {t: self.boosters[t].predict(X, num_iteration=self.boosters[t].best_iteration) for t in TARGETS}
 
+    def split_scores(self, split: str) -> tuple[pd.DataFrame, dict[str, np.ndarray]]:
+        """All prediction windows of one patient split and the model's risk for each."""
+        rows = (self.windows.split == split).to_numpy()
+        w = self.windows[rows]
+        return w, self.predict(self.model_input(self._window_feats[rows], w))
+
     def _alert_thresholds(self, models_dir: Path) -> dict[str, float]:
-        """Thresholds at the configured false-alert rate on VALIDATION onset windows (cached to JSON)."""
-        far = self.cfg["twin"]["alert_false_alert_rate"]
+        """Per-target thresholds at the policy's false-alert rate on VALIDATION onset windows (cached to JSON)."""
+        far = policy_far(self.cfg)
         path = models_dir / f"{self.model_name}_alert_thresholds.json"
         if path.exists():
             saved = json.loads(path.read_text(encoding="utf-8"))
             if saved.get("false_alert_rate") == far and saved.get("n_windows") == len(self.windows):
                 return {t: saved[t] for t in TARGETS}
-        va = (self.windows.split == "val").to_numpy()
-        probs = self.predict(self.model_input(self._window_feats[va], self.windows[va]))
+        w, probs = self.split_scores("val")
         out = {}
         for t in TARGETS:
-            onset = ~self.windows[va][f"in_event_{t}"].to_numpy(bool)
-            out[t] = threshold_at_far(self.windows[va][t].to_numpy(int)[onset], probs[t][onset], far)
+            onset = ~w[f"in_event_{t}"].to_numpy(bool)
+            out[t] = threshold_at_far(w[t].to_numpy(int)[onset], probs[t][onset], far[t])
         path.write_text(json.dumps({**out, "false_alert_rate": far, "n_windows": len(self.windows)}, indent=2), encoding="utf-8")
         return out
 
@@ -157,14 +167,19 @@ class TwinContext:
         return self.build_twin(patient_id, anchor)
 
     def risk_timeline(self, patient_id: str) -> pd.DataFrame:
-        """Predicted risks and alerts at every prediction time of one patient, plus observed outcomes."""
+        """Predicted risks and alerts at every prediction time of one patient, plus observed outcomes.
+
+        `<t>_above`: risk at or above the alert threshold. `<t>_alert`: an alert fired here under the
+        alert policy (once per risk episode; repeats suppressed by refractory period and hysteresis).
+        """
         rows = (self.windows.patient_id == patient_id).to_numpy()
         w = self.windows[rows]
         probs = self.predict(self.model_input(self._window_feats[rows], w))
         out = w[["timestamp", "anchor_idx", "hyper", "hypo", "in_event_hyper", "in_event_hypo", "nocturnal"]].copy()
         for t in TARGETS:
             out[f"{t}_risk"] = probs[t]
-            out[f"{t}_alert"] = probs[t] >= self.thresholds[t]
+            out[f"{t}_above"] = probs[t] >= self.thresholds[t]
+            out[f"{t}_alert"] = policy_alerts(w, probs[t], self.policies[t], t)
         return out.reset_index(drop=True)
 
     def series_frame(self, patient_id: str) -> pd.DataFrame:

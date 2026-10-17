@@ -50,7 +50,7 @@ per-prediction explanations (TreeSHAP) and a what-if engine. A Streamlit clinici
 
 | View | What the clinician sees |
 |---|---|
-| Glucose timeline | CGM with high (> 180) and low (< 70) bands shaded, both risk scores over time, alert markers, a "now" line, and the actual next 2 h (marked as not seen by the model) |
+| Glucose timeline | CGM with high (> 180) and low (< 70) bands shaded, both risk scores over time, alert markers (one per risk episode, from the alert policy), a "now" line, and the actual next 2 h (marked as not seen by the model) |
 | Alert drivers | Top reasons for each risk, e.g. *current glucose 70 mg/dL* or *sulfonylurea 3 mg/day*, grouped by data stream |
 | What-if | Presets (late dinner, poor sleep night, skipped meal, extra insulin dose) plus custom edits; model risk before/after and the simulated glucose, shown separately. The glucose projection comes from a **personalised twin** fitted to the patient's own first week of data (default) or, for comparison, an oracle replay of the hidden simulator |
 | Patient overview | Demographics, labs, medications, comorbidities, ICD-10 codes, 14-day CGM metrics (TIR / TBR / TAR, GMI, CV) |
@@ -96,7 +96,7 @@ Plotly, Matplotlib, PyYAML, pytest. CPU only.
 | Persistence baseline | Extrapolates the latest CGM along its 30-min trend over 2 h; scores = trajectory max (hyper) / minus min (hypo) |
 | LightGBM | One model per target on 37 handcrafted window features (mean, min, max, SD/CV, 30/60-min slopes, last value, time above/below range, minutes since last high/low, **meal-rise proxy**, time of day) plus wearable features (steps, HR, sleep) plus the static vector. Unweighted, early-stopped on validation-patient AUPRC. |
 | Fusion net (PyTorch) | Static MLP (24 -> 64 -> 32) and a GRU (13 per-step channels -> 64; a dilated 1D-CNN is a config swap), concatenated -> shared layer (64) -> **two heads** (hyper, hypo). Hypo rarity: weighted BCE with `pos_weight = sqrt(neg/pos)` (~4.8); focal loss available. AdamW, early stopping on validation onset AUPRC. A sequence-only twin (no EHR branch) isolates the EHR effect. |
-| Twin layer | `PatientTwin` snapshot; alert thresholds at a 5% false-alert rate on **validation** patients; TreeSHAP via LightGBM `pred_contrib` (tested to match `shap.TreeExplainer`); what-if on a **personalised twin**: 4 simulator parameters (basal glucose, carb gain, clearance, drug sensitivity) fitted per patient to the first 7 days of CGM + the meal/dose log with `scipy.optimize.least_squares` (~3 s per patient, cached), a state observer up to *now*, then free-running; oracle replay of the hidden simulation kept for comparison ([docs/twin_personalisation.md](docs/twin_personalisation.md)) |
+| Twin layer | `PatientTwin` snapshot; an **alert policy** per target (threshold + refractory period; hysteresis, escalation and a daily budget available) chosen on **validation** patients ([docs/alert_policy.md](docs/alert_policy.md)); TreeSHAP via LightGBM `pred_contrib` (tested to match `shap.TreeExplainer`); what-if on a **personalised twin**: 4 simulator parameters (basal glucose, carb gain, clearance, drug sensitivity) fitted per patient to the first 7 days of CGM + the meal/dose log with `scipy.optimize.least_squares` (~3 s per patient, cached), a state observer up to *now*, then free-running; oracle replay of the hidden simulation kept for comparison ([docs/twin_personalisation.md](docs/twin_personalisation.md)) |
 | Evaluation | AUROC, **AUPRC (headline for hypo)**, sensitivity / PPV / alert burden at fixed false-alert rates, lead time before event onset, calibration (Brier, ECE), all with **patient-level bootstrap** 95% CIs; paired bootstrap for model differences |
 
 ## Results
@@ -138,12 +138,31 @@ Bold = 95% CI excludes zero.
   rarely contains the previous night's sleep.
 * **At a clinical operating point** (10% false-alert rate on onset windows) the deployed model catches 98%
   of hypo windows and 77% of hyper windows, but **only ~18% of hypo alerts are true positives**, at about
-  5-8 alerting windows per patient-day. That burden would need work before real use.
+  5-8 alerting windows per patient-day. Scoring every window like this would cause alarm fatigue; the
+  alert policy below addresses it.
 * **Calibration:** LightGBM probabilities are well calibrated (hypo ECE 0.004), which is why it is the
   deployed model. The GRU's weighted loss makes its hypo probabilities overstate risk (ECE 0.019).
 * Hypo AUROC (~0.98) and lead time (median ~100 min, near the 120 min cap) are **optimistic**: in the
   simulator, lows arrive as slow drifts (the lowest CGM in the 2 h before onset is already 70 mg/dL,
   median). Expect real-world performance to be markedly lower.
+
+**Alerts, judged the way clinicians judge them.** An alert policy fires once when risk crosses the threshold,
+then at most once per 90 min while risk stays high, and never while the CGM already reads low or high.
+Operating points were chosen on validation patients only. On the 60 test patients, counting **episodes**
+(>= 15 min below 70 mg/dL) rather than windows:
+
+| Target | Episodes warned >= 30 min ahead | Alerts per patient-day | False alerts per patient-day | PPV per alert |
+|---|---|---|---|---|
+| Hypoglycaemia (< 70) | **76%** (68-82%); 83% with >= 15 min | **0.49** (0.23-0.86) | 0.17 | 66% |
+| Nocturnal hypoglycaemia | 71% (67-75%) | 0.09 per night | | |
+| Hyperglycaemia (> 180) | 68% (62-73%) | 2.46 (2.02-2.84) | 0.76 | 69% |
+
+That is 6x fewer hypo alerts than counting every alerting window (3.0 per patient-day). The price is 21
+points of episodes caught >= 30 min ahead (98% -> 76%) and a shorter median lead time (105 -> 65 min).
+Hysteresis (re-arm only after risk falls) was tested and **hurt**: simulated lows drift down slowly, so
+risk stays high and a hysteresis policy stays silent when the low finally arrives. The lows are slow and
+easy to anticipate in this simulator; expect real-world numbers to be worse. Method, sweep, trade-off figure
+and caveats: [docs/alert_policy.md](docs/alert_policy.md).
 
 **External sanity check on real CGM (CGMacros).** The synthetic-trained CGM-only LightGBM was run unchanged
 on 14 real T2D participants from [CGMacros](https://physionet.org/content/cgmacros/) (US cohort, Dexcom G6,
@@ -189,7 +208,7 @@ bash scripts/demo.sh
 ```
 
 **Deploying the dashboard (Streamlit Community Cloud).** The repo ships a 14 MB `demo_bundle/` (precomputed
-synthetic data, the deployed LightGBM pair and its alert thresholds). The dashboard loads it automatically
+synthetic data, the deployed LightGBM pair and its alert thresholds; the alert policy itself is in `config.yaml`). The dashboard loads it automatically
 when `data/processed` is absent, so the cloud never runs the pipeline. `src/app/requirements.txt` lists only
 the dashboard's dependencies (no PyTorch or SHAP), and `packages.txt` adds `libgomp1` for LightGBM.
 1. Sign in at [share.streamlit.io](https://share.streamlit.io) with GitHub (allow private-repo access if the repo is private).
