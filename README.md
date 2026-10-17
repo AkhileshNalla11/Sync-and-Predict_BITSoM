@@ -39,11 +39,16 @@ The dashboard opens at http://localhost:8501.
 python -m venv .venv
 .venv\Scripts\pip install -r requirements.txt
 scripts\run_pipeline.cmd        # generate data, train and evaluate everything
-scripts\demo.cmd                # launch the dashboard
+scripts\demo.cmd                # launch the dashboard (opens your browser; Ctrl+C to stop)
 .venv\Scripts\python -m pytest  # tests
 ```
-On Windows on ARM, create the environment with an x64 Python (LightGBM, SHAP and PyTorch have no native
-ARM64 wheels), e.g. `uv venv --python cpython-3.12-windows-x86_64-none .venv`.
+On Windows on ARM, LightGBM, SHAP and PyTorch have no native ARM64 wheels, so use an x64 Python (it runs
+under emulation). With [uv](https://docs.astral.sh/uv/), keeping the interpreter inside the project:
+```powershell
+$env:UV_PYTHON_INSTALL_DIR = ".python"; uv python install cpython-3.12-windows-x86_64-none
+uv venv --python .python\cpython-3.12.14-windows-x86_64-none\python.exe .venv
+uv pip install --python .venv\Scripts\python.exe -r requirements.txt
+```
 
 **Linux / macOS (or Git Bash on Windows)**
 ```bash
