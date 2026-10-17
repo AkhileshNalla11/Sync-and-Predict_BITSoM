@@ -37,7 +37,7 @@ python -m venv .venv && .venv/Scripts/pip install -r requirements.txt   # or .ve
 # 2. Full pipeline (currently: data generation -> linking, split, windows -> baselines), ~3 min on CPU
 bash scripts/run_pipeline.sh
 
-# 3. Dashboard (Stage 7)
+# 3. Clinician dashboard (http://localhost:8501)
 bash scripts/demo.sh
 
 # Tests
