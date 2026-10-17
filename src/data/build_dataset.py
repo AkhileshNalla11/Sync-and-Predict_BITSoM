@@ -112,7 +112,7 @@ def summarize_dataset(ds: dict[str, Any]) -> dict[str, Any]:
 
 def save_dataset(ds: dict[str, Any], cfg: dict[str, Any]) -> None:
     out = resolve_path(cfg["paths"]["processed_dir"])
-    np.savez_compressed(out / "series.npz", series=ds["series"], patient_ids=ds["patient_ids"],
+    np.savez_compressed(out / "series.npz", series=ds["series"], patient_ids=np.asarray(ds["patient_ids"]).astype(str),
                         timestamps=ds["timestamps"].asi8, channels=np.array(SERIES_CHANNELS))
     ds["windows"].to_csv(out / "windows.csv.gz", index=False)
     ds["static"].to_csv(out / "static_features.csv", index_label="patient_id")

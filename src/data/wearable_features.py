@@ -73,6 +73,9 @@ def label_windows(cgm: np.ndarray, timestamps: pd.DatetimeIndex, cfg: dict[str, 
     f_cov, f_max, f_min = (a[:, anchors + 1] for a in (fut_cov, fut_max, fut_min))
 
     noct = is_nocturnal(timestamps[anchors], thr["nocturnal_start"], thr["nocturnal_end"])
+    # Current state at prediction time (last observed reading). Windows already past a threshold are
+    # "ongoing" events; the clinically useful question is event ONSET, so metrics report both.
+    current = _ffill(cgm.astype(np.float64))[:, anchors]
     out = pd.DataFrame({
         "patient_idx": np.repeat(np.arange(n_pat), len(anchors)),
         "anchor_idx": np.tile(anchors, n_pat),
@@ -81,6 +84,8 @@ def label_windows(cgm: np.ndarray, timestamps: pd.DatetimeIndex, cfg: dict[str, 
         "hyper": (f_max > thr["hyper_mgdl"]).ravel(),
         "hypo": (f_min < thr["hypo_mgdl"]).ravel(),
         "nocturnal": np.tile(noct, n_pat),
+        "in_event_hyper": (current > thr["hyper_mgdl"]).ravel(),
+        "in_event_hypo": (current < thr["hypo_mgdl"]).ravel(),
     })
     w = cfg["windows"]
     keep = (out.history_coverage >= w["min_history_coverage"]) & (out.horizon_coverage >= w["min_horizon_coverage"])
@@ -157,3 +162,118 @@ def encode_sequences(raw: np.ndarray, anchor_idx: np.ndarray, start_hour: float,
         np.sin(ang), np.cos(ang),
     ]
     return np.stack([np.asarray(f, dtype=np.float32) for f in feats], axis=-1)
+
+
+# --------------------------------------------------------------------------- handcrafted features (Stage 3)
+NOT_IN_WINDOW_MIN = 400.0      # "minutes since X" when X did not happen in the 6 h history
+
+FEATURE_GROUPS: dict[str, tuple[str, ...]] = {
+    "cgm": ("cgm_last", "cgm_minutes_since_obs", "cgm_mean", "cgm_std", "cgm_cv", "cgm_min", "cgm_max",
+            "cgm_mean_1h", "cgm_min_1h", "cgm_max_1h", "cgm_slope_30m", "cgm_slope_60m", "cgm_accel",
+            "cgm_delta_15m", "cgm_frac_above_180", "cgm_frac_below_70", "min_since_above_180",
+            "min_since_below_70", "min_since_meal_rise", "max_rise_3h", "cgm_coverage"),
+    "time": ("hour", "tod_sin", "tod_cos"),
+    "wearables": ("steps_30m", "steps_1h", "steps_3h", "steps_max_1h", "min_since_active", "wear_coverage",
+                  "hr_last", "hr_mean_30m", "hr_minus_6h_mean", "asleep_now", "asleep_minutes",
+                  "awake_in_bed_minutes", "deep_frac"),
+}
+
+
+def _minutes_since(cond: np.ndarray, dt_min: int) -> np.ndarray:
+    """Minutes from the last True in each row to the end of the window (NOT_IN_WINDOW_MIN if never)."""
+    h = cond.shape[1]
+    any_ = cond.any(1)
+    last = h - 1 - np.argmax(cond[:, ::-1], axis=1)
+    return np.where(any_, (h - 1 - last) * dt_min, NOT_IN_WINDOW_MIN).astype(np.float32)
+
+
+def _slope(y: np.ndarray, dt_min: int) -> np.ndarray:
+    """NaN-aware least-squares slope (mg/dL per minute) along axis 1; NaN if < 3 observed points."""
+    x = np.arange(y.shape[1], dtype=np.float64) * dt_min
+    w = ~np.isnan(y)
+    n = w.sum(1)
+    xm = np.where(w, x, 0).sum(1) / np.maximum(n, 1)
+    ym = np.nansum(y, 1) / np.maximum(n, 1)
+    dx = np.where(w, x[None, :] - xm[:, None], 0)
+    dy = np.where(w, y - ym[:, None], 0)
+    den = (dx ** 2).sum(1)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        s = (dx * dy).sum(1) / den
+    return np.where(n >= 3, s, np.nan).astype(np.float32)
+
+
+def handcrafted_features(raw: np.ndarray, anchor_idx: np.ndarray, start_hour: float, dt_min: int,
+                         cfg: dict[str, Any]) -> pd.DataFrame:
+    """Summary features for raw windows (N, H, C) -> DataFrame with every column in FEATURE_GROUPS.
+
+    NaN is kept where a quantity is undefined (LightGBM handles missing values natively).
+    """
+    f = cfg["features"]
+    sph = 60 // dt_min                                   # samples per hour
+    cgm, steps, hr, sleep = (raw[..., i].astype(np.float64) for i in range(4))
+    cgm_f = _ffill(cgm)
+    obs = ~np.isnan(cgm)
+    out: dict[str, np.ndarray] = {}
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        out["cgm_last"] = cgm_f[:, -1]
+        out["cgm_minutes_since_obs"] = _minutes_since(obs, dt_min)
+        out["cgm_mean"] = np.nanmean(cgm, 1)
+        out["cgm_std"] = np.nanstd(cgm, 1)
+        out["cgm_cv"] = out["cgm_std"] / out["cgm_mean"]
+        out["cgm_min"], out["cgm_max"] = np.nanmin(cgm, 1), np.nanmax(cgm, 1)
+        last_h = cgm[:, -sph:]
+        out["cgm_mean_1h"], out["cgm_min_1h"], out["cgm_max_1h"] = np.nanmean(last_h, 1), np.nanmin(last_h, 1), np.nanmax(last_h, 1)
+        out["cgm_slope_30m"] = _slope(cgm[:, -sph // 2 - 1:], dt_min)
+        out["cgm_slope_60m"] = _slope(cgm[:, -sph - 1:], dt_min)
+        out["cgm_accel"] = out["cgm_slope_30m"] - _slope(cgm[:, -sph - 1: -sph // 2], dt_min)
+        out["cgm_delta_15m"] = cgm_f[:, -1] - cgm_f[:, -4]
+        n_obs = np.maximum(obs.sum(1), 1)
+        out["cgm_frac_above_180"] = (cgm > 180).sum(1) / n_obs
+        out["cgm_frac_below_70"] = (cgm < 70).sum(1) / n_obs
+        out["min_since_above_180"] = _minutes_since(cgm > 180, dt_min)
+        out["min_since_below_70"] = _minutes_since(cgm < 70, dt_min)
+        k = f["meal_rise_minutes"] // dt_min
+        # rise[t] = cgm[t] - min(cgm[t-k .. t]): how far glucose climbed in the last 30 min
+        trailing_min = np.full_like(cgm_f, np.nan)
+        trailing_min[:, k:] = sliding_window_view(cgm_f, k + 1, axis=1).min(-1)
+        rise = cgm_f - trailing_min
+        out["min_since_meal_rise"] = _minutes_since((rise >= f["meal_rise_mgdl"]) & obs, dt_min)
+        out["max_rise_3h"] = np.nanmax(rise[:, -3 * sph:], 1)
+        out["cgm_coverage"] = obs.mean(1)
+
+        hours = (start_hour + np.asarray(anchor_idx) * dt_min / 60) % 24
+        out["hour"] = hours
+        out["tod_sin"], out["tod_cos"] = np.sin(2 * np.pi * hours / 24), np.cos(2 * np.pi * hours / 24)
+
+        out["steps_30m"] = np.nansum(steps[:, -sph // 2:], 1)
+        out["steps_1h"] = np.nansum(steps[:, -sph:], 1)
+        out["steps_3h"] = np.nansum(steps[:, -3 * sph:], 1)
+        out["steps_max_1h"] = np.nanmax(steps[:, -sph:], 1)
+        out["min_since_active"] = _minutes_since(steps >= f["active_steps_per_5min"], dt_min)
+        out["wear_coverage"] = (~np.isnan(steps)).mean(1)
+        out["hr_last"] = _ffill(hr)[:, -1]
+        out["hr_mean_30m"] = np.nanmean(hr[:, -sph // 2:], 1)
+        out["hr_minus_6h_mean"] = out["hr_mean_30m"] - np.nanmean(hr, 1)
+        asleep = np.isin(sleep, (1, 2, 3))
+        out["asleep_now"] = asleep[:, -1].astype(float)
+        out["asleep_minutes"] = asleep.sum(1) * dt_min
+        out["awake_in_bed_minutes"] = (sleep == 0).sum(1) * dt_min
+        out["deep_frac"] = (sleep == 2).sum(1) / np.maximum(asleep.sum(1), 1)
+
+    cols = [c for g in FEATURE_GROUPS.values() for c in g]
+    return pd.DataFrame({c: np.asarray(out[c], dtype=np.float32) for c in cols})
+
+
+def build_feature_table(series: np.ndarray, windows: pd.DataFrame, timestamps: pd.DatetimeIndex,
+                        cfg: dict[str, Any], chunk: int = 20000) -> pd.DataFrame:
+    """Handcrafted features for every row of `windows` (same order), computed in memory-bounded chunks."""
+    history, _, _ = window_sizes(cfg)
+    dt = cfg["sampling"]["interval_minutes"]
+    start_hour = timestamps[0].hour + timestamps[0].minute / 60
+    parts = []
+    for a in range(0, len(windows), chunk):
+        w = windows.iloc[a:a + chunk]
+        raw = extract_windows(series, w.patient_idx.to_numpy(), w.anchor_idx.to_numpy(), history)
+        parts.append(handcrafted_features(raw, w.anchor_idx.to_numpy(), start_hour, dt, cfg))
+    return pd.concat(parts, ignore_index=True)
