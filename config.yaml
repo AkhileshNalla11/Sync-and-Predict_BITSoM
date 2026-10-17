@@ -31,9 +31,11 @@ simulation:
   # Calibration knobs, tuned once so window-level event rates land in the targets below.
   calibration:
     meal_gain: 2.1             # mg/dL rise per gram of absorbed carbohydrate (scaled by insulin resistance)
-    drug_effect_scale: 3.0     # multiplies insulin / sulfonylurea glucose-lowering effect
+    drug_effect_scale: 8.0     # multiplies insulin / sulfonylurea glucose-lowering effect
     exercise_scale: 0.010      # direct glucose uptake per 5 min at brisk walking pace
     exercise_drug_boost: 0.8   # post-exercise amplification of drug effect
+    titration_exponent: 0.5    # prescriber compensates sensitivity**0.5 of the patient's true drug response
+    max_drug_dependence: 1.5   # cap on (untreated / treated basal glucose - 1)
     process_noise_sd: 1.2      # mg/dL per 5 min of unmodelled physiological variability
   target_rates:
     hyper: [0.20, 0.40]

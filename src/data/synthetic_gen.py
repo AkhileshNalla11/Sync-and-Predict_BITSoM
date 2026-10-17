@@ -85,10 +85,12 @@ def derive_patient_params(ehr: pd.DataFrame, latent: pd.DataFrame, cal: dict[str
     """Map EHR traits (+ hidden latents) to simulator parameters. This is where fusion signal is created.
 
     HbA1c is an *on-treatment* lab, so it sets the treated basal glucose `g_target`. Drug users get a
-    higher untreated basal `g_basal`, chosen so the prescriber's *expected* drug effect brings them back
-    to `g_target` on average (titration). Lows then come from timing mismatches (dose peaks, skipped or
-    delayed meals, exercise, extra doses) and from hidden over-exposure: higher-than-nominal drug
-    sensitivity and slower renal clearance than the prescriber assumed.
+    higher untreated basal `g_basal`, chosen so the drug effect the prescriber *expects* brings them back
+    to `g_target` on average (titration). Titration is partial: the prescriber has seen sqrt(sensitivity)
+    of the patient's true response, but does not adjust for kidney function or age. Lows then come from
+    timing mismatches (dose peaks, skipped or delayed meals, exercise, extra doses) and from the residual
+    hidden over-exposure. Drug dependence (untreated / treated basal - 1) is capped so no patient's
+    glucose is a fragile balance of two huge opposing terms.
     """
     n = len(ehr)
     a1c, bmi, egfr = ehr.hba1c.to_numpy(), ehr.bmi.to_numpy(), ehr.egfr.to_numpy()
@@ -98,9 +100,14 @@ def derive_patient_params(ehr: pd.DataFrame, latent: pd.DataFrame, cal: dict[str
     tau_clear = 80 + 30 * ir
     g_target = 104 + 18 * (a1c - 6.5) + rng.normal(0, 6, n)
     g_target = np.clip(np.where(ehr.on_metformin, g_target * 0.95, g_target), 90, 230)
-    g_basal = g_target * (1 + nominal_mean_drug_effect(ehr, cal) / (dt / tau_clear))
     renal = 1 + 0.6 * np.clip((60 - egfr) / 45, 0, 1)            # eGFR 15 -> 1.6x slower drug clearance
-    drug_sens = latent.drug_sensitivity.to_numpy() * (1 + 0.5 * (renal - 1)) * (1 + 0.01 * np.clip(age - 60, 0, None))
+    latent_sens = latent.drug_sensitivity.to_numpy()
+    drug_sens = latent_sens * (1 + 0.5 * (renal - 1)) * (1 + 0.01 * np.clip(age - 60, 0, None))
+
+    dependence = nominal_mean_drug_effect(ehr, cal) / (dt / tau_clear) * latent_sens ** cal["titration_exponent"]
+    potency_mult = np.minimum(1.0, cal["max_drug_dependence"] / np.maximum(dependence, 1e-9))
+    g_basal = g_target * (1 + dependence * potency_mult)
+    drug_sens = drug_sens * potency_mult
 
     return pd.DataFrame({
         "patient_id": ehr.patient_id,
@@ -461,12 +468,19 @@ def generate_dataset(cfg: dict[str, Any], n_patients: int | None = None, n_days:
     n_keep = n_t - keep.start
     ts = pd.date_range(sim["start_date"], periods=n_keep, freq=f"{dt}min")
     pid = np.repeat(ehr.patient_id.to_numpy(), n_keep)
+    # The wearable stream is keyed by device, not patient, as a real deployment would be;
+    # the study enrollment log is the only link between the two (see linker.py).
+    dev_codes = np.random.default_rng([seed, 6]).choice(16 ** 6, n_patients, replace=False)
+    device_ids = np.array([f"DEV-{c:06X}" for c in dev_codes])
+    enrollment = pd.DataFrame({"patient_id": ehr.patient_id, "device_id": device_ids,
+                               "enrolled_on": pd.Timestamp(sim["start_date"]).date(),
+                               "devices": "14-day CGM + wrist wearable (simulated)"})
     stage_k, worn_k = stage[:, keep], worn[:, keep]
     stage_str = np.array([SLEEP_STAGES[c] for c in range(-1, 4)], dtype=object)[stage_k + 1]
     stage_str[~worn_k] = None
 
     wearables = pd.DataFrame({
-        "patient_id": pid,
+        "device_id": np.repeat(device_ids, n_keep),
         "timestamp": np.tile(ts, n_patients),
         "cgm_mgdl": cgm[:, keep].ravel(),
         "steps": np.where(worn_k, steps[:, keep], np.nan).ravel(),
@@ -488,8 +502,8 @@ def generate_dataset(cfg: dict[str, Any], n_patients: int | None = None, n_days:
                 ev.append({"patient_id": p_id, "timestamp": ts[e["step"] - keep.start], **{k: e[k] for k in ("event_type", "detail", "value")}})
     events = pd.DataFrame(ev).sort_values(["patient_id", "timestamp"], kind="stable").reset_index(drop=True)
 
-    return {"ehr": ehr, "patient_params": params.merge(latent, on="patient_id"), "wearables": wearables,
-            "sim_truth": truth, "events": events}
+    return {"ehr": ehr, "enrollment": enrollment, "patient_params": params.merge(latent, on="patient_id"),
+            "wearables": wearables, "sim_truth": truth, "events": events}
 
 
 # --------------------------------------------------------------------------- reporting
@@ -497,6 +511,8 @@ def summarize(tables: dict[str, pd.DataFrame], cfg: dict[str, Any]) -> dict[str,
     """Event rates and sanity statistics used to calibrate and document the simulator."""
     ehr, w = tables["ehr"], tables["wearables"]
     n_p = len(ehr)
+    # rows are generated in EHR order; verify rather than assume
+    assert (w.device_id.to_numpy()[:: len(w) // n_p] == tables["enrollment"].device_id.to_numpy()).all()
     cgm = w.cgm_mgdl.to_numpy().reshape(n_p, -1)
     ts = pd.DatetimeIndex(w.timestamp.iloc[: cgm.shape[1]])
     labels = label_windows(cgm, ts, cfg)
@@ -510,11 +526,11 @@ def summarize(tables: dict[str, pd.DataFrame], cfg: dict[str, Any]) -> dict[str,
         "tar": np.nanmean(cgm > 180, 1) / np.mean(~np.isnan(cgm), 1),
     })
     gmi = 3.31 + 0.02392 * per_pat["mean"]
-    day_steps = w.groupby([w.patient_id, w.timestamp.dt.date]).steps.sum(min_count=1)
+    day_steps = w.groupby([w.device_id, w.timestamp.dt.date]).steps.sum(min_count=1)
     # sleep per recorded night (noon-to-noon), excluding nights the watch was not worn
     night = (w.timestamp - pd.Timedelta(hours=12)).dt.date
     asleep = w.sleep_stage.notna() & (w.sleep_stage != "awake")
-    per_night = asleep.groupby([w.patient_id, night]).sum() * cfg["sampling"]["interval_minutes"] / 60
+    per_night = asleep.groupby([w.device_id, night]).sum() * cfg["sampling"]["interval_minutes"] / 60
     first, last = night.min(), night.max()                        # partial nights at the data edges
     nights = per_night.index.get_level_values(1)
     sleep_h = per_night[(per_night > 0) & (nights != first) & (nights != last)]
@@ -596,8 +612,9 @@ def plot_examples(tables: dict[str, pd.DataFrame], path: Path, n_days: int = 3) 
              ehr[ehr.insulin_regimen == "premix_bid"].patient_id.iloc[0]]
     end = w.timestamp.min() + pd.Timedelta(days=n_days)
     fig, axes = plt.subplots(len(picks), 1, figsize=(13, 3.2 * len(picks)), sharex=True)
+    device_of = tables["enrollment"].set_index("patient_id").device_id
     for ax, pid in zip(axes, picks):
-        m = (w.patient_id == pid) & (w.timestamp < end)
+        m = (w.device_id == device_of[pid]) & (w.timestamp < end)
         ax.axhspan(180, 400, color="#f4d6c6", alpha=0.5, lw=0)
         ax.axhspan(40, 70, color="#c9d7ee", alpha=0.6, lw=0)
         ax.plot(truth.timestamp[m], truth.glucose_true_mgdl[m], color="#999999", lw=0.8, label="true glucose (hidden)")
@@ -632,6 +649,7 @@ def main() -> None:
     tables = generate_dataset(cfg, args.n_patients, args.n_days)
     raw = resolve_path(cfg["paths"]["raw_dir"])
     tables["ehr"].to_csv(raw / "ehr.csv", index=False)
+    tables["enrollment"].to_csv(raw / "enrollment.csv", index=False)
     tables["patient_params"].to_csv(raw / "patient_params_HIDDEN.csv", index=False)
     tables["events"].to_csv(raw / "events_truth.csv", index=False)
     tables["wearables"].to_csv(raw / "wearables.csv.gz", index=False)

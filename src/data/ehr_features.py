@@ -85,17 +85,19 @@ def generate_cohort(n_patients: int, rng: np.random.Generator) -> tuple[pd.DataF
     on_met &= ~diet_only
 
     insulin_regimen = np.where(on_insulin, np.where(rng.random(n) < 0.7, "premix_bid", "basal"), "")
-    u_per_kg = np.clip(rng.normal(0.45, 0.12, n), 0.2, 0.9)
+    # Doses are titrated to control: tighter HbA1c -> lower doses (de-intensification).
+    u_per_kg = np.clip(rng.normal(0.45, 0.10, n) + 0.06 * (hba1c - 8.0), 0.2, 0.9)
     u_per_kg = np.where(insulin_regimen == "basal", u_per_kg * 0.55, u_per_kg)
     insulin_units = np.where(on_insulin, np.round(weight_kg * u_per_kg), 0.0)
     # Glimepiride-equivalent total daily dose; twice-daily (BD) split is common in Indian practice.
-    su_dose_mg = np.where(on_su, rng.choice([1, 2, 3, 4], n, p=[0.3, 0.4, 0.15, 0.15]), 0)
+    su_dose_mg = np.where(on_su, np.clip(np.round(1.8 + 0.7 * (hba1c - 7.5) + rng.normal(0, 0.7, n)), 1, 4), 0)
     su_frequency = np.where(on_su, np.where(rng.random(n) < 0.5, "BD", "OD"), "")
     metformin_dose_mg = np.where(on_met, rng.choice([1000, 1500, 2000], n, p=[0.4, 0.35, 0.25]), 0)
 
     # Hidden trait: how strongly this patient's glucose responds to insulin / SU
     # (titration mismatch, erratic absorption...). Prior severe hypo correlates with it.
-    drug_sens = rng.lognormal(0.0, 0.5, n)
+    # Capped: in routine care a patient this over-treated would be de-escalated.
+    drug_sens = np.clip(rng.lognormal(0.0, 0.5, n), 0.4, 1.6)
     on_hypo_drug = on_insulin | on_su
     prior_hypo = on_hypo_drug & (rng.random(n) < _sigmoid(
         -2.2 + 2.0 * np.log(drug_sens) + 0.8 * (egfr < 45) + 0.03 * (age - 60)))
@@ -135,3 +137,68 @@ def generate_cohort(n_patients: int, rng: np.random.Generator) -> tuple[pd.DataF
         "ir_noise": rng.normal(0, 0.12, n),
     })
     return ehr, latent
+
+
+# --------------------------------------------------------------------------- static features (Stage 2)
+# Free-text / derived columns (patient_id, regimen, diagnoses_icd10, height) are deliberately excluded:
+# the codes are a deterministic re-statement of the fields below.
+NUMERIC_FEATURES = ("age", "bmi", "weight_kg", "diabetes_duration_years", "hba1c", "egfr", "ldl_mgdl",
+                    "triglycerides_mgdl", "insulin_total_daily_units", "insulin_units_per_kg",
+                    "sulfonylurea_dose_mg", "metformin_dose_mg")
+BINARY_FEATURES = ("sex_male", "hypertension", "dyslipidemia", "coronary_artery_disease",
+                   "family_history_diabetes", "on_metformin", "on_sulfonylurea", "on_insulin",
+                   "insulin_premix", "insulin_basal", "sulfonylurea_bd", "prior_severe_hypo_12m")
+STATIC_FEATURES = NUMERIC_FEATURES + BINARY_FEATURES
+
+
+def encode_static(ehr: pd.DataFrame) -> pd.DataFrame:
+    """One numeric row per patient (unscaled), indexed by patient_id, columns = STATIC_FEATURES."""
+    df = pd.DataFrame(index=ehr.patient_id.to_numpy())
+    for col in NUMERIC_FEATURES:
+        if col == "insulin_units_per_kg":
+            df[col] = (ehr.insulin_total_daily_units / ehr.weight_kg).to_numpy()
+        else:
+            df[col] = ehr[col].to_numpy(dtype=float)
+    df["sex_male"] = (ehr.sex == "M").to_numpy()
+    df["insulin_premix"] = (ehr.insulin_regimen == "premix_bid").to_numpy()
+    df["insulin_basal"] = (ehr.insulin_regimen == "basal").to_numpy()
+    df["sulfonylurea_bd"] = (ehr.sulfonylurea_frequency == "BD").to_numpy()
+    for col in BINARY_FEATURES:
+        if col not in df:
+            df[col] = ehr[col].to_numpy()
+    return df[list(STATIC_FEATURES)].astype(float)
+
+
+class StaticEncoder:
+    """Standardises numeric EHR features using statistics from the TRAINING patients only.
+
+    Binary features pass through as 0/1. Parameters serialise to JSON for the twin/dashboard.
+    """
+
+    def __init__(self) -> None:
+        self.mean_: dict[str, float] = {}
+        self.std_: dict[str, float] = {}
+
+    def fit(self, encoded: pd.DataFrame) -> "StaticEncoder":
+        for col in NUMERIC_FEATURES:
+            self.mean_[col] = float(encoded[col].mean())
+            std = float(encoded[col].std(ddof=0))
+            self.std_[col] = std if std > 1e-9 else 1.0
+        return self
+
+    def transform(self, encoded: pd.DataFrame) -> pd.DataFrame:
+        if not self.mean_:
+            raise RuntimeError("StaticEncoder.transform called before fit")
+        out = encoded.copy()
+        for col in NUMERIC_FEATURES:
+            out[col] = (encoded[col] - self.mean_[col]) / self.std_[col]
+        return out
+
+    def to_dict(self) -> dict[str, dict[str, float]]:
+        return {"mean": self.mean_, "std": self.std_}
+
+    @classmethod
+    def from_dict(cls, d: dict[str, dict[str, float]]) -> "StaticEncoder":
+        enc = cls()
+        enc.mean_, enc.std_ = dict(d["mean"]), dict(d["std"])
+        return enc

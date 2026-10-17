@@ -85,3 +85,75 @@ def label_windows(cgm: np.ndarray, timestamps: pd.DatetimeIndex, cfg: dict[str, 
     w = cfg["windows"]
     keep = (out.history_coverage >= w["min_history_coverage"]) & (out.horizon_coverage >= w["min_horizon_coverage"])
     return out[keep].reset_index(drop=True)
+
+
+# --------------------------------------------------------------------------- series + windows
+# Raw per-patient series, shape (n_patients, n_steps, len(SERIES_CHANNELS)); NaN = not observed.
+SERIES_CHANNELS = ("cgm_mgdl", "steps", "heart_rate_bpm", "sleep_code")
+SLEEP_CODES = {"awake": 0, "light": 1, "deep": 2, "rem": 3}
+
+# Model-ready per-timestep features produced by encode_sequences.
+SEQUENCE_FEATURES = ("cgm", "cgm_observed", "cgm_delta", "steps", "steps_observed", "hr", "hr_observed",
+                     "asleep", "awake_in_bed", "deep", "rem", "tod_sin", "tod_cos")
+
+# Fixed physiological scaling constants (not fitted, so they cannot leak test information).
+CGM_CENTER, CGM_SCALE = 140.0, 50.0
+HR_CENTER, HR_SCALE = 70.0, 15.0
+STEPS_LOG_SCALE = float(np.log1p(600))
+
+
+def to_series(linked: pd.DataFrame, patient_ids: list[str] | np.ndarray) -> tuple[np.ndarray, pd.DatetimeIndex]:
+    """Pivot linked long-format wearable rows into a dense (P, T, C) float32 array in `patient_ids` order.
+
+    All patients must share one regular timestamp grid (true for the simulated cohort).
+    """
+    timestamps = pd.DatetimeIndex(np.sort(linked.timestamp.unique()))
+    df = linked.assign(sleep_code=linked.sleep_stage.map(SLEEP_CODES))
+    df = df.set_index(["patient_id", "timestamp"])[list(SERIES_CHANNELS)]
+    full = pd.MultiIndex.from_product([list(patient_ids), timestamps], names=["patient_id", "timestamp"])
+    arr = df.reindex(full).to_numpy(dtype=np.float32)
+    return arr.reshape(len(patient_ids), len(timestamps), len(SERIES_CHANNELS)), timestamps
+
+
+def extract_windows(series: np.ndarray, patient_idx: np.ndarray, anchor_idx: np.ndarray, history: int) -> np.ndarray:
+    """Raw history windows ending at (and including) each anchor: shape (N, history, C)."""
+    offsets = np.arange(-history + 1, 1)
+    return series[np.asarray(patient_idx)[:, None], np.asarray(anchor_idx)[:, None] + offsets]
+
+
+def _ffill(x: np.ndarray) -> np.ndarray:
+    """Forward-fill NaNs along axis 1 of an (N, T) array; leading NaNs are back-filled."""
+    n, t = x.shape
+    obs = ~np.isnan(x)
+    idx = np.maximum.accumulate(np.where(obs, np.arange(t), 0), axis=1)
+    out = x[np.arange(n)[:, None], idx]
+    first = np.where(obs.any(1), obs.argmax(1), 0)
+    lead = np.arange(t)[None, :] < first[:, None]
+    out[lead] = x[np.arange(n), first][:, None].repeat(t, 1)[lead]
+    return out
+
+
+def encode_sequences(raw: np.ndarray, anchor_idx: np.ndarray, start_hour: float, dt_min: int) -> np.ndarray:
+    """Turn raw windows (N, H, C) into model-ready features (N, H, len(SEQUENCE_FEATURES)), NaN-free.
+
+    Missing CGM / HR are forward-filled within the window and flagged by `*_observed`
+    masks, so the model can tell a real reading from an imputed one.
+    """
+    n, h, _ = raw.shape
+    cgm, steps, hr, sleep = (raw[..., i] for i in range(4))
+    cgm_obs, steps_obs, hr_obs = (~np.isnan(a) for a in (cgm, steps, hr))
+
+    cgm_f = np.nan_to_num(_ffill(cgm), nan=CGM_CENTER)
+    hr_f = np.nan_to_num(_ffill(hr), nan=HR_CENTER)
+    cgm_delta = np.diff(cgm_f, axis=1, prepend=cgm_f[:, :1]) / 10.0      # mg/dL per 5 min, scaled
+    hours = (start_hour + (np.asarray(anchor_idx)[:, None] + np.arange(-h + 1, 1)) * dt_min / 60) % 24
+    ang = 2 * np.pi * hours / 24
+
+    feats = [
+        (cgm_f - CGM_CENTER) / CGM_SCALE, cgm_obs, cgm_delta,
+        np.log1p(np.nan_to_num(steps, nan=0.0)) / STEPS_LOG_SCALE, steps_obs,
+        (hr_f - HR_CENTER) / HR_SCALE, hr_obs,
+        np.isin(sleep, (1, 2, 3)), sleep == 0, sleep == 2, sleep == 3,
+        np.sin(ang), np.cos(ang),
+    ]
+    return np.stack([np.asarray(f, dtype=np.float32) for f in feats], axis=-1)

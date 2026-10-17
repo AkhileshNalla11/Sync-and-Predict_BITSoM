@@ -34,7 +34,7 @@ _TODO (Stage 5): ablation table for both targets (AUPRC is the headline metric f
 # 1. Environment (Python 3.10+). On Windows ARM64, use an x64 Python, e.g. `uv venv --python cpython-3.12-windows-x86_64-none`
 python -m venv .venv && .venv/Scripts/pip install -r requirements.txt   # or .venv/bin/pip on Linux/macOS
 
-# 2. Full pipeline (currently: data generation)
+# 2. Full pipeline (currently: data generation -> linking, split, windows)
 bash scripts/run_pipeline.sh
 
 # 3. Dashboard (Stage 7)
@@ -48,7 +48,7 @@ bash scripts/demo.sh
 ```
 config.yaml           seeds, window sizes, thresholds, simulator calibration
 data/                 generated data (git-ignored) + data/README.md
-src/data/             synthetic_gen, ehr_features, wearable_features, linker
+src/data/             synthetic_gen, ehr_features, wearable_features, linker, build_dataset
 src/models/           baselines, fusion_model, train
 src/eval/             metrics, ablation
 src/twin/             state, explain, whatif

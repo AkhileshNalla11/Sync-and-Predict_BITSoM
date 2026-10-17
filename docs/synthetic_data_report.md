@@ -10,27 +10,27 @@ linkage is created by the simulator by design and does not reflect real people.*
 
 | Target | Rate | Target range |
 |---|---|---|
-| Hyperglycaemia (> 180 mg/dL) | 29.0% | 20-40% |
-| Hypoglycaemia (< 70 mg/dL) | 4.4% | 3-8% |
-| Nocturnal hypoglycaemia (prediction 22:00-06:00) | 3.0% | - |
+| Hyperglycaemia (> 180 mg/dL) | 26.7% | 20-40% |
+| Hypoglycaemia (< 70 mg/dL) | 4.2% | 3-8% |
+| Nocturnal hypoglycaemia (prediction 22:00-06:00) | 2.1% | - |
 
-Hypo rate on insulin or sulfonylurea: 10.5%; on metformin only / no drugs: 0.02%.
-Patients with at least one hypo window: 26%.
+Hypo rate on insulin or sulfonylurea: 9.8%; on metformin only / no drugs: 0.02%.
+Patients with at least one hypo window: 32%.
 
 | Regimen | Windows | Hypo rate | Hyper rate |
 |---|---|---|---|
-| insulin | 657 | 0.00% | 76.6% |
-| insulin+metformin | 16,035 | 11.04% | 32.4% |
-| insulin+metformin+sulfonylurea | 5,187 | 15.13% | 40.7% |
-| insulin+sulfonylurea | 1,946 | 0.72% | 50.7% |
-| metformin | 93,093 | 0.02% | 28.6% |
-| metformin+sulfonylurea | 53,014 | 9.27% | 30.0% |
-| none | 18,800 | 0.03% | 20.3% |
-| sulfonylurea | 5,186 | 21.65% | 22.9% |
+| insulin | 657 | 1.07% | 37.9% |
+| insulin+metformin | 16,035 | 2.89% | 29.1% |
+| insulin+metformin+sulfonylurea | 5,187 | 5.51% | 32.0% |
+| insulin+sulfonylurea | 1,946 | 2.42% | 35.3% |
+| metformin | 93,093 | 0.02% | 28.7% |
+| metformin+sulfonylurea | 53,014 | 12.93% | 21.5% |
+| none | 18,800 | 0.05% | 21.1% |
+| sulfonylurea | 5,186 | 7.81% | 46.4% |
 
 ## Sanity statistics
 
-- Mean CGM glucose 144 mg/dL; TIR 80%, TAR 18%, TBR 2.1%
-- Correlation of EHR HbA1c with simulated mean glucose: 0.65
-- Mean EHR HbA1c 7.3% vs mean CGM-derived GMI 6.8%
-- Median daily steps 7,168; mean sleep 6.4 h/night
+- Mean CGM glucose 141 mg/dL; TIR 82%, TAR 16%, TBR 1.5%
+- Correlation of EHR HbA1c with simulated mean glucose: 0.69
+- Mean EHR HbA1c 7.3% vs mean CGM-derived GMI 6.7%
+- Median daily steps 7,165; mean sleep 6.4 h/night
