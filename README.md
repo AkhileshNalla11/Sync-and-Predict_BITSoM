@@ -76,9 +76,11 @@ per-prediction explanations (TreeSHAP) and a what-if engine. A Streamlit clinici
   built in. It shows the pipeline *can* use static context, not how much EHR data helps real patients.
 * **Calibrated event rates** (prediction windows every 30 min): hyperglycaemia 26.7%, hypoglycaemia 4.2%,
   nocturnal hypoglycaemia 2.1%; metformin-only and untreated patients essentially never go low (0.02%).
-* **External sources, checked and not used:** [CGMacros](https://physionet.org/content/cgmacros/)
-  (PhysioNet, open access, CC BY-NC-SA 4.0) has only 14 T2D participants and no medication-driven lows.
-  [Synthea](https://github.com/synthetichealth/synthea) (Apache 2.0) produces US-centric EHR without CGM
+* **External real CGM, used only for a sanity check, never for training:**
+  [CGMacros](https://physionet.org/content/cgmacros/) (PhysioNet, open access, CC BY-NC-SA 4.0, not
+  redistributed here). It has only 14 T2D participants and no medication-driven lows. See
+  [docs/external_validation.md](docs/external_validation.md).
+* **Checked and not used:** [Synthea](https://github.com/synthetichealth/synthea) (Apache 2.0) produces US-centric EHR without CGM
   and needs Java. See [data/README.md](data/README.md).
 
 ## Technical stack and model details
@@ -143,6 +145,20 @@ Bold = 95% CI excludes zero.
   simulator, lows arrive as slow drifts (the lowest CGM in the 2 h before onset is already 70 mg/dL,
   median). Expect real-world performance to be markedly lower.
 
+**External sanity check on real CGM (CGMacros).** The synthetic-trained CGM-only LightGBM was run unchanged
+on 14 real T2D participants from [CGMacros](https://physionet.org/content/cgmacros/) (US cohort, Dexcom G6,
+about 10 days each).
+* **Hyperglycaemia onset:** AUPRC 0.463 (0.388-0.547) at prevalence 0.276, AUROC 0.698. On synthetic
+  test patients the same model scores 0.724 and 0.930.
+  * It beats persistence on AUROC (+0.04), but its AUPRC gain (+0.03) is not significant.
+  * A model with the same features retrained leave-one-participant-out on the real cohort reaches
+    0.537 (0.474-0.614).
+* **The synthetic numbers clearly overstate real-world performance.**
+* **Hypoglycaemia cannot be checked:** there are only 31 hypo windows, from 3 T2D participants, and no
+  medication-driven lows.
+
+Method, cohort and caveats: [docs/external_validation.md](docs/external_validation.md).
+
 ## How to run
 
 Python 3.10+. The full pipeline takes about 25 min on a laptop CPU (most of it is training the GRU models).
@@ -196,7 +212,7 @@ config.yaml           seeds, window sizes, thresholds, simulator calibration, mo
 data/                 generated data (git-ignored) + data/README.md
 src/data/             synthetic_gen, ehr_features, wearable_features, linker, build_dataset
 src/models/           baselines (persistence, LightGBM), fusion_model, train
-src/eval/             metrics, ablation
+src/eval/             metrics, ablation, external_cgmacros (real-CGM sanity check; loader in src/data/cgmacros.py)
 src/twin/             state (PatientTwin), explain (TreeSHAP), whatif (scenarios)
 src/app/dashboard.py  Streamlit clinician dashboard
 docs/                 ablation results + figures, data report, architecture diagram, video script
@@ -207,8 +223,13 @@ tests/                pytest suite
 
 ## Limitations
 
-* **Synthetic data only.** No real patients; results say nothing about clinical performance. The model has
-  not been validated on real CGM or EHR data and must not inform care.
+* **Trained on synthetic data only.** No real patients are used for training. The model has not been
+  clinically validated on real CGM or EHR data and must not inform care.
+* **The one real-data check is small and only partly reassuring.**
+  * On 14 real T2D participants from CGMacros, hyperglycaemia onset AUROC drops from 0.93 (synthetic) to
+    0.70, with uncalibrated probabilities.
+  * Hypoglycaemia and the EHR fusion could not be tested there at all.
+  * See [docs/external_validation.md](docs/external_validation.md).
 * **The EHR signal is built in.** The simulator makes EHR traits drive glucose by design, so the measured
   EHR gain is a property of the simulator as much as of the model.
 * **Simplified physiology.** The simulator is a lumped model, not a validated physiological simulator.
