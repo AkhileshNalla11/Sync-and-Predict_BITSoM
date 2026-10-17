@@ -84,3 +84,7 @@ fusion:
   focal_gamma: 2.0
   hypo_loss_weight: 1.0        # relative weight of the hypo head in the joint loss
   num_threads: 4
+
+twin:
+  model: lgbm_cgm_wearables_ehr   # best hypo model with calibrated probabilities (see docs/ablation_results.md)
+  alert_false_alert_rate: 0.05    # alert threshold = 5% false-alert rate on VALIDATION onset windows

@@ -335,8 +335,11 @@ def _chain_step(q: np.ndarray, inp: np.ndarray, k: np.ndarray) -> np.ndarray:
 
 def simulate_glucose(params: pd.DataFrame, carbs: np.ndarray, doses: np.ndarray, steps: np.ndarray,
                      ir_mult: np.ndarray, tod_hours: np.ndarray, dt: int, cal: dict[str, float],
-                     rng: np.random.Generator) -> np.ndarray:
-    """Integrate true glucose for P patients. carbs (3,P,T), doses (4,P,T), steps/ir_mult (P,T)."""
+                     rng: np.random.Generator | None, noise: np.ndarray | None = None) -> np.ndarray:
+    """Integrate true glucose for P patients. carbs (3,P,T), doses (4,P,T), steps/ir_mult (P,T).
+
+    `noise` (T, P) can be passed in to replay a run exactly (used by the what-if engine).
+    """
     n_p, n_t = steps.shape
     gb = params.g_basal.to_numpy()
     p1 = dt / params.tau_clear_min.to_numpy()
@@ -357,7 +360,8 @@ def simulate_glucose(params: pd.DataFrame, carbs: np.ndarray, doses: np.ndarray,
     gut = np.zeros((3, 2, n_p))
     pk = np.zeros((4, 2, n_p))
     s_post = np.zeros(n_p)
-    noise = rng.normal(0, cal["process_noise_sd"], (n_t, n_p))
+    if noise is None:
+        noise = rng.normal(0, cal["process_noise_sd"], (n_t, n_p))
     out = np.empty((n_p, n_t))
     for t in range(n_t):
         q2 = _chain_step(gut, carbs[:, :, t], k_gut)
@@ -382,24 +386,16 @@ def simulate_glucose(params: pd.DataFrame, carbs: np.ndarray, doses: np.ndarray,
     return out
 
 
-def apply_cgm_sensor(g_true: np.ndarray, dt: int, rng: np.random.Generator) -> np.ndarray:
-    """Observed CGM: interstitial lag, AR(1) error, calibration bias, range limits, dropouts."""
-    n_p, n_t = g_true.shape
-    lagged = np.empty_like(g_true)
-    s = g_true[:, 0].copy()
-    err = np.zeros(n_p)
-    phi, sd = 0.85, 5.0
-    e = rng.normal(0, sd * np.sqrt(1 - phi ** 2), (n_t, n_p))
-    errs = np.empty_like(g_true)
-    for t in range(n_t):
-        s += dt / 10 * (g_true[:, t] - s)
-        err = phi * err + e[t]
-        lagged[:, t], errs[:, t] = s, err
-    gain = rng.normal(1.0, 0.04, (n_p, 1))
-    cgm = np.clip(np.round(lagged * gain + errs + rng.normal(0, 1.5, g_true.shape)), 40, 400)
+CGM_ERR_PHI, CGM_ERR_SD = 0.85, 5.0
 
+
+def draw_cgm_noise(n_p: int, n_t: int, dt: int, rng: np.random.Generator) -> dict[str, np.ndarray]:
+    """All random parts of the CGM sensor model (independent of glucose), drawn in a fixed order."""
+    e = rng.normal(0, CGM_ERR_SD * np.sqrt(1 - CGM_ERR_PHI ** 2), (n_t, n_p))
+    gain = rng.normal(1.0, 0.04, (n_p, 1))
+    white = rng.normal(0, 1.5, (n_p, n_t))
     per_day = 24 * 60 // dt
-    mask = rng.random(g_true.shape) < 0.01                       # isolated missed readings
+    mask = rng.random((n_p, n_t)) < 0.01                         # isolated missed readings
     for i in range(n_p):
         for d in range(n_t // per_day):
             if rng.random() < 0.35:                              # signal-loss gap, 15-120 min
@@ -408,12 +404,32 @@ def apply_cgm_sensor(g_true: np.ndarray, dt: int, rng: np.random.Generator) -> n
         if rng.random() < 0.15:                                  # one long sensor failure, 6-12 h
             a = rng.integers(0, n_t)
             mask[i, a:a + rng.integers(72, 145)] = True
-    cgm[mask] = np.nan
+    return {"e": e, "gain": gain, "white": white, "mask": mask}
+
+
+def apply_cgm_noise(g_true: np.ndarray, noise: dict[str, np.ndarray], dt: int) -> np.ndarray:
+    """Observed CGM: interstitial lag, AR(1) error, calibration bias, range limits, dropouts."""
+    n_p, n_t = g_true.shape
+    lagged = np.empty_like(g_true)
+    s = g_true[:, 0].copy()
+    err = np.zeros(n_p)
+    errs = np.empty_like(g_true)
+    for t in range(n_t):
+        s += dt / 10 * (g_true[:, t] - s)
+        err = CGM_ERR_PHI * err + noise["e"][t]
+        lagged[:, t], errs[:, t] = s, err
+    cgm = np.clip(np.round(lagged * noise["gain"] + errs + noise["white"]), 40, 400)
+    cgm[noise["mask"]] = np.nan
     return cgm
 
 
+def apply_cgm_sensor(g_true: np.ndarray, dt: int, rng: np.random.Generator) -> np.ndarray:
+    return apply_cgm_noise(g_true, draw_cgm_noise(*g_true.shape, dt, rng), dt)
+
+
 def simulate_heart_rate(params: pd.DataFrame, steps: np.ndarray, stage: np.ndarray, ir_mult: np.ndarray,
-                        g_true: np.ndarray, dt: int, rng: np.random.Generator) -> np.ndarray:
+                        g_true: np.ndarray, dt: int, rng: np.random.Generator | None,
+                        eps: np.ndarray | None = None) -> np.ndarray:
     """HR from rest level, activity, sleep stage, poor-sleep strain and adrenergic response to lows."""
     n_p, n_t = steps.shape
     smooth = np.empty_like(steps)
@@ -427,7 +443,8 @@ def simulate_heart_rate(params: pd.DataFrame, steps: np.ndarray, stage: np.ndarr
           + 12 * (ir_mult - 1) + 0.35 * np.maximum(72 - g_true, 0))
     noise = np.zeros(n_p)
     out = np.empty_like(hr)
-    eps = rng.normal(0, 2.0, (n_t, n_p))
+    if eps is None:
+        eps = rng.normal(0, 2.0, (n_t, n_p))
     for t in range(n_t):
         noise = 0.7 * noise + eps[t]
         out[:, t] = hr[:, t] + noise
