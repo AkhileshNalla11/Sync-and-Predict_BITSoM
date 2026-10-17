@@ -1,0 +1,30 @@
+{
+  "mean": {
+    "age": 53.94845360824742,
+    "bmi": 26.762371134020615,
+    "weight_kg": 69.24742268041236,
+    "diabetes_duration_years": 5.4180412371134015,
+    "hba1c": 7.223195876288661,
+    "egfr": 92.0360824742268,
+    "ldl_mgdl": 105.54639175257732,
+    "triglycerides_mgdl": 163.6237113402062,
+    "insulin_total_daily_units": 3.6597938144329896,
+    "insulin_units_per_kg": 0.05121329432811481,
+    "sulfonylurea_dose_mg": 0.6494845360824743,
+    "metformin_dose_mg": 1239.6907216494844
+  },
+  "std": {
+    "age": 9.43165446017268,
+    "bmi": 4.114479905551535,
+    "weight_kg": 13.407849622581304,
+    "diabetes_duration_years": 4.108042687211147,
+    "hba1c": 0.9355124803057077,
+    "egfr": 13.78194460241826,
+    "ldl_mgdl": 28.564097073419386,
+    "triglycerides_mgdl": 62.30766409345366,
+    "insulin_total_daily_units": 10.609164097330451,
+    "insulin_units_per_kg": 0.14792269515124248,
+    "sulfonylurea_dose_mg": 1.0653031814077945,
+    "metformin_dose_mg": 622.2025287807248
+  }
+}

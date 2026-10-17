@@ -1,0 +1,50 @@
+{
+  "n_patients": 300,
+  "series_shape": [
+    300,
+    4032,
+    4
+  ],
+  "train": {
+    "patients": 194,
+    "windows": 125415,
+    "hyper_rate": 0.2593,
+    "hypo_rate": 0.0416,
+    "hypo_positives": 5211,
+    "nocturnal_windows": 39820,
+    "nocturnal_hypo_positives": 717,
+    "strata": {
+      "other": 112,
+      "sulfonylurea": 58,
+      "insulin": 24
+    }
+  },
+  "val": {
+    "patients": 46,
+    "windows": 29777,
+    "hyper_rate": 0.2265,
+    "hypo_rate": 0.0511,
+    "hypo_positives": 1523,
+    "nocturnal_windows": 9511,
+    "nocturnal_hypo_positives": 313,
+    "strata": {
+      "other": 26,
+      "sulfonylurea": 14,
+      "insulin": 6
+    }
+  },
+  "test": {
+    "patients": 60,
+    "windows": 38726,
+    "hyper_rate": 0.3228,
+    "hypo_rate": 0.035,
+    "hypo_positives": 1355,
+    "nocturnal_windows": 12324,
+    "nocturnal_hypo_positives": 269,
+    "strata": {
+      "other": 35,
+      "sulfonylurea": 18,
+      "insulin": 7
+    }
+  }
+}

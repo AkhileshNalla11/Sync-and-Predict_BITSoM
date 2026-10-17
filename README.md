@@ -172,6 +172,17 @@ bash scripts/demo.sh
 .venv/bin/python -m pytest
 ```
 
+**Deploying the dashboard (Streamlit Community Cloud).** The repo ships a 14 MB `demo_bundle/` (precomputed
+synthetic data, the deployed LightGBM pair and its alert thresholds). The dashboard loads it automatically
+when `data/processed` is absent, so the cloud never runs the pipeline. `src/app/requirements.txt` lists only
+the dashboard's dependencies (no PyTorch or SHAP), and `packages.txt` adds `libgomp1` for LightGBM.
+1. Sign in at [share.streamlit.io](https://share.streamlit.io) with GitHub (allow private-repo access if the repo is private).
+2. **Create app** -> repository `AkhileshNalla11/glycaemic-digital-twin`, branch `main`, main file `src/app/dashboard.py`.
+3. **Advanced settings** -> Python **3.12** -> **Deploy**.
+
+After re-running the pipeline, refresh the bundle with `python scripts/make_demo_bundle.py` and commit it.
+Vercel is not suitable: Streamlit needs a long-running server with WebSockets, which serverless functions don't provide.
+
 **Reproducibility.** Every random draw derives from `seed` in `config.yaml`; dependencies are pinned in
 `requirements.txt`; PyTorch runs with deterministic algorithms. A clean re-run from an empty data directory
 reproduced the data report and baseline results exactly. 75 tests cover label correctness at the
@@ -188,7 +199,8 @@ src/eval/             metrics, ablation
 src/twin/             state (PatientTwin), explain (TreeSHAP), whatif (scenarios)
 src/app/dashboard.py  Streamlit clinician dashboard
 docs/                 ablation results + figures, data report, architecture diagram, video script
-scripts/              run_pipeline.{sh,cmd}, demo.{sh,cmd}, make_architecture_diagram.py
+scripts/              run_pipeline.{sh,cmd}, demo.{sh,cmd}, make_architecture_diagram.py, make_demo_bundle.py
+demo_bundle/          precomputed synthetic data + deployed model for cloud hosting (see MANIFEST.md)
 tests/                pytest suite
 ```
 

@@ -2,3 +2,4 @@
 *.png binary
 *.gz binary
 *.cmd text eol=crlf
+demo_bundle/** -text

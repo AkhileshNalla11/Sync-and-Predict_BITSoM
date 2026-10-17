@@ -7,6 +7,7 @@ SYNTHETIC DATA. Research prototype, NOT FOR CLINICAL USE.
 """
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -41,9 +42,20 @@ BANNER = ("⚠️ **SYNTHETIC DATA. Research prototype, not for clinical use.** 
 
 
 # --------------------------------------------------------------------------- cached resources
+def runtime_config() -> dict:
+    """Use the full pipeline outputs if present, else the committed demo bundle (e.g. on a cloud host)."""
+    cfg = load_config()
+    local = ROOT / cfg["paths"]["processed_dir"] / "series.npz"
+    bundle = ROOT / "demo_bundle" / "processed" / "series.npz"
+    if os.environ.get("TWIN_USE_DEMO_BUNDLE") == "1" or (not local.exists() and bundle.exists()):
+        cfg["paths"] = {"raw_dir": "demo_bundle/raw", "processed_dir": "demo_bundle/processed",
+                        "models_dir": "demo_bundle/processed/models", "docs_dir": cfg["paths"]["docs_dir"]}
+    return cfg
+
+
 @st.cache_resource(show_spinner="Loading the twin (data, model, thresholds)...")
 def get_context() -> TwinContext:
-    return TwinContext.load(load_config())
+    return TwinContext.load(runtime_config())
 
 
 @st.cache_resource(show_spinner="Replaying this patient's simulation...", max_entries=8)
@@ -436,6 +448,8 @@ def main() -> None:
     st.sidebar.markdown("---")
     st.sidebar.caption(f"Model: LightGBM on CGM + wearables + EHR. Test patients only ({len(pts)}); none were used "
                        "for training, model selection or alert thresholds.")
+    if str(ctx.cfg["paths"]["raw_dir"]).startswith("demo_bundle"):
+        st.sidebar.caption("Running from the committed demo bundle (precomputed synthetic data and model).")
 
     e = twin.profile
     st.markdown(f"## {pid} &nbsp;·&nbsp; {e['age']} y {'M' if e['sex'] == 'M' else 'F'} &nbsp;·&nbsp; {e['regimen']} "

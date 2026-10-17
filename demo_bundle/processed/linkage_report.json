@@ -1,0 +1,9 @@
+{
+  "method": "enrollment_crosswalk",
+  "n_ehr_patients": 300,
+  "n_devices_with_data": 300,
+  "n_linked": 300,
+  "ehr_without_device": [],
+  "devices_without_enrollment": [],
+  "synthetic_linkage": true
+}
