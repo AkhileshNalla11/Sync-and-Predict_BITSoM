@@ -25,6 +25,7 @@ from src.app import theme as T                      # noqa: E402
 from src.config import load_config                  # noqa: E402
 from src.twin.explain import driver_sentences, explain, group_contributions   # noqa: E402
 from src.twin.state import PatientTwin, TwinContext  # noqa: E402
+from src.twin.personalise import FIT_PARAMS        # noqa: E402
 from src.twin.whatif import (MAIN_MEALS, MEAL_CATALOGUE, AddActivity, AddMeal, DelayMeal, ExtraDose,  # noqa: E402
                              PatientSimulator, PoorSleep, Scenario, ScaleMedication, SkipMeal, WhatIfResult,
                              run_whatif)
@@ -32,6 +33,10 @@ from src.twin.whatif import (MAIN_MEALS, MEAL_CATALOGUE, AddActivity, AddMeal, D
 TARGET_NAME = {"hyper": "Hyperglycaemia", "hypo": "Hypoglycaemia"}
 TARGET_RULE = {"hyper": "Any glucose > 180 mg/dL in the next 2 h", "hypo": "Any glucose < 70 mg/dL in the next 2 h"}
 HIGH_BAND, LOW_BAND = "rgba(235,104,52,0.09)", "rgba(42,120,214,0.10)"
+TWIN_MODES = {"Personalised (fitted to this patient's data)": "fitted",
+              "Oracle (hidden simulator truth, for comparison only)": "oracle"}
+PARAM_LABEL = {"g_basal": "Basal glucose", "meal_gain": "Carb sensitivity", "tau_clear_min": "Clearance time",
+               "drug_sens": "Drug sensitivity"}
 
 
 # --------------------------------------------------------------------------- cached resources
@@ -51,9 +56,9 @@ def get_context() -> TwinContext:
     return TwinContext.load(runtime_config())
 
 
-@st.cache_resource(show_spinner="Replaying this patient's simulation...", max_entries=8)
-def get_simulator(patient_id: str) -> PatientSimulator:
-    return PatientSimulator(get_context().cfg, patient_id)
+@st.cache_resource(show_spinner="Building this patient's twin (a few seconds if the fit is not cached)...", max_entries=8)
+def get_simulator(patient_id: str, mode: str = "fitted") -> PatientSimulator:
+    return PatientSimulator(get_context().cfg, patient_id, mode=mode)
 
 
 @st.cache_data(show_spinner=False, max_entries=32)
@@ -182,14 +187,20 @@ def projection_figure(res: WhatIfResult, thresholds_mgdl: dict[str, float]) -> g
                        font=dict(size=11, color=T.BRAND, family=T.FONT))
     fig.add_hline(y=thresholds_mgdl["hyper_mgdl"], line=dict(color=T.HIGH, width=1.2, dash="dash"))
     fig.add_hline(y=thresholds_mgdl["hypo_mgdl"], line=dict(color=T.LOW, width=1.2, dash="dash"))
-    fig.add_trace(go.Scatter(x=p.timestamp, y=p.true_baseline, name="As it happened", mode="lines",
-                             line=dict(color=T.INK_3, width=2.2, dash="dot"),
-                             hovertemplate="%{y:.0f} mg/dL<extra>as it happened</extra>"))
-    fig.add_trace(go.Scatter(x=p.timestamp, y=p.true_scenario, name="With scenario", mode="lines",
+    fitted = res.mode == "fitted"
+    if fitted:
+        fig.add_trace(go.Scatter(x=p.timestamp, y=p.cgm_baseline, name="Measured CGM", mode="markers",
+                                 marker=dict(color=T.INK_3, size=4, opacity=0.6),
+                                 hovertemplate="%{y:.0f} mg/dL<extra>measured CGM</extra>"))
+    base_name = "Twin estimate, as logged" if fitted else "As it happened (hidden truth)"
+    fig.add_trace(go.Scatter(x=p.timestamp, y=p.sim_baseline, name=base_name, mode="lines",
+                             line=dict(color=T.INK_2, width=2.2, dash="dot"),
+                             hovertemplate="%{y:.0f} mg/dL<extra>" + base_name + "</extra>"))
+    fig.add_trace(go.Scatter(x=p.timestamp, y=p.sim_scenario, name="With scenario", mode="lines",
                              line=dict(color=T.BRAND, width=3), hovertemplate="%{y:.0f} mg/dL<extra>with scenario</extra>"))
     fig.add_vline(x=now, line=dict(color=T.BRAND, width=2))
     T.style_figure(fig, height=360)
-    top = float(np.nanmax(p[["true_baseline", "true_scenario"]].to_numpy()))
+    top = float(np.nanmax(p[["sim_baseline", "sim_scenario", "cgm_baseline"]].to_numpy()))
     fig.update_yaxes(title_text="mg/dL", range=[40, max(260, top + 20)])
     return fig
 
@@ -313,16 +324,32 @@ def preset_scenarios(name: str, ev: pd.DataFrame, now: pd.Timestamp, on_insulin:
     return [], ""
 
 
+def fit_chips(sim: PatientSimulator) -> list[tuple[str, str]]:
+    fit = sim.fit
+    names = str(fit.info.get("fitted_params", ",".join(FIT_PARAMS))).split(",")
+    items = [(f"{PARAM_LABEL[n]} ·", f"{fit.params.iloc[0][n]:.3g} (EHR default {fit.default.iloc[0][n]:.3g})")
+             for n in names]
+    return [("Fit error, first week ·", f"{float(fit.info['fit_mae']):.1f} mg/dL MAE")] + items
+
+
 def view_whatif(ctx: TwinContext, twin: PatientTwin) -> None:
-    sim = get_simulator(twin.patient_id)
-    ev = sim.events(twin.anchor_idx)
     html(T.section_html("Ask the twin “what if?”",
                         "Two separate answers: what the risk model predicts from the data it would see, and what the "
                         "simulated physiology does over the next 2 hours."))
-    mode = st.radio("Scenario", ["Late dinner (+2 h)", "Poor sleep night", "Skipped meal", "Extra insulin dose", "Custom"],
-                    horizontal=True)
-    if mode != "Custom":
-        scenarios, note = preset_scenarios(mode, ev, twin.time, bool(twin.profile["on_insulin"]))
+    label = st.radio("Twin physiology", list(TWIN_MODES), horizontal=True,
+                     help="Personalised: parameters fitted to this patient's first week of CGM and their meal / dose "
+                          "log, as a real twin would have to. Oracle: replays the simulator's hidden truth, which is "
+                          "only possible because the data is synthetic.")
+    mode = TWIN_MODES[label]
+    sim = get_simulator(twin.patient_id, mode)
+    if mode == "oracle":
+        st.warning("Oracle mode uses the simulator's **hidden** parameters, schedule and noise. No real system could do "
+                   "this; it is shown only to compare against the personalised twin.")
+    ev = sim.events(twin.anchor_idx)
+    preset = st.radio("Scenario", ["Late dinner (+2 h)", "Poor sleep night", "Skipped meal", "Extra insulin dose", "Custom"],
+                      horizontal=True)
+    if preset != "Custom":
+        scenarios, note = preset_scenarios(preset, ev, twin.time, bool(twin.profile["on_insulin"]))
         st.caption(note)
     else:
         scenarios = []
@@ -361,7 +388,7 @@ def view_whatif(ctx: TwinContext, twin: PatientTwin) -> None:
                 st.caption("Not on insulin or a sulfonylurea: no dose to change.")
 
     if not scenarios:
-        st.info("Choose at least one change." if mode == "Custom" else "This preset does not apply here (see above).")
+        st.info("Choose at least one change." if preset == "Custom" else "This preset does not apply here (see above).")
         return
     with st.spinner("Re-simulating and re-predicting..."):
         res = run_whatif(ctx, sim, twin.anchor_idx, scenarios)
@@ -375,17 +402,30 @@ def view_whatif(ctx: TwinContext, twin: PatientTwin) -> None:
     if res.unseen_by_model:
         st.warning("The risk model **cannot see** changes after *now* (" + "; ".join(res.unseen_by_model) + "). "
                    "Its risk only reflects past data; the simulator projection below does include them.")
-    html(T.section_html("Simulated glucose", "Twin physiology from the synthetic simulator: as it happened vs with the scenario"))
+    if mode == "fitted":
+        html(T.section_html("Simulated glucose · personalised twin",
+                            "Parameters fitted to this patient's first week; pulled toward the measured CGM up to now, "
+                            "then free-running. Estimate as logged vs with the scenario."))
+    else:
+        html(T.section_html("Simulated glucose · oracle replay",
+                            "The simulator's hidden truth: as it happened vs with the scenario"))
     st.plotly_chart(projection_figure(res, ctx.cfg["thresholds"]), use_container_width=True, config=T.PLOTLY_CONFIG)
     o = res.simulated_outcome
     html(T.chips_html([
-        ("Lowest, next 2 h", f"{o['baseline']['true_min']:.0f} → {o['scenario']['true_min']:.0f} mg/dL"),
-        ("Highest, next 2 h", f"{o['baseline']['true_max']:.0f} → {o['scenario']['true_max']:.0f} mg/dL"),
+        ("Lowest, next 2 h", f"{o['baseline']['sim_min']:.0f} → {o['scenario']['sim_min']:.0f} mg/dL"),
+        ("Highest, next 2 h", f"{o['baseline']['sim_max']:.0f} → {o['scenario']['sim_max']:.0f} mg/dL"),
         ("CGM low", "yes" if o["scenario"]["hypo"] else "no"),
         ("CGM high", "yes" if o["scenario"]["hyper"] else "no"),
     ]))
-    st.caption("The simulator is the synthetic model that generated this data, so the projection is only as good as "
-               "that model. In real use there would be no ground-truth physiology to replay.")
+    if mode == "fitted":
+        html(T.chips_html(fit_chips(sim)))
+        st.caption("Personalised twin: the simulator's equations with four parameters fitted per patient (see "
+                   "docs/twin_personalisation.md). Inputs are the EHR, the first week of CGM, the logged meals and "
+                   "doses, and the wearable; no hidden simulator information is used. The equations are still the "
+                   "synthetic model's own, so this is a best case, not clinical evidence.")
+    else:
+        st.caption("Oracle replay of the synthetic simulator, including its hidden parameters and noise. In real use "
+                   "there would be no ground-truth physiology to replay; use the personalised twin instead.")
 
 
 # --------------------------------------------------------------------------- page

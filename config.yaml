@@ -88,3 +88,7 @@ fusion:
 twin:
   model: lgbm_cgm_wearables_ehr   # best hypo model with calibrated probabilities (see docs/ablation_results.md)
   alert_false_alert_rate: 0.05    # alert threshold = 5% false-alert rate on VALIDATION onset windows
+  personalise:                    # fitted twin: per-patient parameters from observable data (src/twin/personalise.py)
+    fit_days: 7                   # first N days of CGM + meal/dose log used for fitting; the rest is held out
+    prior_weight: 5.0             # (mg/dL)^2 penalty per prior SD of departure from the EHR default (chosen on val patients)
+    observer_gain: 0.2            # what-if: per-5-min pull of simulated glucose toward observed CGM up to 'now'

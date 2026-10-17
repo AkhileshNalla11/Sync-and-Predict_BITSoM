@@ -3,8 +3,9 @@
     python scripts/make_demo_bundle.py        # after scripts/run_pipeline.{sh,cmd}
 
 The dashboard loads demo_bundle/ automatically when data/processed is missing (e.g. on Streamlit
-Community Cloud), or always when TWIN_USE_DEMO_BUNDLE=1. The what-if engine needs no files: it
-regenerates the simulation from config.yaml + seed. Everything in the bundle is SYNTHETIC.
+Community Cloud), or always when TWIN_USE_DEMO_BUNDLE=1. The personalised what-if twin needs the patient
+log (meals + doses) and the cached parameter fits; the oracle mode regenerates the hidden simulation from
+config.yaml + seed. Everything in the bundle is SYNTHETIC.
 """
 from __future__ import annotations
 
@@ -22,7 +23,8 @@ from src.twin.state import TwinContext  # noqa: E402
 
 BUNDLE = ROOT / "demo_bundle"
 PROCESSED = ("series.npz", "windows.csv.gz", "static_features.csv", "static_encoder.json", "splits.csv",
-             "window_features.npz", "dataset_summary.json", "linkage_report.json")
+             "window_features.npz", "dataset_summary.json", "linkage_report.json", "patient_log.csv.gz",
+             "twin_fits.csv")
 
 
 def main() -> None:

@@ -1,0 +1,5 @@
+prior_weight,n_patients,heldout_cgm_mae,forecast_2h_mae,g_basal_med_rel_err,meal_gain_med_rel_err,tau_clear_min_med_rel_err,drug_sens_med_rel_err
+0.0,46,5.7615,5.198,0.0319,0.0386,0.0541,0.037
+2.0,46,5.7265,5.1694,0.0304,0.036,0.0426,0.0293
+5.0,46,5.7168,5.1592,0.0295,0.0366,0.0423,0.0294
+20.0,46,5.7361,5.1664,0.0272,0.0428,0.0267,0.0406

@@ -52,7 +52,7 @@ per-prediction explanations (TreeSHAP) and a what-if engine. A Streamlit clinici
 |---|---|
 | Glucose timeline | CGM with high (> 180) and low (< 70) bands shaded, both risk scores over time, alert markers, a "now" line, and the actual next 2 h (marked as not seen by the model) |
 | Alert drivers | Top reasons for each risk, e.g. *current glucose 70 mg/dL* or *sulfonylurea 3 mg/day*, grouped by data stream |
-| What-if | Presets (late dinner, poor sleep night, skipped meal, extra insulin dose) plus custom edits; model risk before/after and the simulated glucose, shown separately |
+| What-if | Presets (late dinner, poor sleep night, skipped meal, extra insulin dose) plus custom edits; model risk before/after and the simulated glucose, shown separately. The glucose projection comes from a **personalised twin** fitted to the patient's own first week of data (default) or, for comparison, an oracle replay of the hidden simulator |
 | Patient overview | Demographics, labs, medications, comorbidities, ICD-10 codes, 14-day CGM metrics (TIR / TBR / TAR, GMI, CV) |
 
 ## Data sources and synthetic-linkage disclosure
@@ -94,7 +94,7 @@ Plotly, Matplotlib, PyYAML, pytest. CPU only.
 | Persistence baseline | Extrapolates the latest CGM along its 30-min trend over 2 h; scores = trajectory max (hyper) / minus min (hypo) |
 | LightGBM | One model per target on 37 handcrafted window features (mean, min, max, SD/CV, 30/60-min slopes, last value, time above/below range, minutes since last high/low, **meal-rise proxy**, time of day) plus wearable features (steps, HR, sleep) plus the static vector. Unweighted, early-stopped on validation-patient AUPRC. |
 | Fusion net (PyTorch) | Static MLP (24 -> 64 -> 32) and a GRU (13 per-step channels -> 64; a dilated 1D-CNN is a config swap), concatenated -> shared layer (64) -> **two heads** (hyper, hypo). Hypo rarity: weighted BCE with `pos_weight = sqrt(neg/pos)` (~4.8); focal loss available. AdamW, early stopping on validation onset AUPRC. A sequence-only twin (no EHR branch) isolates the EHR effect. |
-| Twin layer | `PatientTwin` snapshot; alert thresholds at a 5% false-alert rate on **validation** patients; TreeSHAP via LightGBM `pred_contrib` (tested to match `shap.TreeExplainer`); what-if by exact replay of the patient's simulation with edits |
+| Twin layer | `PatientTwin` snapshot; alert thresholds at a 5% false-alert rate on **validation** patients; TreeSHAP via LightGBM `pred_contrib` (tested to match `shap.TreeExplainer`); what-if on a **personalised twin**: 4 simulator parameters (basal glucose, carb gain, clearance, drug sensitivity) fitted per patient to the first 7 days of CGM + the meal/dose log with `scipy.optimize.least_squares` (~1.5 s, cached), a state observer up to *now*, then free-running; oracle replay of the hidden simulation kept for comparison ([docs/twin_personalisation.md](docs/twin_personalisation.md)) |
 | Evaluation | AUROC, **AUPRC (headline for hypo)**, sensitivity / PPV / alert burden at fixed false-alert rates, lead time before event onset, calibration (Brier, ECE), all with **patient-level bootstrap** 95% CIs; paired bootstrap for model differences |
 
 ## Results
@@ -196,8 +196,8 @@ config.yaml           seeds, window sizes, thresholds, simulator calibration, mo
 data/                 generated data (git-ignored) + data/README.md
 src/data/             synthetic_gen, ehr_features, wearable_features, linker, build_dataset
 src/models/           baselines (persistence, LightGBM), fusion_model, train
-src/eval/             metrics, ablation
-src/twin/             state (PatientTwin), explain (TreeSHAP), whatif (scenarios)
+src/eval/             metrics, ablation, twin_validation (held-out check of the personalised twin)
+src/twin/             state (PatientTwin), explain (TreeSHAP), whatif (scenarios), personalise (parameter fitting)
 src/app/dashboard.py  Streamlit clinician dashboard
 docs/                 ablation results + figures, data report, architecture diagram, video script
 scripts/              run_pipeline.{sh,cmd}, demo.{sh,cmd}, make_architecture_diagram.py, make_demo_bundle.py
@@ -220,8 +220,10 @@ tests/                pytest suite
 * **Inputs are limited to a 6 h window and do not include logged meals or doses.** The model cannot see
   last night's sleep at midday, a planned dinner, or an insulin dose that has not yet moved CGM. The what-if
   panel shows this explicitly.
-* **What-if relies on replaying the simulator,** which is only possible because the data is synthetic.
-  A real twin would need a validated physiological model calibrated to each patient.
+* **The personalised twin is a best case.** Its parameters are fitted from observable data only (EHR,
+  first-week CGM, meal/dose log, wearable), but its equations are the simulator's own and the log is exact.
+  Real physiology, carb-counting error and missed log entries would make it much less accurate; a real
+  twin would need a validated physiological model. See [docs/twin_personalisation.md](docs/twin_personalisation.md).
 * **Alert burden and precision** at the reported operating points (PPV ~18% for hypo at 10% FAR) are not
   acceptable for deployment as is. Alerts are counted per 30-min window, not per episode.
 * **Population realism.** Cohort distributions are loosely inspired by Indian T2D cohorts but are not

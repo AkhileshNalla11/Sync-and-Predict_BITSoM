@@ -50,3 +50,14 @@ def test_choose_time_and_patient(app) -> None:
     sb = next(s for s in app.selectbox if s.label == "Virtual patient (test set)")
     sb.set_value(sb.options[-1].split(" ")[0]).run()               # raw value = patient id (labels via format_func)
     assert not app.exception, [e.value for e in app.exception]
+
+
+def test_whatif_defaults_to_personalised_twin_and_can_switch_to_oracle(app) -> None:
+    _radio(app, "Scenario").set_value("Extra insulin dose").run()              # a preset that always applies
+    mode = _radio(app, "Twin physiology")
+    assert mode.value.startswith("Personalised")
+    assert any("personalised twin" in m.value for m in app.markdown)
+    mode.set_value(next(o for o in mode.options if o.startswith("Oracle"))).run()
+    assert not app.exception, [e.value for e in app.exception]
+    assert any("hidden" in w.value for w in app.warning)
+    _radio(app, "Twin physiology").set_value(mode.options[0]).run()
