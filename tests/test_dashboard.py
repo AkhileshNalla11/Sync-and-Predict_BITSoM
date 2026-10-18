@@ -22,6 +22,10 @@ def app():
     from streamlit.testing.v1 import AppTest
     at = AppTest.from_file(str(APP), default_timeout=300)
     at.run()
+    assert not at.exception, [e.value for e in at.exception]
+    # The what-if twin is opt-in, so the first load stays fast; nothing scenario-related exists until it starts.
+    assert not any(r.label == "Scenario" for r in at.radio)
+    at.button(key="start_whatif").click().run()
     return at
 
 

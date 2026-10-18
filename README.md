@@ -222,6 +222,17 @@ demo_bundle/          precomputed synthetic data + deployed model for cloud host
 tests/                pytest suite
 ```
 
+## Responsible AI
+
+* [Model card](docs/model_card.md): intended and out-of-scope use, data, synthetic vs real-CGM performance,
+  calibration, risks and recommendations.
+* [Subgroup performance](docs/subgroups.md): the deployed model by sex, age, kidney function, drug class,
+  HbA1c and BMI. Insulin users' lows are the hardest to predict (hypo AUPRC 0.22 vs 0.72 for sulfonylurea
+  users), and reduced kidney function cannot be audited (1 test patient).
+* [Path to real-world deployment in India](docs/deployment_path.md): real-patient validation stages, DPDP Act
+  2023 / Rules 2025 consent and security duties, ABDM / FHIR integration, CDSCO medical-device-software
+  classification and ICMR AI ethics guidelines.
+
 ## Limitations
 
 * **Trained on synthetic data only.** No real patients are used for training. The model has not been

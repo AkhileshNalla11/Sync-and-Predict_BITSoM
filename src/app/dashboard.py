@@ -73,15 +73,27 @@ def get_series(patient_id: str) -> pd.DataFrame:
 
 @st.cache_data(show_spinner=False)
 def patient_table() -> pd.DataFrame:
+    """Sidebar patient list. Built from the labels alone (no model calls) so the first page load stays fast."""
     ctx = get_context()
-    rows = []
-    for pid in ctx.patients("test"):
-        tl = get_timeline(pid)
-        e = ctx.ehr.loc[pid]
-        rows.append({"patient_id": pid, "regimen": e.regimen, "hba1c": e.hba1c, "age": e.age, "sex": e.sex,
-                     "hypo_alerts": int(tl.hypo_alert.sum()), "hyper_alerts": int(tl.hyper_alert.sum()),
-                     "hypo_events": int(tl.hypo.sum())})
-    return pd.DataFrame(rows)
+    ids = ctx.patients("test")
+    hypo_events = ctx.windows[ctx.windows.patient_id.isin(ids)].groupby("patient_id").hypo.sum()
+    e = ctx.ehr.loc[ids]
+    return pd.DataFrame({"patient_id": ids, "regimen": e.regimen.to_numpy(), "hba1c": e.hba1c.to_numpy(),
+                         "age": e.age.to_numpy(), "sex": e.sex.to_numpy(),
+                         "hypo_events": hypo_events.reindex(ids).fillna(0).astype(int).to_numpy()})
+
+
+def cached_whatif(ctx: TwinContext, sim: PatientSimulator, patient_id: str, anchor_idx: int, mode: str,
+                  scenarios: list) -> WhatIfResult:
+    """Re-simulate only when the patient, time, twin mode or scenario changes (results kept per browser session)."""
+    store = st.session_state.setdefault("whatif_cache", {})
+    key = (patient_id, int(anchor_idx), mode, tuple(repr(sc) for sc in scenarios))
+    if key not in store:
+        if len(store) >= 24:
+            store.pop(next(iter(store)))
+        with st.spinner("Re-simulating and re-predicting..."):
+            store[key] = run_whatif(ctx, sim, anchor_idx, scenarios)
+    return store[key]
 
 
 # --------------------------------------------------------------------------- helpers
@@ -336,6 +348,14 @@ def view_whatif(ctx: TwinContext, twin: PatientTwin) -> None:
     html(T.section_html("Ask the twin “what if?”",
                         "Two separate answers: what the risk model predicts from the data it would see, and what the "
                         "simulated physiology does over the next 2 hours."))
+    if not st.session_state.get("whatif_on"):
+        # The twin is built and re-simulated on demand, so the first page load does not pay for it.
+        st.markdown("Try a **late dinner**, a **poor night's sleep**, a **skipped meal** or an **extra insulin dose**, "
+                    "or build your own scenario. The twin is fitted to this patient's own first week of data.")
+        if st.button("Start the what-if twin", type="primary", key="start_whatif"):
+            st.session_state["whatif_on"] = True
+            st.rerun()
+        return
     label = st.radio("Twin physiology", list(TWIN_MODES), horizontal=True,
                      help="Personalised: parameters fitted to this patient's first week of CGM and their meal / dose "
                           "log, as a real twin would have to. Oracle: replays the simulator's hidden truth, which is "
@@ -390,8 +410,7 @@ def view_whatif(ctx: TwinContext, twin: PatientTwin) -> None:
     if not scenarios:
         st.info("Choose at least one change." if preset == "Custom" else "This preset does not apply here (see above).")
         return
-    with st.spinner("Re-simulating and re-predicting..."):
-        res = run_whatif(ctx, sim, twin.anchor_idx, scenarios)
+    res = cached_whatif(ctx, sim, twin.patient_id, twin.anchor_idx, mode, scenarios)
 
     html(T.chips_html([("Scenario ·", "; ".join(res.descriptions))]))
     st.write("")
