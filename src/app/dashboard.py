@@ -53,12 +53,12 @@ def runtime_config() -> dict:
     return cfg
 
 
-@st.cache_resource(show_spinner="Loading the twin (data, model, thresholds)...")
+@st.cache_resource(show_spinner="Loading the twin (data, model, thresholds)…")
 def get_context() -> TwinContext:
     return TwinContext.load(runtime_config())
 
 
-@st.cache_resource(show_spinner="Building this patient's twin (a few seconds if the fit is not cached)...", max_entries=8)
+@st.cache_resource(show_spinner="Building this patient's twin (a few seconds if the fit is not cached)…", max_entries=8)
 def get_simulator(patient_id: str, mode: str = "fitted") -> PatientSimulator:
     return PatientSimulator(get_context().cfg, patient_id, mode=mode)
 
@@ -93,7 +93,7 @@ def cached_whatif(ctx: TwinContext, sim: PatientSimulator, patient_id: str, anch
     if key not in store:
         if len(store) >= 24:
             store.pop(next(iter(store)))
-        with st.spinner("Re-simulating and re-predicting..."):
+        with st.spinner("Re-simulating and re-predicting…"):
             store[key] = run_whatif(ctx, sim, anchor_idx, scenarios)
     return store[key]
 
@@ -194,8 +194,10 @@ def timeline_figure(series: pd.DataFrame, tl: pd.DataFrame, now: pd.Timestamp, h
     fig.update_yaxes(range=[0, 1.02], tickformat=".0%", row=2, col=1)
     fig.update_yaxes(range=[0, 560], showticklabels=False, row=3, col=1)
     fig.update_xaxes(range=[start, end])
-    T.style_figure(fig, height=660)
-    fig.update_layout(bargap=0.1)
+    T.style_figure(fig, height=700)
+    # Six legend entries: below the plot they have room and never collide with the panel titles.
+    fig.update_layout(bargap=0.1, margin=dict(l=8, r=12, t=36, b=86),
+                      legend=dict(orientation="h", yanchor="top", y=-0.07, x=0, xanchor="left"))
     for a in fig.layout.annotations[:3]:
         a.update(font=dict(size=13, color=T.INK, family=T.HEAD_FONT), x=0, xanchor="left")
     return fig
@@ -502,7 +504,8 @@ def pick_time(ctx: TwinContext, pid: str, tl: pd.DataFrame) -> int:
 
 
 def main() -> None:
-    st.set_page_config(page_title="Glycaemic Digital Twin", page_icon="🩸", layout="wide")
+    st.set_page_config(page_title="Glycaemic Digital Twin", page_icon=str(ROOT / "src" / "app" / "assets" / "favicon.png"),
+                       layout="wide")
     html(T.CSS)
     html(T.banner_html())
     try:
