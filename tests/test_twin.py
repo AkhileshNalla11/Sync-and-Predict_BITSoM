@@ -75,8 +75,19 @@ def test_twin_at_time_picks_latest_anchor(ctx: TwinContext) -> None:
 def test_alert_thresholds_from_validation(ctx: TwinContext) -> None:
     path = next(Path(ctx.cfg["paths"]["models_dir"]).glob("*alert_thresholds.json"))
     saved = json.loads(path.read_text(encoding="utf-8"))
-    assert saved["false_alert_rate"] == ctx.cfg["twin"]["alert_false_alert_rate"]
+    assert saved["false_alert_rate"] == {t: ctx.cfg["twin"]["alert_policy"][t]["false_alert_rate"] for t in ("hyper", "hypo")}
     assert 0 < ctx.thresholds["hyper"] < 1 and 0 < ctx.thresholds["hypo"] < 1
+    assert all(ctx.policies[t].threshold == ctx.thresholds[t] for t in ("hyper", "hypo"))
+
+
+def test_timeline_alerts_follow_the_policy(ctx: TwinContext) -> None:
+    pid = ctx.patient_ids[0]
+    tl = ctx.risk_timeline(pid)
+    for t in ("hyper", "hypo"):
+        assert (tl[f"{t}_above"] == (tl[f"{t}_risk"] >= ctx.thresholds[t])).all()
+        assert not (tl[f"{t}_alert"] & ~tl[f"{t}_above"]).any()          # an alert needs risk above threshold
+        assert tl[f"{t}_alert"].sum() <= tl[f"{t}_above"].sum()
+        assert not (tl[f"{t}_alert"] & tl[f"in_event_{t}"]).any()        # no predictive alert while already past it
 
 
 # ------------------------------------------------------------------ explanations

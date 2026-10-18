@@ -124,6 +124,8 @@ div[role="radiogroup"] label[data-baseweb="radio"] p {{ font-weight: 600; font-s
 .gt-pill.alert {{ background: {ALERT_SOFT}; color: {ALERT}; border-color: {ALERT_LINE}; }}
 .gt-pill.ok {{ background: {OK_SOFT}; color: {OK}; border-color: {OK_LINE}; }}
 .gt-pill.neutral {{ background: {GRID}; color: {INK_2}; border-color: {LINE}; }}
+.gt-pill.warn {{ background: {WARN_SOFT}; color: {WARN}; border-color: {WARN_LINE}; }}
+.gt-risk .status {{ color: {INK_2}; font-size: 0.8rem; margin-top: 6px; }}
 
 .gt-section {{ margin: 18px 0 8px; }}
 .gt-section .t {{ font-family: {HEAD_FONT}; font-weight: 700; font-size: 1.08rem; color: {INK}; }}
@@ -196,10 +198,19 @@ def pill_html(text: str, kind: str, icon: str = "") -> str:
     return f'<span class="gt-pill {kind}">{icon} {escape(text)}</span>'
 
 
-def risk_card_html(target: str, name: str, rule: str, p: float, threshold: float, alert: bool) -> str:
+ALERT_STATES = {"alert": ("ALERT RAISED", "alert"), "active": ("Above threshold · alert already raised", "warn"),
+                "ok": ("Below threshold", "ok")}
+
+
+def risk_card_html(target: str, name: str, rule: str, p: float, threshold: float, state: str, status: str,
+                   basis: str) -> str:
+    """Risk card. `state`: alert (the policy raises an alert now) | active (above threshold, repeat suppressed) | ok."""
     accent, soft = TARGET_COLOR[target], TARGET_SOFT[target]
-    pill = pill_html("ALERT", "alert", "▲" if target == "hyper" else "▼") if alert else pill_html("Below threshold", "ok", "✓")
-    card_style = f"border-left-color:{accent};" + (f"border-color:{accent};background:linear-gradient(135deg,{soft} 0%,{CARD} 70%)" if alert else "")
+    label, kind = ALERT_STATES[state]
+    icon = ("▲" if target == "hyper" else "▼") if state != "ok" else "✓"
+    pill = pill_html(label, kind, icon)
+    above = state != "ok"
+    card_style = f"border-left-color:{accent};" + (f"border-color:{accent};background:linear-gradient(135deg,{soft} 0%,{CARD} 70%)" if above else "")
     return _one_line(f"""
     <div class="gt-risk" style="{card_style}">
       <div class="row"><div class="title"><span class="dot" style="background:{accent}"></span>{escape(name)} risk</div>{pill}</div>
@@ -208,7 +219,8 @@ def risk_card_html(target: str, name: str, rule: str, p: float, threshold: float
       <div class="gt-gauge"><div class="fill" style="width:{max(p, 0.004) * 100:.1f}%;background:{accent}"></div>
         <div class="thr" style="left:calc({threshold * 100:.1f}% - 1px)"></div></div>
       <div class="foot"><span>Alert threshold <b>{threshold:.0%}</b> (marker)</span>
-        <span>5% false-alert rate on validation patients</span></div>
+        <span>{escape(basis)}</span></div>
+      <div class="status">{escape(status)}</div>
     </div>""")
 
 
@@ -220,7 +232,8 @@ def compare_card_html(target: str, name: str, before: float, after: float, alert
         delta = f'<span class="d" style="color:{OK}">▼ {pts} points</span>'
     else:
         delta = f'<span class="d" style="color:{INK_2}">no change</span>'
-    pill = pill_html("ALERT", "alert", "▲" if target == "hyper" else "▼") if alert else pill_html("Below threshold", "ok", "✓")
+    pill = (pill_html("Above alert threshold", "alert", "▲" if target == "hyper" else "▼") if alert
+            else pill_html("Below threshold", "ok", "✓"))
     return _one_line(f"""
     <div class="gt-compare" style="border-left-color:{TARGET_COLOR[target]}">
       <div class="row" style="display:flex;justify-content:space-between;align-items:center">

@@ -87,7 +87,21 @@ fusion:
 
 twin:
   model: lgbm_cgm_wearables_ehr   # best hypo model with calibrated probabilities (see docs/ablation_results.md)
-  alert_false_alert_rate: 0.05    # alert threshold = 5% false-alert rate on VALIDATION onset windows
+  alert_policy:                   # one alert per risk episode, not one per window (src/twin/alerts.py)
+    # Chosen on VALIDATION patients by src/eval/alert_policy.py (see docs/alert_policy.md). Hysteresis,
+    # escalation and a daily budget are supported and were swept, but did not help on validation.
+    hypo:
+      false_alert_rate: 0.01      # arm threshold = this false-alert rate on validation onset windows
+      rearm_fraction: null        # hysteresis: re-arm only once risk < fraction x threshold (null = none)
+      refractory_min: 90          # at most one alert per 90 min while risk stays above the threshold
+      daily_budget: null          # optional cap on alerts per patient per calendar day
+      escalation: null            # with hysteresis: re-alert once risk >= escalation x risk at the last alert
+    hyper:
+      false_alert_rate: 0.03
+      rearm_fraction: null
+      refractory_min: 90
+      daily_budget: null
+      escalation: null
   personalise:                    # fitted twin: per-patient parameters from observable data (src/twin/personalise.py)
     fit_days: 7                   # first N days of CGM + meal/dose log used for fitting; the rest is held out
     prior_weight: 5.0             # (mg/dL)^2 penalty per prior SD of departure from the EHR default (chosen on val patients)
