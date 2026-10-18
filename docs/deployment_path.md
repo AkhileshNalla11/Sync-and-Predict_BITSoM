@@ -52,7 +52,8 @@ What exists today: a synthetic proof of concept, plus a real-CGM sanity check on
 ## 4. Product and safety
 
 * **A supplement, never a replacement:** the CGM's own low-glucose alarms stay on, and the twin's alerts never suppress them.
-* **Per-episode alerting** with a refractory period and a daily alert budget, tuned with clinicians.
+* **Per-episode alerting** with a refractory period and a daily alert budget, re-tuned with clinicians on real
+  episodes (the synthetic-data policy and its trade-off curve are in [alert_policy.md](alert_policy.md)).
 * **Inputs a real twin needs:** logged meals and doses (the model can't see a planned dinner or a fresh
   dose today), device wear status, and medication changes from the EHR.
 * **Personalisation:** fit each patient's twin parameters from their own first weeks of data

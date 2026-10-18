@@ -9,7 +9,7 @@
 | Name | Glycaemic Digital Twin: 2-hour hyper- / hypoglycaemia risk |
 | Type | Two binary LightGBM classifiers (one per target), deployed in the dashboard. A PyTorch multi-task fusion net (static MLP + GRU) is a research comparator only. |
 | Inputs | Last 6 h of 5-min CGM, steps, heart rate and sleep stage (37 summary features) + 24 encoded EHR features (demographics, HbA1c, eGFR, lipids, comorbidities, medication class and dose, prior severe hypo). |
-| Outputs | Probability of any CGM > 180 mg/dL (hyper) and any CGM < 70 mg/dL (hypo) in the next 2 h, every 30 min; an alert when risk reaches a threshold set at a 5% false-alert rate on validation patients. |
+| Outputs | Probability of any CGM > 180 mg/dL (hyper) and any CGM < 70 mg/dL (hypo) in the next 2 h, every 30 min. Alerts come from an **alert policy** ([alert_policy.md](alert_policy.md)): one alert per risk episode (threshold + refractory period), with operating points chosen on validation patients (hypo at a 1%, hyper at a 3% window-level false-alert rate). |
 | Explanations | Per-prediction TreeSHAP drivers (LightGBM `pred_contrib`, verified against `shap.TreeExplainer`). |
 | Training | `src/models/baselines.py`, seed 42, early stopping on validation patients. Hyperparameters in `config.yaml`. |
 | Licence | MIT |
@@ -55,6 +55,16 @@ Onset windows (the patient is not already past the threshold). 95% CIs resample 
   Thresholds and probabilities would need recalibrating on the target population.
 * **EHR value:** +0.051 hypo AUPRC (95% CI +0.018 to +0.113) on synthetic data, partly by construction;
   untested on real data (CGMacros has no medication records).
+* **Alerting, episode level** (synthetic test, [alert_policy.md](alert_policy.md)): the policy warns of **76% of
+  hypo episodes at least 30 min before onset** (83% with >= 15 min; nocturnal 71%) with **0.49 hypo alerts per
+  patient-day** at 66% PPV per alert and a median lead of 65 min. Hyper: 68% of episodes warned >= 30 min ahead,
+  2.46 alerts per patient-day (PPV 69%), slightly above the 2-per-day cap it met on validation patients.
+  The trade-off: scoring every window instead catches 98% of hypo episodes >= 30 min ahead, but at about
+  3 alerting windows per patient-day.
+* **Does synthetic data help real-world training?** Mostly no ([transfer_experiment.md](transfer_experiment.md)).
+  On CGMacros T2D, adding synthetic data (pretraining or pooling) gives a small AUROC-only gain with 2 real
+  participants, nothing from 4, and slightly hurts from 7 up. Its one consistent benefit is lower
+  variance across training-set draws. Real data matters more than the simulator.
 * Full results: [ablation_results.md](ablation_results.md).
 
 ## Subgroups
@@ -72,7 +82,9 @@ From [subgroups.md](subgroups.md) (synthetic test set):
   signal are synthetic.
 * **Missed lows are the costliest error.** A false sense of safety from a low risk score could delay action.
   Any real use needs a human in the loop and must never replace standard glucose alarms.
-* **Alert fatigue.** At a 10% false-alert rate, only ~18% of window-level hypo alerts are true positives.
+* **Alert fatigue.** Scoring every window would cause it (at a 10% window-level false-alert rate, only ~18% of
+  hypo alerts are true). The episode policy cuts hypo alerts to ~0.5 per patient-day at 66% PPV, at the cost of
+  missing early warning for about 1 in 4 episodes. Where to sit on that curve is a clinical decision.
 * **Automation bias.** Explanations describe what the model reacted to, not physiological causes.
 * **Equity.** The synthetic cohort is loosely modelled on Indian T2D patients but is not epidemiology. Region,
   diet, socioeconomic status and device type are absent, and real performance across them is unknown.
@@ -81,6 +93,7 @@ From [subgroups.md](subgroups.md) (synthetic test set):
 
 ## Recommendations
 
-Before any clinical use: validate on real paired EHR + CGM data from the target population, recalibrate,
-evaluate per-episode alerting with clinicians, complete the subgroup audit on a representative cohort,
+Before any clinical use: validate on real paired EHR + CGM data from the target population (the transfer
+experiment shows real training data matters more than the simulator), recalibrate, re-tune the alert policy
+with clinicians on real episodes, complete the subgroup audit on a representative cohort,
 and obtain ethics and regulatory review ([deployment_path.md](deployment_path.md)).
