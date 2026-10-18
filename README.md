@@ -159,6 +159,21 @@ about 10 days each).
 
 Method, cohort and caveats: [docs/external_validation.md](docs/external_validation.md).
 
+**Does synthetic data help when real data is scarce?** On the same 14 T2D participants (hyper onset,
+leave-one-participant-out), we compared a real-only model with two ways of adding synthetic data:
+synthetic pretraining with real fine-tuning, and pooled training with real windows up-weighted. We also
+varied the number of real training participants (2, 4, 7 or 10, with 10 random draws each).
+* **Not reliably.**
+  * With 2 participants, pooling gains +0.03 AUROC (significant) and +0.02 AUPRC (not significant).
+  * From 4 participants up it adds nothing.
+  * At 7, fine-tuning is slightly worse (-0.025 AUPRC).
+  * With all 10, pooled scores 0.550 against 0.537 for real only (difference +0.013, CI -0.022 to +0.030).
+* **Synthetic data mainly reduces the variance between draws.**
+* **Real data overtakes the synthetic-only model at 4-7 participants.**
+* **Pooling without up-weighting the real windows hurts** (-0.053 AUPRC).
+
+Details: [docs/transfer_experiment.md](docs/transfer_experiment.md).
+
 ## How to run
 
 Python 3.10+. The full pipeline takes about 25 min on a laptop CPU (most of it is training the GRU models).
