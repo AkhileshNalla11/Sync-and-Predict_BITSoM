@@ -9,7 +9,6 @@ SYNTHETIC DATA. Research prototype, NOT FOR CLINICAL USE. Styling lives in src/a
 from __future__ import annotations
 
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -25,7 +24,7 @@ from plotly.subplots import make_subplots           # noqa: E402
 
 from src.app import replay as R                     # noqa: E402
 from src.app import theme as T                      # noqa: E402
-from src.config import load_config                  # noqa: E402
+from src.config import runtime_config               # noqa: E402
 from src.eval.twin_intervals import band_for        # noqa: E402
 from src.twin.explain import driver_sentences, explain, group_contributions   # noqa: E402
 from src.twin.alerts import policy_far              # noqa: E402
@@ -48,17 +47,6 @@ PARAM_LABEL = {"g_basal": "Basal glucose", "meal_gain": "Carb sensitivity", "tau
 
 
 # --------------------------------------------------------------------------- cached resources
-def runtime_config() -> dict:
-    """Use the full pipeline outputs if present, else the committed demo bundle (e.g. on a cloud host)."""
-    cfg = load_config()
-    local = ROOT / cfg["paths"]["processed_dir"] / "series.npz"
-    bundle = ROOT / "demo_bundle" / "processed" / "series.npz"
-    if os.environ.get("TWIN_USE_DEMO_BUNDLE") == "1" or (not local.exists() and bundle.exists()):
-        cfg["paths"] = {"raw_dir": "demo_bundle/raw", "processed_dir": "demo_bundle/processed",
-                        "models_dir": "demo_bundle/processed/models", "docs_dir": cfg["paths"]["docs_dir"]}
-    return cfg
-
-
 @st.cache_resource(show_spinner="Loading the twin (data, model, thresholds)…")
 def get_context() -> TwinContext:
     return TwinContext.load(runtime_config())

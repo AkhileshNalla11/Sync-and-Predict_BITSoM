@@ -10,6 +10,10 @@ openpyxl==3.1.5          # reads ShanghaiT2DM .xlsx (external check only; not ne
 xlrd==2.0.1              # reads ShanghaiT2DM .xls
 pyarrow==17.0.0          # streamlit dependency; newer releases require NumPy 2
 plotly==5.24.1
+fastapi==0.115.6         # FHIR risk API (src/api/app.py)
+uvicorn==0.34.0
+pydantic==2.14.1
+httpx==0.27.2            # API tests (FastAPI TestClient)
 matplotlib==3.9.2
 pyyaml==6.0.2
 pytest==8.3.3

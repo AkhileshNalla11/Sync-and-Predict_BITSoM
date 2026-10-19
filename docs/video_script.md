@@ -158,7 +158,7 @@ Four: every choice, such as alert thresholds and the alert policy, was made on v
 test patients were touched once.
 
 Five: everything is reproducible. Fixed seeds, one command rebuilds the data, the models and every
-report, and 131 automated tests check it on every push.
+report, and 140 automated tests check it on every push.
 
 ## 7. Results on synthetic patients (8:30-10:10) · slide 7
 
@@ -267,8 +267,12 @@ never used for training.
 
 The first is CGMacros from PhysioNet: 14 adults with Type 2 diabetes in the US. We applied our model
 unchanged. It still ranks risk better than chance and beats trend extrapolation, but AUROC for highs
-drops from 0.93 on synthetic patients to 0.70 on real ones. Real glucose is noisier and less regular than
-our simulator's. We show that gap rather than hide it.
+drops from 0.93 on synthetic patients to 0.70 on real ones. We show that gap rather than hide it, and we
+measured where it comes from. Comparing our simulator with both real cohorts, the level of glucose, time in
+range and the rate of highs and lows are realistic. But real glucose makes bigger swings, real lows arrive
+about twice as fast (falling roughly half a milligram per decilitre per minute, against a quarter in the
+simulator), and real patients peak after breakfast while our simulator peaks late in the evening. That is a
+concrete to-do list for the simulator, and it explains why synthetic lows were so easy to predict.
 
 The probabilities were also off: the model underpredicted. Recalibrating on the other real
 participants, without retraining, cuts the calibration error from 0.136 to 0.024. That is the first step
@@ -341,9 +345,11 @@ changes, checks that the scores and their calibration do not drift, versioned mo
 each version recorded, a route for reporting missed lows and harmful alerts, and a subgroup audit at every
 release, adding region, diet and device type, which our synthetic data does not have.
 
-*(Slide 18.)* And it is built to be checked, not just demoed: 131 automated tests that run on every push, one command to rebuild
+*(Slide 18.)* And it is built to be checked, not just demoed: 140 automated tests that run on every push, one command to rebuild
 everything, two public real datasets checked, a live dashboard, an MIT licence, and a model card in the
 repository.
+
+It can also plug into a hospital system. A FHIR API takes a patient's record and their CGM readings in FHIR, the standard behind India's ABDM health records, and returns the two risks as standard FHIR RiskAssessment resources, with their reasons. We tested that a patient exported to FHIR and sent through the API gets exactly the same risk as the dashboard. What is not built yet is the ABDM consent flow, authentication and audit logging around it.
 
 ## 13. Limitations and close (23:40-24:40) · slides 19-20
 

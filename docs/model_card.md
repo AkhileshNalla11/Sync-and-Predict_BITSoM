@@ -11,6 +11,7 @@
 | Type | Two binary LightGBM classifiers (one per target), deployed in the dashboard. A PyTorch multi-task fusion net (static MLP + GRU) is a research comparator only. |
 | Inputs | Last 6 h of 5-min CGM, steps, heart rate and sleep stage (37 summary features) + 24 encoded EHR features (demographics, HbA1c, eGFR, lipids, comorbidities, medication class and dose, prior severe hypo). |
 | Outputs | Probability of any CGM > 180 mg/dL (hyper) and any CGM < 70 mg/dL (hypo) in the next 2 h, every 30 min. Alerts come from an **alert policy** ([alert_policy.md](alert_policy.md)): one alert per risk episode (threshold + refractory period), with operating points chosen on validation patients (hypo at a 1%, hyper at a 3% window-level false-alert rate). |
+| Interfaces | Streamlit dashboard; FHIR R4 API (`POST` a Bundle, get JSON or FHIR `RiskAssessment` back), see [fhir_api.md](fhir_api.md) |
 | Explanations | Per-prediction TreeSHAP drivers (LightGBM `pred_contrib`, verified against `shap.TreeExplainer`). |
 | Training | `src/models/baselines.py`, seed 42, early stopping on validation patients. Hyperparameters in `config.yaml`. |
 | Licence | MIT |
@@ -55,10 +56,11 @@ Onset windows (the patient is not already past the threshold). 95% CIs resample 
 | ShanghaiT2DM, same, nocturnal | Hypo | 0.913 | 0.343 (0.032) |
 | ShanghaiT2DM, same | Hyper | 0.871 (0.858-0.885) | 0.577 (0.147) |
 
-* **The synthetic numbers are optimistic.** On real CGM, discrimination falls from 0.93 to 0.70 AUROC.
+* **The synthetic numbers are optimistic.** On real CGM, discrimination falls from 0.93 to 0.70 AUROC. The
+  [simulator realism check](simulator_realism.md) shows simulated lows fall about half as fast as real ones.
   Simulated lows drift in slowly (the lowest CGM in the 2 h before onset is already ~70 mg/dL), which makes
-  them easy to anticipate. Hypoglycaemia could not be checked on real data: only 3 CGMacros T2D
-  participants go low.
+  them easy to anticipate. Hypoglycaemia could not be checked on CGMacros (only 3 T2D participants go low);
+  ShanghaiT2DM, with 65 patients who go low, covers it (rows above).
 * **Calibration:** good on synthetic test data (hypo ECE 0.004), poor on real CGM (zero-shot ECE 0.14).
   Recalibrating on other real participants (leave-one-out Platt scaling, no retraining) brings it to 0.024
   with AUROC almost unchanged (0.690). Alert thresholds would still need re-tuning on real episodes.

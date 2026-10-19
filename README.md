@@ -295,6 +295,25 @@ the dashboard's dependencies (no PyTorch or SHAP), and `packages.txt` adds `libg
    risk scores are identical to the training environment's).
 
 After re-running the pipeline, refresh the bundle with `python scripts/make_demo_bundle.py` and commit it.
+
+**FHIR risk API (interoperability).** Hospital systems and ABDM-connected apps exchange data as FHIR R4. The
+API takes one FHIR `Bundle` (Patient, CGM Observations, and optionally labs, conditions, medications and
+wearable data) and returns the 2-hour risks with their top drivers, as JSON or as FHIR `RiskAssessment`
+resources. It defaults to the model trained on real patients. A synthetic patient exported to FHIR gets exactly
+the dashboard's risk back, which CI checks on every push. Details and the full code mapping:
+[docs/fhir_api.md](docs/fhir_api.md).
+```bash
+uvicorn src.api.app:app --port 8000          # or scripts\api.cmd / bash scripts/api.sh; docs at /docs
+curl -X POST "http://localhost:8000/v1/risk/fhir?model=real" -H "Content-Type: application/json" --data @examples/fhir/P0014_bundle.json
+```
+
+**Real-data checks** (download the datasets first; see [data/README.md](data/README.md)):
+```bash
+python -m src.eval.external_cgmacros      # CGMacros: zero-shot, recalibration
+python -m src.eval.external_shanghai      # ShanghaiT2DM: does the EHR help? (+ external_shanghai_coldstart)
+python -m src.eval.real_model             # train the real-patient model, alert policy on real patients
+python -m src.eval.simulator_realism      # simulated vs real CGM, metric by metric
+```
 Vercel is not suitable: Streamlit needs a long-running server with WebSockets, which serverless functions don't provide.
 
 **Reproducibility.** Every random draw derives from `seed` in `config.yaml`; dependencies are pinned in
@@ -312,12 +331,16 @@ src/models/           baselines (persistence, LightGBM), fusion_model, train
 src/eval/             metrics, ablation, external_cgmacros (real-CGM sanity check; loader in src/data/cgmacros.py),
                       external_shanghai (+ _coldstart) (real linked EHR + CGM check; loader in src/data/shanghai.py),
                       real_model (CGM-only model trained and alert-tested on real patients, shipped to the dashboard),
+                      simulator_realism (synthetic vs real CGM statistics),
                       twin_validation (held-out check of the personalised twin), twin_intervals (its uncertainty
                       bands), alert_policy, subgroups, transfer_cgmacros
 src/twin/             state (PatientTwin), explain (TreeSHAP), whatif (scenarios), personalise (parameter fitting)
+src/interop/          fhir (FHIR R4 Bundle in / out), service (risk scoring of one Bundle)
+src/api/app.py        FastAPI: POST a FHIR Bundle, get risks or FHIR RiskAssessment back
+examples/fhir/        a synthetic patient as a FHIR Bundle (P0014_bundle.json)
 src/app/              dashboard.py (Streamlit clinician dashboard), replay.py (live replay), theme.py
 docs/                 ablation results + figures, data report, architecture diagram, video script
-scripts/              run_pipeline.{sh,cmd}, demo.{sh,cmd}, make_architecture_diagram.py, make_demo_bundle.py
+scripts/              run_pipeline.{sh,cmd}, demo.{sh,cmd}, api.{sh,cmd}, make_architecture_diagram.py, make_demo_bundle.py
 demo_bundle/          precomputed synthetic data + deployed model for cloud hosting (see MANIFEST.md)
 tests/                pytest suite
 ```
@@ -345,7 +368,11 @@ tests/                pytest suite
     [docs/external_validation.md](docs/external_validation.md) and [docs/external_shanghai.md](docs/external_shanghai.md).
 * **The EHR signal is built in, and did not hold up on real data.** The simulator makes EHR traits drive
   glucose by design. On real linked records (ShanghaiT2DM) the EHR added nothing to a 2-hour CGM forecast.
-* **Simplified physiology.** The simulator is a lumped model, not a validated physiological simulator.
+* **Simplified physiology, now measured against real CGM** ([docs/simulator_realism.md](docs/simulator_realism.md)).
+  Glucose level, time in range and event rates are realistic, but lows fall about half as fast as real ones
+  (0.26 vs 0.47-0.77 mg/dL per minute in the hour before a low), large swings are rarer, short-term sensor
+  jitter is too high, and the daily rhythm differs (real cohorts peak after breakfast).
+  The simulator is a lumped model, not a validated physiological simulator.
   Lows develop slowly and daily patterns are regular, which makes prediction (especially hypoglycaemia and
   lead time) easier than in reality. In the simulator, insulin users have fewer lows than sulfonylurea
   users, the reverse of most real-world data.

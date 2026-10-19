@@ -124,7 +124,8 @@ Recalibration makes the probabilities honest; it does not make the model better 
 * **The synthetic numbers overstate real-world performance by a wide margin.**
   * Onset AUROC falls from 0.93 on synthetic patients to 0.70 on real ones.
   * Sensitivity at a 10 % false-alert rate falls from 0.76 to 0.27.
-  * This matches the warning in the README that simulated glucose is smoother and more regular than real glucose.
+  * The [simulator realism check](simulator_realism.md) shows why: simulated lows and swings develop more
+    slowly than real ones, and the daily rhythm differs.
 * **Real data helps.** The same features and hyperparameters, trained on just 10-13 real T2D
   participants, beat the zero-shot model by +0.07 AUPRC. That still falls well short of the synthetic numbers.
   The simulator's meal responses and daily rhythm are not a good enough stand-in for real ones.

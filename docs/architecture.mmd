@@ -27,14 +27,15 @@ flowchart LR
         MET["metrics.py + ablation.py<br/>AUPRC, AUROC, calibration,<br/>paired EHR-value test, patient-bootstrap CIs"]
         ALERT["alert_policy.py + subgroups.py<br/>one alert per episode, chosen on validation;<br/>audit by sex, age, eGFR, drug class"]
         BAND["twin_validation.py + twin_intervals.py<br/>held-out week; conformal 80% / 95% bands"]
-        REAL["Real-data checks (never used for training)<br/>CGMacros 14 US: zero-shot + recalibration<br/>ShanghaiT2DM 100: real linked EHR + CGM"]
+        REAL["Real-data checks<br/>CGMacros 14 US: zero-shot + recalibration<br/>ShanghaiT2DM 100: real linked EHR + CGM,<br/>real-trained model, simulator realism"]
     end
 
     subgraph TWIN["5. Digital twin & dashboard"]
         STATE["PatientTwin (state.py)<br/>profile, 6 h history, both risks,<br/>alert-policy state"]
         EXP["explain.py<br/>TreeSHAP drivers"]
         WHAT["whatif.py + personalise.py<br/>4 parameters fitted per patient, observer,<br/>uncertainty band, ML re-prediction"]
-        APP["Streamlit dashboard<br/>live replay, timeline, drivers, what-if, overview"]
+        APP["Streamlit dashboard<br/>live replay, timeline, drivers, what-if, overview;<br/>model switch: synthetic- or real-patient-trained"]
+        API["FHIR risk API (FastAPI)<br/>FHIR R4 Bundle in, RiskAssessment out"]
     end
 
     EHR --> LINK
@@ -58,6 +59,8 @@ flowchart LR
     SIM -. "equations" .-> WHAT
     STATE --> WHAT
     STATE --> APP
+    STATE --> API
+    REAL -. "real-trained model" .-> STATE
     EXP --> APP
     WHAT --> APP
 
@@ -67,5 +70,5 @@ flowchart LR
     class EHR,STAT ehr
     class WEAR,WIN sensor
     classDef real fill:#e6f4f2,stroke:#0f766e,color:#0b0b0b
-    class SIM,ENR,LINK,SPLIT,PERS,LGB,FUS,MET,ALERT,BAND,STATE,EXP,WHAT,APP neutral
+    class SIM,ENR,LINK,SPLIT,PERS,LGB,FUS,MET,ALERT,BAND,STATE,EXP,WHAT,APP,API neutral
     class REAL real

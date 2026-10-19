@@ -39,7 +39,10 @@ real-world baseline step 1 has to beat.
   patient's consented link between their clinic record and their device account, ideally via their ABHA
   (Ayushman Bharat Health Account) and ABDM consent flows, rather than any matching by attributes.
 * **Interoperability.** Exchange EHR data and CGM readings as FHIR resources through ABDM-compliant
-  systems (*to confirm*: the applicable NRCeS FHIR profiles and the CGM device-integration route).
+  systems (*to confirm*: the applicable NRCeS FHIR profiles and the CGM device-integration route). A working
+  start exists: [the FHIR risk API](fhir_api.md) reads a FHIR R4 Bundle (LOINC-coded CGM and labs, ICD-10 /
+  SNOMED conditions, medications) and returns FHIR `RiskAssessment` resources. Still missing: authentication,
+  audit logging, ABDM consent-flow wiring and validation against the national FHIR profiles.
 
 ## 3. Regulation
 

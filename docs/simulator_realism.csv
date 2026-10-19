@@ -1,0 +1,15 @@
+metric,key,Synthetic,ShanghaiT2DM,CGMacros T2D,verdict
+Mean glucose (mg/dL),mean,138.4914,140.0262,155.8186,within real range
+Coefficient of variation (%),cv,22.376,27.4482,22.2817,too low
+Time in range 70-180 (%),tir,88.1837,83.5152,80.5169,within real range
+Time above 180 (%),tar,9.7884,14.6378,18.9017,within real range
+"Time below 70 (%), cohort mean",tbr,1.477,2.3611,0.1511,within real range
+"Hypo episodes per day, cohort mean",hypo_per_day,0.1972,0.3002,0.0363,within real range
+Patients with any low episode (%),any_hypo,25.3333,57.7982,21.4286,within real range
+Hyper episodes per day,hyper_per_day,1.1698,1.5764,2.2411,within real range
+SD of 15-min change (mg/dL),delta_sd,7.9386,9.508,13.5255,within real range
+Large swings: 95th percentile of the absolute 15-min change (mg/dL),delta_p95,16.0,19.8,27.99,too low
+Direction reversals (% of steps),reversal_rate,41.5094,22.4907,36.601,too high
+Glucose 60 min before a low (mg/dL),pre_hypo_g60,81.7917,94.05,113.4,too low
+Fall rate in the hour before a low (mg/dL/min),pre_hypo_slope,-0.2574,-0.4714,-0.765,too slow
+Daily rhythm: correlation of the hourly profile with the real cohorts' (the two real cohorts with each other: 0.55),rhythm_corr,0.2821,,,different

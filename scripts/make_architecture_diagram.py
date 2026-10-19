@@ -23,7 +23,7 @@ STYLE = {"ehr": ("#fdebe3", "#eb6834"), "sensor": ("#e3eefb", "#2a78d6"), "neutr
 W, H = 0.165, 0.135
 COLS = [0.025, 0.225, 0.425, 0.625, 0.815]
 LANES = ["1  Synthetic data", "2  Linking & features", "3  Models", "4  Evaluation & real data",
-         "5  Digital twin & dashboard"]
+         "5  Twin, dashboard & API"]
 ROWS = [0.72, 0.52, 0.32, 0.12]
 
 BOXES = {
@@ -41,11 +41,11 @@ BOXES = {
     "met": (3, ROWS[0], "neutral", "Metrics & ablation", "AUPRC, AUROC, calibration,\npaired EHR-value test,\npatient-bootstrap CIs"),
     "alert": (3, ROWS[1], "neutral", "Alert policy & subgroups", "one alert per episode, set\non validation; audit by group"),
     "band": (3, ROWS[2], "neutral", "Twin validation", "held-out week; conformal\n80% / 95% bands (79% / 94%)"),
-    "real": (3, ROWS[3], "real", "Real-data checks", "CGMacros (14, US) + recalib.;\nShanghaiT2DM (100, linked EHR)"),
+    "real": (3, ROWS[3], "real", "Real-data checks", "CGMacros (14, US) + recalib.;\nShanghaiT2DM (100, linked EHR):\nreal-trained model, sim realism"),
     "state": (4, ROWS[0], "neutral", "PatientTwin", "profile, 6 h history, risks,\nalert-policy state"),
     "exp": (4, ROWS[1], "neutral", "Explanations", "TreeSHAP drivers\nper prediction"),
     "what": (4, ROWS[2], "neutral", "Personalised what-if twin", "4 params fitted per patient,\nobserver, uncertainty band"),
-    "app": (4, ROWS[3], "neutral", "Streamlit dashboard", "live replay, timeline, drivers,\nwhat-if, overview"),
+    "app": (4, ROWS[3], "neutral", "Dashboard + FHIR API", "live replay, drivers, what-if;\nFHIR Bundle in -> RiskAssessment"),
 }
 
 
@@ -142,12 +142,12 @@ def main() -> None:
         ax.text(x + 0.01, y + H - 0.056, body, fontsize=9, color=INK_2, va="top", zorder=3, linespacing=1.35)
 
     for i, (style, text) in enumerate((("ehr", "static / EHR stream"), ("sensor", "dynamic / sensor stream"),
-                                       ("neutral", "processing"), ("real", "real external data (checks only)"))):
+                                       ("neutral", "processing"), ("real", "real external data (checks + real-trained model)"))):
         fill, edge = STYLE[style]
         x = 0.025 + i * 0.135
         ax.add_patch(FancyBboxPatch((x, 0.025), 0.018, 0.022, boxstyle="round,pad=0.002", facecolor=fill, edgecolor=edge, lw=1.4))
         ax.text(x + 0.026, 0.036, text, fontsize=9, color=INK_2, va="center")
-    ax.text(0.975, 0.036, "Training data synthetic. Research prototype, not for clinical use.", fontsize=9.5,
+    ax.text(0.975, 0.036, "Research prototype, not for clinical use.", fontsize=9.5,
             color=INK_2, ha="right", va="center", fontweight="bold")
     fig.savefig(OUT, dpi=130, facecolor=SURFACE)
     fig.savefig(OUT_PDF, facecolor=SURFACE)

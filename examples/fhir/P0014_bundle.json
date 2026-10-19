@@ -1,0 +1,6954 @@
+{
+ "resourceType": "Bundle",
+ "type": "collection",
+ "timestamp": "2026-01-18T09:55:00",
+ "entry": [
+  {
+   "fullUrl": "urn:uuid:patient-P0014",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "P0014",
+    "gender": "female",
+    "birthDate": "1959-07-20",
+    "meta": {
+     "tag": [
+      {
+       "code": "SYNTHETIC",
+       "display": "Synthetic test patient, not a real person"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:condition-t2d",
+   "resource": {
+    "resourceType": "Condition",
+    "id": "t2d",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "clinicalStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+       "code": "active"
+      }
+     ]
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://hl7.org/fhir/sid/icd-10",
+       "code": "E11.9",
+       "display": "Type 2 diabetes mellitus without complications"
+      }
+     ]
+    },
+    "onsetDateTime": "2019-11-06T20:42:59.999999968"
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:condition-hypertension",
+   "resource": {
+    "resourceType": "Condition",
+    "id": "hypertension",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "clinicalStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+       "code": "active"
+      }
+     ]
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://hl7.org/fhir/sid/icd-10",
+       "code": "I10",
+       "display": "Essential (primary) hypertension"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:familymemberhistory-fh-t2d",
+   "resource": {
+    "resourceType": "FamilyMemberHistory",
+    "id": "fh-t2d",
+    "status": "completed",
+    "patient": {
+     "reference": "Patient/P0014"
+    },
+    "relationship": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+       "code": "PRN"
+      }
+     ]
+    },
+    "condition": [
+     {
+      "code": {
+       "coding": [
+        {
+         "system": "http://hl7.org/fhir/sid/icd-10",
+         "code": "E11",
+         "display": "Type 2 diabetes mellitus"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:medicationstatement-metformin",
+   "resource": {
+    "resourceType": "MedicationStatement",
+    "id": "metformin",
+    "status": "active",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "medicationCodeableConcept": {
+     "text": "Metformin"
+    },
+    "dosage": [
+     {
+      "timing": {
+       "repeat": {
+        "frequency": 1,
+        "period": 1,
+        "periodUnit": "d"
+       }
+      },
+      "doseAndRate": [
+       {
+        "doseQuantity": {
+         "value": 1000.0,
+         "unit": "mg"
+        }
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:medicationstatement-glimepiride",
+   "resource": {
+    "resourceType": "MedicationStatement",
+    "id": "glimepiride",
+    "status": "active",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "medicationCodeableConcept": {
+     "text": "Glimepiride"
+    },
+    "dosage": [
+     {
+      "timing": {
+       "repeat": {
+        "frequency": 1,
+        "period": 1,
+        "periodUnit": "d"
+       }
+      },
+      "doseAndRate": [
+       {
+        "doseQuantity": {
+         "value": 3.0,
+         "unit": "mg"
+        }
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-lab-hba1c",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "lab-hba1c",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "4548-4",
+       "display": "Hemoglobin A1c/Hemoglobin.total in Blood"
+      }
+     ]
+    },
+    "effectiveDateTime": "2025-12-19T09:55:00",
+    "valueQuantity": {
+     "value": 7.1,
+     "unit": "%",
+     "system": "http://unitsofmeasure.org",
+     "code": "%"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-lab-egfr",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "lab-egfr",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "62238-1",
+       "display": "Glomerular filtration rate/1.73 sq M.predicted (CKD-EPI)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2025-12-19T09:55:00",
+    "valueQuantity": {
+     "value": 100.0,
+     "unit": "mL/min/1.73m2",
+     "system": "http://unitsofmeasure.org",
+     "code": "mL/min/{1.73_m2}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-lab-ldl_mgdl",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "lab-ldl_mgdl",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "13457-7",
+       "display": "Cholesterol in LDL [Mass/volume] in Serum or Plasma by calculation"
+      }
+     ]
+    },
+    "effectiveDateTime": "2025-12-19T09:55:00",
+    "valueQuantity": {
+     "value": 76.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-lab-triglycerides_mgdl",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "lab-triglycerides_mgdl",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "2571-8",
+       "display": "Triglyceride [Mass/volume] in Serum or Plasma"
+      }
+     ]
+    },
+    "effectiveDateTime": "2025-12-19T09:55:00",
+    "valueQuantity": {
+     "value": 178.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-lab-bmi",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "lab-bmi",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "39156-5",
+       "display": "Body mass index (BMI) [Ratio]"
+      }
+     ]
+    },
+    "effectiveDateTime": "2025-12-19T09:55:00",
+    "valueQuantity": {
+     "value": 28.2,
+     "unit": "kg/m2",
+     "system": "http://unitsofmeasure.org",
+     "code": "kg/m2"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-lab-weight_kg",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "lab-weight_kg",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "29463-7",
+       "display": "Body weight"
+      }
+     ]
+    },
+    "effectiveDateTime": "2025-12-19T09:55:00",
+    "valueQuantity": {
+     "value": 66.1,
+     "unit": "kg",
+     "system": "http://unitsofmeasure.org",
+     "code": "kg"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-0",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-0",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:00:00",
+    "valueQuantity": {
+     "value": 153.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-0",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-0",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:00:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-0",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-0",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:00:00",
+    "valueQuantity": {
+     "value": 73.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-0",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-0",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:00:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-1",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-1",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:05:00",
+    "valueQuantity": {
+     "value": 152.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-1",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-1",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:05:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-1",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-1",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:05:00",
+    "valueQuantity": {
+     "value": 72.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-1",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-1",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:05:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "deep"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-2",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-2",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:10:00",
+    "valueQuantity": {
+     "value": 152.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-2",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-2",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:10:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-2",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-2",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:10:00",
+    "valueQuantity": {
+     "value": 68.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-2",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-2",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:10:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "deep"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-3",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-3",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:15:00",
+    "valueQuantity": {
+     "value": 152.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-3",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-3",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:15:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-3",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-3",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:15:00",
+    "valueQuantity": {
+     "value": 70.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-3",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-3",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:15:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-4",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-4",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:20:00",
+    "valueQuantity": {
+     "value": 147.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-4",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-4",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:20:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-4",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-4",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:20:00",
+    "valueQuantity": {
+     "value": 67.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-4",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-4",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:20:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "deep"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-5",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-5",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:25:00",
+    "valueQuantity": {
+     "value": 147.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-5",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-5",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:25:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-5",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-5",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:25:00",
+    "valueQuantity": {
+     "value": 68.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-5",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-5",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:25:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-6",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-6",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:30:00",
+    "valueQuantity": {
+     "value": 147.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-6",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-6",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:30:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-6",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-6",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:30:00",
+    "valueQuantity": {
+     "value": 67.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-6",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-6",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:30:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-7",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-7",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:35:00",
+    "valueQuantity": {
+     "value": 159.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-7",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-7",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:35:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-7",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-7",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:35:00",
+    "valueQuantity": {
+     "value": 67.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-7",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-7",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:35:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-8",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-8",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:40:00",
+    "valueQuantity": {
+     "value": 162.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-8",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-8",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:40:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-8",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-8",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:40:00",
+    "valueQuantity": {
+     "value": 67.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-8",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-8",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:40:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-9",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-9",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:45:00",
+    "valueQuantity": {
+     "value": 164.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-9",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-9",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:45:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-9",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-9",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:45:00",
+    "valueQuantity": {
+     "value": 67.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-9",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-9",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:45:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-10",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-10",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:50:00",
+    "valueQuantity": {
+     "value": 163.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-10",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-10",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:50:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-10",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-10",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:50:00",
+    "valueQuantity": {
+     "value": 69.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-10",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-10",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:50:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-11",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-11",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:55:00",
+    "valueQuantity": {
+     "value": 161.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-11",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-11",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:55:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-11",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-11",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:55:00",
+    "valueQuantity": {
+     "value": 74.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-11",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-11",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T04:55:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "rem"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-12",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-12",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:00:00",
+    "valueQuantity": {
+     "value": 167.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-12",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-12",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:00:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-12",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-12",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:00:00",
+    "valueQuantity": {
+     "value": 74.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-12",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-12",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:00:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "rem"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-13",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-13",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:05:00",
+    "valueQuantity": {
+     "value": 164.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-13",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-13",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:05:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-13",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-13",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:05:00",
+    "valueQuantity": {
+     "value": 74.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-13",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-13",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:05:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "rem"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-14",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-14",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:10:00",
+    "valueQuantity": {
+     "value": 169.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-14",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-14",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:10:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-14",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-14",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:10:00",
+    "valueQuantity": {
+     "value": 77.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-14",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-14",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:10:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "rem"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-15",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-15",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:15:00",
+    "valueQuantity": {
+     "value": 168.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-15",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-15",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:15:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-15",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-15",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:15:00",
+    "valueQuantity": {
+     "value": 69.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-15",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-15",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:15:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-16",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-16",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:20:00",
+    "valueQuantity": {
+     "value": 172.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-16",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-16",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:20:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-16",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-16",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:20:00",
+    "valueQuantity": {
+     "value": 67.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-16",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-16",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:20:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-17",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-17",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:25:00",
+    "valueQuantity": {
+     "value": 175.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-17",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-17",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:25:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-17",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-17",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:25:00",
+    "valueQuantity": {
+     "value": 73.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-17",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-17",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:25:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-18",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-18",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:30:00",
+    "valueQuantity": {
+     "value": 178.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-18",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-18",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:30:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-18",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-18",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:30:00",
+    "valueQuantity": {
+     "value": 74.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-18",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-18",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:30:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-19",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-19",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:35:00",
+    "valueQuantity": {
+     "value": 173.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-19",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-19",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:35:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-19",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-19",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:35:00",
+    "valueQuantity": {
+     "value": 74.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-19",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-19",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:35:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-20",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-20",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:40:00",
+    "valueQuantity": {
+     "value": 175.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-20",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-20",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:40:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-20",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-20",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:40:00",
+    "valueQuantity": {
+     "value": 75.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-20",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-20",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:40:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-21",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-21",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:45:00",
+    "valueQuantity": {
+     "value": 174.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-21",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-21",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:45:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-21",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-21",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:45:00",
+    "valueQuantity": {
+     "value": 76.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-21",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-21",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:45:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-22",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-22",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:50:00",
+    "valueQuantity": {
+     "value": 174.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-22",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-22",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:50:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-22",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-22",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:50:00",
+    "valueQuantity": {
+     "value": 75.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-22",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-22",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:50:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-23",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-23",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:55:00",
+    "valueQuantity": {
+     "value": 174.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-23",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-23",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:55:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-23",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-23",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:55:00",
+    "valueQuantity": {
+     "value": 70.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-23",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-23",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T05:55:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "deep"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-24",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-24",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:00:00",
+    "valueQuantity": {
+     "value": 178.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-24",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-24",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:00:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-24",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-24",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:00:00",
+    "valueQuantity": {
+     "value": 72.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-24",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-24",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:00:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-25",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-25",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:05:00",
+    "valueQuantity": {
+     "value": 178.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-25",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-25",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:05:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-25",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-25",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:05:00",
+    "valueQuantity": {
+     "value": 71.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-25",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-25",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:05:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "light"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-26",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-26",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:10:00",
+    "valueQuantity": {
+     "value": 180.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-26",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-26",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:10:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-26",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-26",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:10:00",
+    "valueQuantity": {
+     "value": 81.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-sleep-26",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "sleep-26",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "sleep-stage",
+       "display": "Sleep stage (wearable)"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:10:00",
+    "valueCodeableConcept": {
+     "coding": [
+      {
+       "system": "https://github.com/AkhileshNalla11/glycaemic-digital-twin/fhir/sleep-stage",
+       "code": "awake"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-27",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-27",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:15:00",
+    "valueQuantity": {
+     "value": 185.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-27",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-27",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:15:00",
+    "valueQuantity": {
+     "value": 0.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-27",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-27",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:15:00",
+    "valueQuantity": {
+     "value": 86.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-28",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-28",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:20:00",
+    "valueQuantity": {
+     "value": 189.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-28",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-28",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:20:00",
+    "valueQuantity": {
+     "value": 26.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-28",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-28",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:20:00",
+    "valueQuantity": {
+     "value": 85.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-29",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-29",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:25:00",
+    "valueQuantity": {
+     "value": 186.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-29",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-29",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:25:00",
+    "valueQuantity": {
+     "value": 33.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-29",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-29",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:25:00",
+    "valueQuantity": {
+     "value": 86.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-30",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-30",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:30:00",
+    "valueQuantity": {
+     "value": 189.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-30",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-30",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:30:00",
+    "valueQuantity": {
+     "value": 32.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-30",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-30",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:30:00",
+    "valueQuantity": {
+     "value": 90.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-31",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-31",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:35:00",
+    "valueQuantity": {
+     "value": 189.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-31",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-31",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:35:00",
+    "valueQuantity": {
+     "value": 27.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-31",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-31",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:35:00",
+    "valueQuantity": {
+     "value": 84.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-32",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-32",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:40:00",
+    "valueQuantity": {
+     "value": 187.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-32",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-32",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:40:00",
+    "valueQuantity": {
+     "value": 37.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-32",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-32",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:40:00",
+    "valueQuantity": {
+     "value": 85.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-33",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-33",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:45:00",
+    "valueQuantity": {
+     "value": 186.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-33",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-33",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:45:00",
+    "valueQuantity": {
+     "value": 33.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-33",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-33",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:45:00",
+    "valueQuantity": {
+     "value": 87.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-34",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-34",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:50:00",
+    "valueQuantity": {
+     "value": 185.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-34",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-34",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:50:00",
+    "valueQuantity": {
+     "value": 443.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-34",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-34",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:50:00",
+    "valueQuantity": {
+     "value": 95.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-35",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-35",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:55:00",
+    "valueQuantity": {
+     "value": 184.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-35",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-35",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:55:00",
+    "valueQuantity": {
+     "value": 430.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-35",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-35",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T06:55:00",
+    "valueQuantity": {
+     "value": 106.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-36",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-36",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:00:00",
+    "valueQuantity": {
+     "value": 191.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-36",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-36",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:00:00",
+    "valueQuantity": {
+     "value": 444.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-36",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-36",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:00:00",
+    "valueQuantity": {
+     "value": 107.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-37",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-37",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:05:00",
+    "valueQuantity": {
+     "value": 190.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-37",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-37",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:05:00",
+    "valueQuantity": {
+     "value": 426.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-37",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-37",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:05:00",
+    "valueQuantity": {
+     "value": 111.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-38",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-38",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:10:00",
+    "valueQuantity": {
+     "value": 194.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-38",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-38",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:10:00",
+    "valueQuantity": {
+     "value": 409.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-38",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-38",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:10:00",
+    "valueQuantity": {
+     "value": 109.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-39",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-39",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:15:00",
+    "valueQuantity": {
+     "value": 198.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-39",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-39",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:15:00",
+    "valueQuantity": {
+     "value": 389.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-39",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-39",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:15:00",
+    "valueQuantity": {
+     "value": 108.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-40",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-40",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:20:00",
+    "valueQuantity": {
+     "value": 200.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-40",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-40",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:20:00",
+    "valueQuantity": {
+     "value": 27.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-40",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-40",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:20:00",
+    "valueQuantity": {
+     "value": 97.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-41",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-41",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:25:00",
+    "valueQuantity": {
+     "value": 193.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-41",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-41",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:25:00",
+    "valueQuantity": {
+     "value": 31.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-41",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-41",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:25:00",
+    "valueQuantity": {
+     "value": 91.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-42",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-42",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:30:00",
+    "valueQuantity": {
+     "value": 194.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-42",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-42",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:30:00",
+    "valueQuantity": {
+     "value": 27.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-42",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-42",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:30:00",
+    "valueQuantity": {
+     "value": 88.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-43",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-43",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:35:00",
+    "valueQuantity": {
+     "value": 195.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-43",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-43",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:35:00",
+    "valueQuantity": {
+     "value": 29.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-43",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-43",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:35:00",
+    "valueQuantity": {
+     "value": 87.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-44",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-44",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:40:00",
+    "valueQuantity": {
+     "value": 194.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-44",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-44",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:40:00",
+    "valueQuantity": {
+     "value": 30.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-44",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-44",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:40:00",
+    "valueQuantity": {
+     "value": 87.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-45",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-45",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:45:00",
+    "valueQuantity": {
+     "value": 194.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-45",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-45",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:45:00",
+    "valueQuantity": {
+     "value": 25.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-45",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-45",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:45:00",
+    "valueQuantity": {
+     "value": 90.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-46",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-46",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:50:00",
+    "valueQuantity": {
+     "value": 183.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-46",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-46",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:50:00",
+    "valueQuantity": {
+     "value": 21.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-46",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-46",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:50:00",
+    "valueQuantity": {
+     "value": 87.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-47",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-47",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:55:00",
+    "valueQuantity": {
+     "value": 183.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-47",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-47",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:55:00",
+    "valueQuantity": {
+     "value": 28.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-47",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-47",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T07:55:00",
+    "valueQuantity": {
+     "value": 87.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-48",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-48",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:00:00",
+    "valueQuantity": {
+     "value": 178.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-48",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-48",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:00:00",
+    "valueQuantity": {
+     "value": 23.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-48",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-48",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:00:00",
+    "valueQuantity": {
+     "value": 86.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-49",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-49",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:05:00",
+    "valueQuantity": {
+     "value": 173.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-49",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-49",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:05:00",
+    "valueQuantity": {
+     "value": 32.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-49",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-49",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:05:00",
+    "valueQuantity": {
+     "value": 82.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-50",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-50",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:10:00",
+    "valueQuantity": {
+     "value": 164.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-50",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-50",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:10:00",
+    "valueQuantity": {
+     "value": 34.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-50",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-50",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:10:00",
+    "valueQuantity": {
+     "value": 85.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-51",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-51",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:15:00",
+    "valueQuantity": {
+     "value": 158.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-51",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-51",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:15:00",
+    "valueQuantity": {
+     "value": 25.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-51",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-51",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:15:00",
+    "valueQuantity": {
+     "value": 81.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-52",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-52",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:20:00",
+    "valueQuantity": {
+     "value": 147.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-52",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-52",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:20:00",
+    "valueQuantity": {
+     "value": 42.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-52",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-52",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:20:00",
+    "valueQuantity": {
+     "value": 84.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-53",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-53",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:25:00",
+    "valueQuantity": {
+     "value": 138.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-53",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-53",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:25:00",
+    "valueQuantity": {
+     "value": 33.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-53",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-53",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:25:00",
+    "valueQuantity": {
+     "value": 89.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-54",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-54",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:30:00",
+    "valueQuantity": {
+     "value": 132.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-54",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-54",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:30:00",
+    "valueQuantity": {
+     "value": 26.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-54",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-54",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:30:00",
+    "valueQuantity": {
+     "value": 88.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-55",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-55",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:35:00",
+    "valueQuantity": {
+     "value": 129.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-55",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-55",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:35:00",
+    "valueQuantity": {
+     "value": 31.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-55",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-55",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:35:00",
+    "valueQuantity": {
+     "value": 86.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-56",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-56",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:40:00",
+    "valueQuantity": {
+     "value": 126.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-56",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-56",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:40:00",
+    "valueQuantity": {
+     "value": 34.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-56",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-56",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:40:00",
+    "valueQuantity": {
+     "value": 86.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-57",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-57",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:45:00",
+    "valueQuantity": {
+     "value": 115.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-57",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-57",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:45:00",
+    "valueQuantity": {
+     "value": 35.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-57",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-57",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:45:00",
+    "valueQuantity": {
+     "value": 84.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-58",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-58",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:50:00",
+    "valueQuantity": {
+     "value": 115.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-58",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-58",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:50:00",
+    "valueQuantity": {
+     "value": 40.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-58",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-58",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:50:00",
+    "valueQuantity": {
+     "value": 86.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-59",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-59",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:55:00",
+    "valueQuantity": {
+     "value": 110.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-59",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-59",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:55:00",
+    "valueQuantity": {
+     "value": 25.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-59",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-59",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T08:55:00",
+    "valueQuantity": {
+     "value": 86.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-60",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-60",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:00:00",
+    "valueQuantity": {
+     "value": 104.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-60",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-60",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:00:00",
+    "valueQuantity": {
+     "value": 224.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-60",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-60",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:00:00",
+    "valueQuantity": {
+     "value": 90.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-61",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-61",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:05:00",
+    "valueQuantity": {
+     "value": 97.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-61",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-61",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:05:00",
+    "valueQuantity": {
+     "value": 243.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-61",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-61",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:05:00",
+    "valueQuantity": {
+     "value": 94.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-62",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-62",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:10:00",
+    "valueQuantity": {
+     "value": 95.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-62",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-62",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:10:00",
+    "valueQuantity": {
+     "value": 33.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-62",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-62",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:10:00",
+    "valueQuantity": {
+     "value": 89.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-63",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-63",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:15:00",
+    "valueQuantity": {
+     "value": 85.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-63",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-63",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:15:00",
+    "valueQuantity": {
+     "value": 35.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-63",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-63",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:15:00",
+    "valueQuantity": {
+     "value": 89.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-64",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-64",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:20:00",
+    "valueQuantity": {
+     "value": 77.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-64",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-64",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:20:00",
+    "valueQuantity": {
+     "value": 39.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-64",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-64",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:20:00",
+    "valueQuantity": {
+     "value": 87.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-65",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-65",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:25:00",
+    "valueQuantity": {
+     "value": 76.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-65",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-65",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:25:00",
+    "valueQuantity": {
+     "value": 34.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-65",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-65",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:25:00",
+    "valueQuantity": {
+     "value": 85.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-66",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-66",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:30:00",
+    "valueQuantity": {
+     "value": 73.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-66",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-66",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:30:00",
+    "valueQuantity": {
+     "value": 35.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-66",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-66",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:30:00",
+    "valueQuantity": {
+     "value": 90.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-67",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-67",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:35:00",
+    "valueQuantity": {
+     "value": 71.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-67",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-67",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:35:00",
+    "valueQuantity": {
+     "value": 33.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-67",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-67",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:35:00",
+    "valueQuantity": {
+     "value": 90.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-68",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-68",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:40:00",
+    "valueQuantity": {
+     "value": 64.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-68",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-68",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:40:00",
+    "valueQuantity": {
+     "value": 23.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-68",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-68",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:40:00",
+    "valueQuantity": {
+     "value": 93.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-69",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-69",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:45:00",
+    "valueQuantity": {
+     "value": 67.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-69",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-69",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:45:00",
+    "valueQuantity": {
+     "value": 29.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-69",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-69",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:45:00",
+    "valueQuantity": {
+     "value": 93.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-70",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-70",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:50:00",
+    "valueQuantity": {
+     "value": 67.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-70",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-70",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:50:00",
+    "valueQuantity": {
+     "value": 35.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-70",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-70",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:50:00",
+    "valueQuantity": {
+     "value": 90.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-cgm-71",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "cgm-71",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "99504-3",
+       "display": "Glucose [Mass/volume] in Interstitial fluid"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:55:00",
+    "valueQuantity": {
+     "value": 70.0,
+     "unit": "mg/dL",
+     "system": "http://unitsofmeasure.org",
+     "code": "mg/dL"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-steps-71",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "steps-71",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "55423-8",
+       "display": "Number of steps in unspecified time Pedometer"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:55:00",
+    "valueQuantity": {
+     "value": 34.0,
+     "unit": "steps",
+     "system": "http://unitsofmeasure.org",
+     "code": "{steps}"
+    }
+   }
+  },
+  {
+   "fullUrl": "urn:uuid:observation-hr-71",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "hr-71",
+    "status": "final",
+    "subject": {
+     "reference": "Patient/P0014"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "8867-4",
+       "display": "Heart rate"
+      }
+     ]
+    },
+    "effectiveDateTime": "2026-01-18T09:55:00",
+    "valueQuantity": {
+     "value": 90.0,
+     "unit": "/min",
+     "system": "http://unitsofmeasure.org",
+     "code": "/min"
+    }
+   }
+  }
+ ]
+}
