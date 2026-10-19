@@ -75,12 +75,17 @@ per-prediction explanations (TreeSHAP) and a what-if engine. A Streamlit clinici
   *on purpose* (higher HbA1c gives larger spikes; sulfonylurea / insulin, low eGFR and long duration give
   more lows), so that fusion has real signal to find. Any EHR gain reported below is therefore partly
   built in. It shows the pipeline *can* use static context, not how much EHR data helps real patients.
+  **On real linked data (ShanghaiT2DM, below) the EHR did not improve the 2-hour forecast.**
 * **Calibrated event rates** (prediction windows every 30 min): hyperglycaemia 26.7%, hypoglycaemia 4.2%,
   nocturnal hypoglycaemia 2.1%; metformin-only and untreated patients essentially never go low (0.02%).
 * **External real CGM, used only for a sanity check, never for training:**
   [CGMacros](https://physionet.org/content/cgmacros/) (PhysioNet, open access, CC BY-NC-SA 4.0, not
   redistributed here). It has only 14 T2D participants and no medication-driven lows. See
   [docs/external_validation.md](docs/external_validation.md).
+* **External real linked EHR + CGM, used only for a check:** ShanghaiT2DM (Zhao et al., *Scientific Data*
+  2023, [figshare](https://doi.org/10.6084/m9.figshare.c.6310860), CC BY 4.0, not redistributed here):
+  100 real T2D patients with CGM, clinical records and logged doses for the same people. See
+  [docs/external_shanghai.md](docs/external_shanghai.md).
 * **Checked and not used:** [Synthea](https://github.com/synthetichealth/synthea) (Apache 2.0) produces US-centric EHR without CGM
   and needs Java. See [data/README.md](data/README.md).
 
@@ -131,7 +136,8 @@ Bold = 95% CI excludes zero.
 
 **Reading the results honestly**
 * Learned models beat persistence by a wide margin (+0.35 hyper, +0.46 hypo AUPRC).
-* **EHR helps the tabular model clearly for hypoglycaemia (+0.05)** and modestly for hyperglycaemia; in
+* **On synthetic data, EHR helps the tabular model clearly for hypoglycaemia (+0.05)** and modestly for
+  hyperglycaemia (but see the real linked-data check below: there it did not help); in
   the GRU it helps hyperglycaemia slightly and hypoglycaemia not measurably. The GRU fusion model does
   not beat LightGBM + EHR (hypo -0.033, CI -0.087 to +0.008). With only 194 training patients, the
   static branch sees few distinct profiles, while trees can split directly on drug class or HbA1c.
@@ -188,6 +194,25 @@ about 10 days each).
   medication-driven lows.
 
 Method, cohort and caveats: [docs/external_validation.md](docs/external_validation.md).
+
+**Real linked EHR + CGM (ShanghaiT2DM): does the EHR help on real patients?** 100 real T2D patients, 109
+recording periods, CGM plus the same patients' clinical records and logged doses; 65 patients have lows.
+Models were trained with patient-grouped 10-fold cross-validation.
+* **The CGM approach works on real data, including for lows:** hypo onset AUROC **0.893** (AUPRC 0.341 at
+  prevalence 0.027), nocturnal hypo AUROC **0.913**, hyper AUROC 0.871. Probabilities are well calibrated.
+* **The synthetic-trained model transfers for lows:** zero-shot hypo AUPRC 0.214 against 0.146 for
+  persistence (+0.07, CI excludes zero). It does not beat persistence for highs.
+* **The EHR did not improve the forecast.** Adding our 24 EHR features changed hypo AUPRC by -0.014
+  (-0.048 to +0.010) and hyper by **-0.030** (-0.052 to -0.008). Logged insulin and oral-drug doses added
+  nothing, even for insulin users, and the full clinical record hurt hypo (-0.041). A low-capacity model,
+  which cannot memorise patients, also found no extra EHR signal on top of 6 h of CGM.
+* **So the synthetic EHR gain (+0.051) does not carry over to real patients.** The simulator wires EHR traits
+  into glucose by design. On real data the last 6 h of CGM already show what the record says, at least for
+  a 2-hour forecast in 100 patients. The EHR may still matter for new patients with little CGM, for longer
+  horizons, in larger cohorts, and for explaining a risk to a clinician.
+
+Method, mapping, caveats (Chinese, partly hospitalised cohort; 15-min CGM interpolated to 5 min):
+[docs/external_shanghai.md](docs/external_shanghai.md).
 
 **Does synthetic data help when real data is scarce?** On the same 14 T2D participants (hyper onset,
 leave-one-participant-out), we compared a real-only model with two ways of adding synthetic data:
@@ -258,6 +283,7 @@ data/                 generated data (git-ignored) + data/README.md
 src/data/             synthetic_gen, ehr_features, wearable_features, linker, build_dataset
 src/models/           baselines (persistence, LightGBM), fusion_model, train
 src/eval/             metrics, ablation, external_cgmacros (real-CGM sanity check; loader in src/data/cgmacros.py),
+                      external_shanghai (real linked EHR + CGM check; loader in src/data/shanghai.py),
                       twin_validation (held-out check of the personalised twin), twin_intervals (its uncertainty
                       bands), alert_policy, subgroups, transfer_cgmacros
 src/twin/             state (PatientTwin), explain (TreeSHAP), whatif (scenarios), personalise (parameter fitting)
@@ -283,13 +309,14 @@ tests/                pytest suite
 
 * **Trained on synthetic data only.** No real patients are used for training. The model has not been
   clinically validated on real CGM or EHR data and must not inform care.
-* **The one real-data check is small and only partly reassuring.**
+* **The real-data checks are small and only partly reassuring.**
   * On 14 real T2D participants from CGMacros, hyperglycaemia onset AUROC drops from 0.93 (synthetic) to
-    0.70, with uncalibrated probabilities.
-  * Hypoglycaemia and the EHR fusion could not be tested there at all.
-  * See [docs/external_validation.md](docs/external_validation.md).
-* **The EHR signal is built in.** The simulator makes EHR traits drive glucose by design, so the measured
-  EHR gain is a property of the simulator as much as of the model.
+    0.70, with uncalibrated probabilities (recalibration fixes the probabilities, not the ranking).
+  * On 100 real T2D patients from ShanghaiT2DM, models trained on real CGM predict lows well, but that cohort
+    is Chinese and partly hospitalised, and its CGM is 15-minutely. See
+    [docs/external_validation.md](docs/external_validation.md) and [docs/external_shanghai.md](docs/external_shanghai.md).
+* **The EHR signal is built in, and did not hold up on real data.** The simulator makes EHR traits drive
+  glucose by design. On real linked records (ShanghaiT2DM) the EHR added nothing to a 2-hour CGM forecast.
 * **Simplified physiology.** The simulator is a lumped model, not a validated physiological simulator.
   Lows develop slowly and daily patterns are regular, which makes prediction (especially hypoglycaemia and
   lead time) easier than in reality. In the simulator, insulin users have fewer lows than sulfonylurea

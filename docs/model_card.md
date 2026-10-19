@@ -34,6 +34,9 @@
 * **External check:** 14 real adults with T2D from [CGMacros](https://physionet.org/content/cgmacros/)
   (PhysioNet, CC BY-NC-SA 4.0, US cohort), CGM-only model, hyperglycaemia only
   ([external_validation.md](external_validation.md)).
+* **Real linked EHR + CGM check:** 100 real adults with T2D from ShanghaiT2DM (Scientific Data 2023, CC BY
+  4.0, Chinese, partly hospitalised), with the same patients' records and logged doses; models trained with
+  patient-grouped cross-validation ([external_shanghai.md](external_shanghai.md)).
 
 ## Performance
 
@@ -46,6 +49,10 @@ Onset windows (the patient is not already past the threshold). 95% CIs resample 
 | Synthetic test, nocturnal | Hypo | 0.989 (0.980-0.995) | 0.659 (0.015) |
 | **Real CGM (CGMacros T2D, 14), CGM-only model, zero-shot** | Hyper | **0.698 (0.656-0.736)** | **0.463 (0.276)** |
 | Real CGM, same features trained on the real cohort (leave-one-out) | Hyper | 0.771 (0.732-0.808) | 0.537 (0.276) |
+| **Real linked data (ShanghaiT2DM, 100), CGM-only model, zero-shot** | Hypo | 0.870 (0.846-0.891) | 0.214 (0.027) |
+| ShanghaiT2DM, CGM-only trained on the real cohort (10-fold by patient) | Hypo | 0.893 (0.871-0.914) | 0.341 (0.027) |
+| ShanghaiT2DM, same, nocturnal | Hypo | 0.913 | 0.343 (0.032) |
+| ShanghaiT2DM, same | Hyper | 0.871 (0.858-0.885) | 0.577 (0.147) |
 
 * **The synthetic numbers are optimistic.** On real CGM, discrimination falls from 0.93 to 0.70 AUROC.
   Simulated lows drift in slowly (the lowest CGM in the 2 h before onset is already ~70 mg/dL), which makes
@@ -54,8 +61,11 @@ Onset windows (the patient is not already past the threshold). 95% CIs resample 
 * **Calibration:** good on synthetic test data (hypo ECE 0.004), poor on real CGM (zero-shot ECE 0.14).
   Recalibrating on other real participants (leave-one-out Platt scaling, no retraining) brings it to 0.024
   with AUROC almost unchanged (0.690). Alert thresholds would still need re-tuning on real episodes.
-* **EHR value:** +0.051 hypo AUPRC (95% CI +0.018 to +0.113) on synthetic data, partly by construction;
-  untested on real data (CGMacros has no medication records).
+* **EHR value: synthetic only.** +0.051 hypo AUPRC (95% CI +0.018 to +0.113) on synthetic data, partly by
+  construction. **On real linked data (ShanghaiT2DM) the EHR did not improve the 2-hour forecast**: hypo
+  -0.014 (-0.048 to +0.010), hyper -0.030 (-0.052 to -0.008); logged doses and a richer record did not help
+  either, and a low-capacity model found no extra signal. The deployed model still uses EHR features
+  (it was trained on synthetic data), and its EHR drivers explain what it reacts to, not proven extra value.
 * **Alerting, episode level** (synthetic test, [alert_policy.md](alert_policy.md)): the policy warns of **76% of
   hypo episodes at least 30 min before onset** (83% with >= 15 min; nocturnal 71%) with **0.49 hypo alerts per
   patient-day** at 66% PPV per alert and a median lead of 65 min. Hyper: 68% of episodes warned >= 30 min ahead,

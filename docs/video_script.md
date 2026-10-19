@@ -56,8 +56,10 @@ config, re-check them.
 **Narration**
 - Headline metric for rare lows is AUPRC (chance = 0.02). Persistence: 0.19. LightGBM on CGM: 0.65.
   Adding the EHR: **0.71**. Hyperglycaemia: 0.38 -> 0.72 -> 0.74.
-- Does the EHR add value? With paired patient bootstrap: **+0.05 for lows in LightGBM, CI clear of
-  zero**. Smaller and uncertain in the GRU, which didn't beat LightGBM. Wearables added nothing measurable.
+- Does the EHR add value? On synthetic data, yes: **+0.05 for lows in LightGBM, CI clear of zero**, but the
+  simulator builds that in. So we tested it on **real linked records** (ShanghaiT2DM, 100 patients): there
+  the EHR added **nothing** to a 2-hour CGM forecast, while the CGM model predicted real lows well (AUROC
+  0.89). We changed our claim to match. Wearables added nothing measurable.
 - Operating point: at a 10% false-alert rate we catch 98% of upcoming lows, but only about 1 in 5 alerts
   is a true low. Alert fatigue is a real open problem.
 - We deploy LightGBM + EHR because it's the best for lows and its probabilities are well calibrated.

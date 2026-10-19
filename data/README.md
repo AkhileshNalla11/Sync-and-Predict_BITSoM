@@ -77,4 +77,5 @@ patient-level bootstrap CIs.
 | Source | Status | Why not used for training |
 |---|---|---|
 | [CGMacros v1.0.0 (PhysioNet)](https://physionet.org/content/cgmacros/) | Open access, **CC BY-NC-SA 4.0** (non-commercial, share-alike, attribution). **Used for the external sanity check only** ([docs/external_validation.md](../docs/external_validation.md)); downloaded to the git-ignored `data/external/cgmacros/`, never committed | Not used for training: 45 participants, only 14 with T2D, ~10 days; US cohort with no medication-driven lows. |
+| [ShanghaiT2DM (Zhao et al., Scientific Data 2023)](https://doi.org/10.6084/m9.figshare.c.6310860) | **CC BY 4.0** (attribution). **Used for the real linked EHR + CGM check only** ([docs/external_shanghai.md](../docs/external_shanghai.md)); downloaded to the git-ignored `data/external/shanghai/`, never committed | Not used for training the deployed model: 100 Chinese T2D patients, partly hospitalised, 15-min CGM. |
 | [Synthea](https://github.com/synthetichealth/synthea) | Apache 2.0 | Needs Java 17+, which is not installed here; generates US-centric EHR without CGM. Our generated EHR covers the needed fields directly. |

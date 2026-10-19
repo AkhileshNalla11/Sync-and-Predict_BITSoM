@@ -6,6 +6,8 @@ lightgbm==4.5.0
 torch==2.5.1
 shap==0.46.0
 streamlit==1.40.1
+openpyxl==3.1.5          # reads ShanghaiT2DM .xlsx (external check only; not needed by the dashboard)
+xlrd==2.0.1              # reads ShanghaiT2DM .xls
 pyarrow==17.0.0          # streamlit dependency; newer releases require NumPy 2
 plotly==5.24.1
 matplotlib==3.9.2

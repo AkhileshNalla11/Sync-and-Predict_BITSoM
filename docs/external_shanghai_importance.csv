@@ -1,0 +1,49 @@
+model,target,stream,gain_share
+lgbm_cgm,hyper,CGM + time,1.0
+lgbm_cgm,hypo,CGM + time,1.0
+lgbm_cgm_ehr,hyper,CGM + time,0.9117045820460663
+lgbm_cgm_ehr,hyper,"EHR, project's 24 features",0.08829541795393381
+lgbm_cgm_ehr,hyper,top non-CGM feature: hba1c,0.01722857250268471
+lgbm_cgm_ehr,hyper,top non-CGM feature: bmi,0.010973806774959991
+lgbm_cgm_ehr,hyper,top non-CGM feature: weight_kg,0.00980413476597947
+lgbm_cgm_ehr,hyper,top non-CGM feature: age,0.00865778343379731
+lgbm_cgm_ehr,hyper,top non-CGM feature: egfr,0.008568544563314209
+lgbm_cgm_ehr,hypo,CGM + time,0.9098928394767466
+lgbm_cgm_ehr,hypo,"EHR, project's 24 features",0.09010716052325347
+lgbm_cgm_ehr,hypo,top non-CGM feature: hba1c,0.01948422397999532
+lgbm_cgm_ehr,hypo,top non-CGM feature: age,0.01450518394240534
+lgbm_cgm_ehr,hypo,top non-CGM feature: triglycerides_mgdl,0.012141855055337429
+lgbm_cgm_ehr,hypo,top non-CGM feature: egfr,0.009458661686004326
+lgbm_cgm_ehr,hypo,top non-CGM feature: diabetes_duration_years,0.007791860122511959
+lgbm_cgm_ehr_doses,hyper,CGM + time,0.9060465656759497
+lgbm_cgm_ehr_doses,hyper,"EHR, project's 24 features",0.08829210408289434
+lgbm_cgm_ehr_doses,hyper,Logged doses / meals,0.005661330241155953
+lgbm_cgm_ehr_doses,hyper,top non-CGM feature: hba1c,0.015832230744732965
+lgbm_cgm_ehr_doses,hyper,top non-CGM feature: bmi,0.010389693174587556
+lgbm_cgm_ehr_doses,hyper,top non-CGM feature: weight_kg,0.009994496678079858
+lgbm_cgm_ehr_doses,hyper,top non-CGM feature: age,0.00936739873970301
+lgbm_cgm_ehr_doses,hyper,top non-CGM feature: ldl_mgdl,0.009033443886966653
+lgbm_cgm_ehr_doses,hypo,CGM + time,0.902820639219235
+lgbm_cgm_ehr_doses,hypo,"EHR, project's 24 features",0.08741292731662707
+lgbm_cgm_ehr_doses,hypo,Logged doses / meals,0.009766433464137848
+lgbm_cgm_ehr_doses,hypo,top non-CGM feature: hba1c,0.018174280536041677
+lgbm_cgm_ehr_doses,hypo,top non-CGM feature: age,0.01630823414035116
+lgbm_cgm_ehr_doses,hypo,top non-CGM feature: triglycerides_mgdl,0.011304373260928355
+lgbm_cgm_ehr_doses,hypo,top non-CGM feature: egfr,0.009094918900898375
+lgbm_cgm_ehr_doses,hypo,top non-CGM feature: ldl_mgdl,0.007574169010132319
+lgbm_cgm_full_ehr,hyper,CGM + time,0.8896460277313123
+lgbm_cgm_full_ehr,hyper,"EHR, extra fields",0.06078114747493424
+lgbm_cgm_full_ehr,hyper,"EHR, project's 24 features",0.04957282479375345
+lgbm_cgm_full_ehr,hyper,top non-CGM feature: fasting_glucose_mgdl,0.0172423070010832
+lgbm_cgm_full_ehr,hyper,top non-CGM feature: hba1c,0.009322539685186173
+lgbm_cgm_full_ehr,hyper,top non-CGM feature: bmi,0.008315407688303453
+lgbm_cgm_full_ehr,hyper,top non-CGM feature: glycated_albumin,0.008114497254426646
+lgbm_cgm_full_ehr,hyper,top non-CGM feature: pp2h_glucose_mgdl,0.006020013647602627
+lgbm_cgm_full_ehr,hypo,CGM + time,0.9003004011894603
+lgbm_cgm_full_ehr,hypo,"EHR, extra fields",0.04773645015409878
+lgbm_cgm_full_ehr,hypo,"EHR, project's 24 features",0.05196314865644092
+lgbm_cgm_full_ehr,hypo,top non-CGM feature: hba1c,0.01248233913684565
+lgbm_cgm_full_ehr,hypo,top non-CGM feature: age,0.00935547297504468
+lgbm_cgm_full_ehr,hypo,top non-CGM feature: fasting_glucose_mgdl,0.007564918295056682
+lgbm_cgm_full_ehr,hypo,top non-CGM feature: uric_acid,0.007483267729019851
+lgbm_cgm_full_ehr,hypo,top non-CGM feature: triglycerides_mgdl,0.007148536952596128

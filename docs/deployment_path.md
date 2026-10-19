@@ -14,8 +14,10 @@ the regulator.
 | 1c | **Silent prospective pilot**: the model scores in the background and clinicians never see the alerts; outcomes are compared afterwards | Episode-level sensitivity, false alerts per patient-day and lead time measured prospectively |
 | 1d | **Clinician-in-the-loop pilot** with diabetologists, judged on alert usefulness, workload and safety events | Agreed safety and usefulness thresholds met |
 
-What exists today: a synthetic proof of concept, plus a real-CGM sanity check on 14 US participants
-([external_validation.md](external_validation.md)).
+What exists today: a synthetic proof of concept, a real-CGM sanity check on 14 US participants
+([external_validation.md](external_validation.md)), and a real linked EHR + CGM check on 100 Chinese
+patients ([external_shanghai.md](external_shanghai.md)). That check found the CGM approach works on real
+lows but the EHR added nothing to a 2-hour forecast, so step 1a must test the EHR's value, not assume it.
 
 ## 2. Data and consent
 
