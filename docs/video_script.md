@@ -158,7 +158,7 @@ Four: every choice, such as alert thresholds and the alert policy, was made on v
 test patients were touched once.
 
 Five: everything is reproducible. Fixed seeds, one command rebuilds the data, the models and every
-report, and 128 automated tests check it.
+report, and 131 automated tests check it on every push.
 
 ## 7. Results on synthetic patients (8:30-10:10) · slide 7
 
@@ -200,6 +200,8 @@ median warning of 65 minutes. That is about one low alert every two days per pat
 three alerts are followed by a real low. The trade-off is explicit: scoring every window would catch 98%,
 at six times the alerts. Where to sit on that curve is a clinical decision, and our tooling shows the
 whole curve.
+
+Those are synthetic patients, so later in the video we will run the same policy on real ones.
 
 At night, 71% of lows are warned at least 30 minutes ahead, with about one alert every eleven nights.
 For highs, 68% of episodes are warned 30 minutes ahead, at about two and a half alerts a day. We also
@@ -303,6 +305,13 @@ all, the record does carry a real signal. AUROC goes from chance to 0.54, which 
 to watch, but far too weak to raise alerts on. With just 30 minutes of CGM, the CGM model already reaches
 0.88, almost as good as six hours, and from then on the record adds nothing.
 
+We also ran the alert policy on these real patients, with a model trained on real data and thresholds set on
+other patients in each fold. It warns of 35% of real lows at least 30 minutes ahead, and 53% at 15 minutes,
+at about 0.6 alerts a day, with 44% of alerts followed by a real low. That is far below the 76% on synthetic
+patients, because real lows arrive faster and less predictably, and we put that number in the README rather
+than hide it. The real-trained model is now in the dashboard as a selectable risk model, so the product uses
+what we learned.
+
 So the record is a prior, not a forecaster. It helps decide who needs a sensor, it personalises the
 twin, and it gives the clinician context. It does not improve a two-hour forecast once glucose is being
 measured.
@@ -332,7 +341,7 @@ changes, checks that the scores and their calibration do not drift, versioned mo
 each version recorded, a route for reporting missed lows and harmful alerts, and a subgroup audit at every
 release, adding region, diet and device type, which our synthetic data does not have.
 
-*(Slide 18.)* And it is built to be checked, not just demoed: 128 automated tests, one command to rebuild
+*(Slide 18.)* And it is built to be checked, not just demoed: 131 automated tests that run on every push, one command to rebuild
 everything, two public real datasets checked, a live dashboard, an MIT licence, and a model card in the
 repository.
 

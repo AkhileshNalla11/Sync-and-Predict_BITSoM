@@ -1,5 +1,7 @@
 # Glycaemic Digital Twin: predicting post-meal spikes and dangerous lows in Type 2 diabetes
 
+[![tests](https://github.com/AkhileshNalla11/glycaemic-digital-twin/actions/workflows/tests.yml/badge.svg)](https://github.com/AkhileshNalla11/glycaemic-digital-twin/actions/workflows/tests.yml)
+
 > **Trained on synthetic data only. Not a medical device. Not for clinical use.** A proof of concept for
 > the Happiest Health *Digital Twin Challenge 2026*. No real patient data is used for training, and the
 > link between the EHR and wearable streams is synthetic by design. Two public, de-identified real datasets
@@ -63,6 +65,7 @@ per-prediction explanations (TreeSHAP) and a what-if engine. A Streamlit clinici
 
 | View | What the clinician sees |
 |---|---|
+| Risk model (sidebar) | Choose the synthetic-trained model (CGM + wearables + EHR, matched to these synthetic patients) or the **real-patient-trained** CGM-only model, with its real-patient alert results shown alongside |
 | Live replay | Plays a stretch of the patient's record forward as if it were happening now: glucose and both risks grow up to a moving line, and alerts pop up when the alert policy raised them, with their top two reasons. Below: every alert in the window with its lead time, any false alert, and any missed episode |
 | Glucose timeline | CGM with high (> 180) and low (< 70) bands shaded, both risk scores over time, alert markers (one per risk episode, from the alert policy), a "now" line, and the actual next 2 h (marked as not seen by the model) |
 | Alert drivers | Top reasons for each risk, e.g. *current glucose 70 mg/dL* or *sulfonylurea 3 mg/day*, grouped by data stream |
@@ -184,6 +187,14 @@ risk stays high and a hysteresis policy stays silent when the low finally arrive
 easy to anticipate in this simulator; expect real-world numbers to be worse. Method, sweep, trade-off figure
 and caveats: [docs/alert_policy.md](docs/alert_policy.md).
 
+**The same alert policy on real patients.** On 100 real patients (ShanghaiT2DM, below), with a CGM-only model
+trained on real data and thresholds set on held-out training patients in each cross-validation fold, the
+policy warns of **35% of real low-glucose episodes at least 30 minutes ahead** (53% at 15 min), at 0.61 alerts per
+patient-day, with 44% of alerts followed by a real low and a median warning of 25 minutes. The synthetic-trained
+model with its synthetic thresholds does worse (29%, 31% of alerts real). Real lows arrive faster and less
+predictably than simulated ones, so the synthetic 76% should be read as an upper bound. This real-trained model
+ships in the dashboard as a selectable risk model. Details: [docs/real_model.md](docs/real_model.md).
+
 **How sure is the twin?** The what-if projection carries a split-conformal uncertainty band, calibrated on
 46 validation patients' held-out days and checked on the 60 test patients. The **80% band contained the real
 CGM 79.0% of the time** (95% CI 77.8-79.9%) and the 95% band 94.3%. The bands are narrow (about +-9 mg/dL)
@@ -300,6 +311,7 @@ src/data/             synthetic_gen, ehr_features, wearable_features, linker, bu
 src/models/           baselines (persistence, LightGBM), fusion_model, train
 src/eval/             metrics, ablation, external_cgmacros (real-CGM sanity check; loader in src/data/cgmacros.py),
                       external_shanghai (+ _coldstart) (real linked EHR + CGM check; loader in src/data/shanghai.py),
+                      real_model (CGM-only model trained and alert-tested on real patients, shipped to the dashboard),
                       twin_validation (held-out check of the personalised twin), twin_intervals (its uncertainty
                       bands), alert_policy, subgroups, transfer_cgmacros
 src/twin/             state (PatientTwin), explain (TreeSHAP), whatif (scenarios), personalise (parameter fitting)

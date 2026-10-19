@@ -4,8 +4,8 @@
 pipeline (e.g. on Streamlit Community Cloud). Rebuild with `python scripts/make_demo_bundle.py`
 after re-running the pipeline.
 
-- Built from commit `45d86e6`, seed 42, model `lgbm_cgm_wearables_ehr`
-- Total size 14.5 MB
+- Built from commit `a3c3593`, seed 42, model `lgbm_cgm_wearables_ehr`
+- Total size 15.2 MB
 
 | File | Bytes | SHA-256 (first 16) |
 |---|---|---|
@@ -24,3 +24,6 @@ after re-running the pipeline.
 | processed/models/lgbm_cgm_wearables_ehr_hypo.txt | 450,834 | `88200651f428c1da` |
 | processed/models/lgbm_cgm_wearables_ehr_alert_thresholds.json | 160 | `bd42e53c015baa94` |
 | processed/models/twin_intervals.json | 8,508 | `8bd9afec1a0125eb` |
+| processed/models/lgbm_cgm_shanghai_hyper.txt | 466,016 | `0b103f2a9663a054` |
+| processed/models/lgbm_cgm_shanghai_hypo.txt | 248,520 | `57743a17dfcfe590` |
+| processed/models/lgbm_cgm_shanghai_alert_thresholds.json | 652 | `bc9de3a0afa723c0` |

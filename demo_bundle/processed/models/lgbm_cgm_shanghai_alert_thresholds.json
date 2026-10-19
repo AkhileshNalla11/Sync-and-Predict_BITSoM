@@ -1,0 +1,32 @@
+{
+  "rounds": {
+    "hyper": 133,
+    "hypo": 71
+  },
+  "hyper": 0.5203074544546009,
+  "hypo": 0.29315768690398025,
+  "false_alert_rate": {
+    "hyper": 0.03,
+    "hypo": 0.01
+  },
+  "fitted_on": "ShanghaiT2DM",
+  "n_patients": 100,
+  "n_windows": 54441,
+  "features": "cgm",
+  "real_patient_alerts": {
+    "hyper": {
+      "caught_15": 0.626,
+      "caught_30": 0.3995,
+      "alerts_per_day": 2.0878,
+      "ppv": 0.6482,
+      "median_lead_min": 27.5
+    },
+    "hypo": {
+      "caught_15": 0.527,
+      "caught_30": 0.347,
+      "alerts_per_day": 0.6066,
+      "ppv": 0.4404,
+      "median_lead_min": 25.0
+    }
+  }
+}

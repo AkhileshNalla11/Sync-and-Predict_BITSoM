@@ -72,3 +72,17 @@ def test_whatif_defaults_to_personalised_twin_and_can_switch_to_oracle(app) -> N
     assert not app.exception, [e.value for e in app.exception]
     assert any("hidden" in w.value for w in app.warning)
     _radio(app, "Twin physiology").set_value(mode.options[0]).run()
+
+
+def test_switch_to_real_patient_trained_model(app) -> None:
+    radio = next((r for r in app.radio if r.label == "Risk model"), None)
+    real = [o for o in (radio.options if radio else []) if o.startswith("Real-patient-trained")]
+    if not real:
+        pytest.skip("real-patient-trained model not built (python -m src.eval.real_model)")
+    radio.set_value(real[0]).run()
+    assert not app.exception, [e.value for e in app.exception]
+    assert any("real patients" in c.value for c in app.sidebar.caption)
+    assert any("CGM only" in m.value for m in app.markdown)            # hero says what the model uses
+    _radio(app, "Scenario").set_value("Skipped meal").run()             # what-if works with the CGM-only model
+    assert not app.exception, [e.value for e in app.exception]
+    _radio(app, "Risk model").set_value(radio.options[0]).run()

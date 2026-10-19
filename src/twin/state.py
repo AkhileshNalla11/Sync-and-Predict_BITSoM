@@ -7,12 +7,15 @@
 
 The predictor is the LightGBM model named in config `twin.model` (CGM + wearables + EHR by default:
 best hypo AUPRC in the ablation and well calibrated). Alert thresholds come from VALIDATION patients
-so the test patients shown in the dashboard stay untouched. Over time, alerts follow the alert policy
+so the test patients shown in the dashboard stay untouched. `ctx.with_model("lgbm_cgm_shanghai")` returns
+a context that shares the data but predicts with the CGM-only model trained on real patients
+(src/eval/real_model.py); its thresholds were set on real patients and are read from its JSON file. Over time, alerts follow the alert policy
 in config `twin.alert_policy` (src/twin/alerts.py): one alert per risk episode, not one per window.
 SYNTHETIC DATA, NOT FOR CLINICAL USE.
 """
 from __future__ import annotations
 
+import copy
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -32,6 +35,8 @@ from src.twin.alerts import AlertPolicy, policy_alerts, policy_far, policy_from_
 
 TARGETS = ("hyper", "hypo")
 SLEEP_NAMES = {0: "awake", 1: "light", 2: "deep", 3: "rem"}
+# Models trained outside the synthetic pipeline: name -> feature set. Their thresholds are fixed at training time.
+EXTERNAL_MODELS = {"lgbm_cgm_shanghai": "cgm"}
 
 
 @dataclass
@@ -71,21 +76,40 @@ class TwinContext:
         ts0 = self.timestamps[0]
         self.start_hour = ts0.hour + ts0.minute / 60
 
-        self.model_name = cfg["twin"]["model"]
-        self.feature_set = self.model_name.removeprefix("lgbm_")
-        models_dir = resolve_path(cfg["paths"]["models_dir"])
-        self.boosters = {t: lgb.Booster(model_file=str(models_dir / f"{self.model_name}_{t}.txt")) for t in TARGETS}
+        self._window_feats = load_or_build_features(ds, cfg)
+        self._use_model(cfg["twin"]["model"])
+
+    def _use_model(self, model_name: str) -> None:
+        self.model_name = model_name
+        self.feature_set = EXTERNAL_MODELS.get(model_name, model_name.removeprefix("lgbm_"))
+        models_dir = resolve_path(self.cfg["paths"]["models_dir"])
+        self.boosters = {t: lgb.Booster(model_file=str(models_dir / f"{model_name}_{t}.txt")) for t in TARGETS}
         self.feature_names = list(FEATURE_SETS[self.feature_set])
         if self.boosters["hyper"].feature_name() != self.feature_names:
             raise ValueError("saved model features do not match FEATURE_SETS; re-run the baselines")
-        self._window_feats = load_or_build_features(ds, cfg)
         self.thresholds = self._alert_thresholds(models_dir)
-        self.policies: dict[str, AlertPolicy] = {t: policy_from_spec(cfg["twin"]["alert_policy"][t], self.thresholds[t])
+        self.policies: dict[str, AlertPolicy] = {t: policy_from_spec(self.cfg["twin"]["alert_policy"][t], self.thresholds[t])
                                                  for t in TARGETS}
 
     @classmethod
     def load(cls, cfg: dict[str, Any] | None = None) -> "TwinContext":
         return cls(cfg or load_config())
+
+    def with_model(self, model_name: str) -> "TwinContext":
+        """A context sharing this one's data (no copy) but predicting with another saved model."""
+        if model_name == self.model_name:
+            return self
+        other = copy.copy(self)
+        other._use_model(model_name)
+        return other
+
+    @staticmethod
+    def model_available(cfg: dict[str, Any], model_name: str) -> bool:
+        models_dir = resolve_path(cfg["paths"]["models_dir"])
+        files = [models_dir / f"{model_name}_{t}.txt" for t in TARGETS]
+        if model_name in EXTERNAL_MODELS:
+            files.append(models_dir / f"{model_name}_alert_thresholds.json")
+        return all(f.exists() for f in files)
 
     # ------------------------------------------------------------------ prediction
     def model_input(self, window_feats: pd.DataFrame, windows: pd.DataFrame,
@@ -106,6 +130,11 @@ class TwinContext:
         """Per-target thresholds at the policy's false-alert rate on VALIDATION onset windows (cached to JSON)."""
         far = policy_far(self.cfg)
         path = models_dir / f"{self.model_name}_alert_thresholds.json"
+        if self.model_name in EXTERNAL_MODELS:                 # set on real patients when the model was trained
+            if not path.exists():
+                raise FileNotFoundError(path)
+            saved = json.loads(path.read_text(encoding="utf-8"))
+            return {t: float(saved[t]) for t in TARGETS}
         if path.exists():
             saved = json.loads(path.read_text(encoding="utf-8"))
             if saved.get("false_alert_rate") == far and saved.get("n_windows") == len(self.windows):

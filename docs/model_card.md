@@ -7,6 +7,7 @@
 | | |
 |---|---|
 | Name | Glycaemic Digital Twin: 2-hour hyper- / hypoglycaemia risk |
+| Variants | **Synthetic-trained** `lgbm_cgm_wearables_ehr` (dashboard default, matched to its synthetic patients) and **real-patient-trained** `lgbm_cgm_shanghai` (CGM + time only, 100 ShanghaiT2DM patients, thresholds set on real patients; selectable in the dashboard, see [real_model.md](real_model.md)) |
 | Type | Two binary LightGBM classifiers (one per target), deployed in the dashboard. A PyTorch multi-task fusion net (static MLP + GRU) is a research comparator only. |
 | Inputs | Last 6 h of 5-min CGM, steps, heart rate and sleep stage (37 summary features) + 24 encoded EHR features (demographics, HbA1c, eGFR, lipids, comorbidities, medication class and dose, prior severe hypo). |
 | Outputs | Probability of any CGM > 180 mg/dL (hyper) and any CGM < 70 mg/dL (hypo) in the next 2 h, every 30 min. Alerts come from an **alert policy** ([alert_policy.md](alert_policy.md)): one alert per risk episode (threshold + refractory period), with operating points chosen on validation patients (hypo at a 1%, hyper at a 3% window-level false-alert rate). |
@@ -74,6 +75,11 @@ Onset windows (the patient is not already past the threshold). 95% CIs resample 
   2.46 alerts per patient-day (PPV 69%), slightly above the 2-per-day cap it met on validation patients.
   The trade-off: scoring every window instead catches 98% of hypo episodes >= 30 min ahead, but at about
   3 alerting windows per patient-day.
+* **Alerting on real patients** ([real_model.md](real_model.md)): on 100 ShanghaiT2DM patients, a CGM-only model
+  trained on real data (thresholds set on held-out training patients per fold) warns of **35% of real hypo
+  episodes >= 30 min ahead** (53% at 15 min), 0.61 alerts per patient-day, 44% of alerts real, median lead 25 min.
+  The synthetic-trained CGM model with synthetic thresholds: 29%, 31% of alerts real. The synthetic 76% is an
+  upper bound, not an expected real-world figure.
 * **Does synthetic data help real-world training?** Mostly no ([transfer_experiment.md](transfer_experiment.md)).
   On CGMacros T2D, adding synthetic data (pretraining or pooling) gives a small AUROC-only gain with 2 real
   participants, nothing from 4, and slightly hurts from 7 up. Its one consistent benefit is lower

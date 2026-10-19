@@ -38,6 +38,9 @@ from src.twin.whatif import (MAIN_MEALS, MEAL_CATALOGUE, AddActivity, AddMeal, D
 TARGET_NAME = {"hyper": "Hyperglycaemia", "hypo": "Hypoglycaemia"}
 TARGET_RULE = {"hyper": "Any glucose > 180 mg/dL in the next 2 h", "hypo": "Any glucose < 70 mg/dL in the next 2 h"}
 HIGH_BAND, LOW_BAND = "rgba(235,104,52,0.09)", "rgba(42,120,214,0.10)"
+REAL_MODEL = "lgbm_cgm_shanghai"
+RISK_MODELS = {"Synthetic-trained: CGM + wearables + EHR": None,
+               "Real-patient-trained: CGM only (100 patients, ShanghaiT2DM)": REAL_MODEL}
 TWIN_MODES = {"Personalised (fitted to this patient's data)": "fitted",
               "Oracle (hidden simulator truth, for comparison only)": "oracle"}
 PARAM_LABEL = {"g_basal": "Basal glucose", "meal_gain": "Carb sensitivity", "tau_clear_min": "Clearance time",
@@ -61,14 +64,26 @@ def get_context() -> TwinContext:
     return TwinContext.load(runtime_config())
 
 
+@st.cache_resource(show_spinner="Loading the risk model…")
+def get_model_context(model: str) -> TwinContext:
+    """The twin with a given risk model; shares the loaded data with get_context()."""
+    return get_context().with_model(model)
+
+
+def real_model_info(ctx: TwinContext) -> dict | None:
+    """Training provenance and real-patient alert results saved with the real-trained model (None otherwise)."""
+    path = ROOT / ctx.cfg["paths"]["models_dir"] / f"{REAL_MODEL}_alert_thresholds.json"
+    return json.loads(path.read_text(encoding="utf-8")) if ctx.model_name == REAL_MODEL and path.exists() else None
+
+
 @st.cache_resource(show_spinner="Building this patient's twin (a few seconds if the fit is not cached)…", max_entries=8)
 def get_simulator(patient_id: str, mode: str = "fitted") -> PatientSimulator:
     return PatientSimulator(get_context().cfg, patient_id, mode=mode)
 
 
 @st.cache_data(show_spinner=False, max_entries=32)
-def get_timeline(patient_id: str) -> pd.DataFrame:
-    return get_context().risk_timeline(patient_id)
+def get_timeline(patient_id: str, model: str) -> pd.DataFrame:
+    return get_model_context(model).risk_timeline(patient_id)
 
 
 @st.cache_data(show_spinner=False, max_entries=32)
@@ -96,9 +111,9 @@ def get_intervals() -> dict | None:
 
 
 @st.cache_data(show_spinner=False, max_entries=16)
-def alert_reasons(patient_id: str, start: pd.Timestamp, end: pd.Timestamp) -> dict[tuple[str, pd.Timestamp], str]:
+def alert_reasons(patient_id: str, start: pd.Timestamp, end: pd.Timestamp, model: str) -> dict[tuple[str, pd.Timestamp], str]:
     """Top two risk-raising drivers of every alert in the window, for the live replay's status card."""
-    ctx, tl = get_context(), get_timeline(patient_id)
+    ctx, tl = get_model_context(model), get_timeline(patient_id, model)
     out = {}
     for t in ("hypo", "hyper"):
         for r in tl[tl[f"{t}_alert"] & tl.timestamp.between(start, end)].itertuples():
@@ -111,7 +126,7 @@ def cached_whatif(ctx: TwinContext, sim: PatientSimulator, patient_id: str, anch
                   scenarios: list) -> WhatIfResult:
     """Re-simulate only when the patient, time, twin mode or scenario changes (results kept per browser session)."""
     store = st.session_state.setdefault("whatif_cache", {})
-    key = (patient_id, int(anchor_idx), mode, tuple(repr(sc) for sc in scenarios))
+    key = (ctx.model_name, patient_id, int(anchor_idx), mode, tuple(repr(sc) for sc in scenarios))
     if key not in store:
         if len(store) >= 24:
             store.pop(next(iter(store)))
@@ -149,7 +164,8 @@ def alert_state(tl: pd.DataFrame, anchor_idx: int, target: str) -> tuple[str, st
 
 
 def far_label(ctx: TwinContext, target: str) -> str:
-    return f"{policy_far(ctx.cfg)[target] * 100:g}% false-alert rate on validation patients"
+    where = "real patients (ShanghaiT2DM)" if ctx.model_name == REAL_MODEL else "validation patients"
+    return f"{policy_far(ctx.cfg)[target] * 100:g}% false-alert rate on {where}"
 
 
 def cgm_summary(series: pd.DataFrame) -> dict[str, float]:
@@ -375,7 +391,7 @@ def view_replay(ctx: TwinContext, twin: PatientTwin, series: pd.DataFrame, tl: p
     start = max(twin.time - pd.Timedelta(hours=hours), series.timestamp.iloc[0])
     end = min(twin.time + pd.Timedelta(hours=2), series.timestamp.iloc[-1])
     with st.spinner("Preparing the replay…"):
-        eps = R.episodes(series, tl, start, end, ctx.cfg["thresholds"], alert_reasons(twin.patient_id, start, end))
+        eps = R.episodes(series, tl, start, end, ctx.cfg["thresholds"], alert_reasons(twin.patient_id, start, end, ctx.model_name))
         fig = R.replay_figure(series, tl, start, end, ctx.thresholds, ctx.cfg["thresholds"], eps,
                               frame_ms=350 if speed == "Normal" else 120)
     st.plotly_chart(fig, use_container_width=True, config=T.PLOTLY_CONFIG)
@@ -600,25 +616,41 @@ def main() -> None:
 
     with st.sidebar:
         html(T.brand_html())
+    models = {k: (v or ctx.cfg["twin"]["model"]) for k, v in RISK_MODELS.items()
+              if v is None or TwinContext.model_available(ctx.cfg, v)}
+    choice = st.sidebar.radio("Risk model", list(models), help=(
+        "Synthetic-trained: matches the synthetic patients shown here. Real-patient-trained: trained and "
+        "alert-tested on 100 real patients; on real data the EHR and wearables did not improve the forecast, "
+        "so it uses CGM only (docs/real_model.md)."))
+    ctx = get_model_context(models[choice])
     pts = patient_table()
     only_hypo = st.sidebar.checkbox("Only patients with hypoglycaemia events", value=True)
     show = pts[pts.hypo_events > 0] if only_hypo and (pts.hypo_events > 0).any() else pts
     labels = {r.patient_id: f"{r.patient_id} · {r.regimen} · HbA1c {r.hba1c}%" for r in show.itertuples()}
     pid = st.sidebar.selectbox("Virtual patient (test set)", list(labels), format_func=labels.get)
-    tl = get_timeline(pid)
+    tl = get_timeline(pid, ctx.model_name)
     anchor = pick_time(ctx, pid, tl)
     twin = ctx.build_twin(pid, anchor)
     series = get_series(pid)
     st.sidebar.markdown("---")
-    st.sidebar.caption(f"Model: LightGBM on CGM + wearables + EHR. Test patients only ({len(pts)}); none were used "
-                       "for training, model selection, alert thresholds or the alert policy.")
+    info = real_model_info(ctx)
+    if info is None:
+        st.sidebar.caption(f"Model: LightGBM on CGM + wearables + EHR, trained on synthetic patients. Test patients only "
+                           f"({len(pts)}); none were used for training, model selection, alert thresholds or the alert policy.")
+    else:
+        a = info.get("real_patient_alerts", {}).get("hypo")
+        st.sidebar.caption(f"Model: LightGBM on CGM + time of day, trained on {info['n_patients']} real patients "
+                           "(ShanghaiT2DM, CC BY 4.0); thresholds set on real patients. It has never seen these synthetic patients."
+                           + (f" On real patients its alerts warned of {a['caught_30']:.0%} of lows at least 30 min ahead "
+                              f"({a['alerts_per_day']:.2f} alerts a day, {a['ppv']:.0%} followed by a real low)." if a else ""))
     if str(ctx.cfg["paths"]["raw_dir"]).startswith("demo_bundle"):
         st.sidebar.caption("Running from the committed demo bundle (precomputed synthetic data and model).")
 
     e = twin.profile
     html(T.hero_html(pid, [f"{e['age']} y · {'Male' if e['sex'] == 'M' else 'Female'}", regimen_label(e["regimen"]),
                            f"HbA1c {e['hba1c']}%", f"eGFR {e['egfr']:.0f}"],
-                     fmt_time(twin.time), "Uses the previous 6 h of data + the EHR profile"))
+                     fmt_time(twin.time), "Uses the previous 6 h of CGM only" if ctx.feature_set == "cgm"
+                     else "Uses the previous 6 h of data + the EHR profile"))
     c1, c2 = st.columns(2, gap="large")
     for col, t in zip((c1, c2), ("hypo", "hyper")):
         with col:

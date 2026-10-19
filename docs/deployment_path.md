@@ -18,6 +18,9 @@ What exists today: a synthetic proof of concept, a real-CGM sanity check on 14 U
 ([external_validation.md](external_validation.md)), and a real linked EHR + CGM check on 100 Chinese
 patients ([external_shanghai.md](external_shanghai.md)). That check found the CGM approach works on real
 lows but the EHR added nothing to a 2-hour forecast, so step 1a must test the EHR's value, not assume it.
+A CGM-only model trained on those patients is shipped in the dashboard; with it, the alert policy warned of 35%
+of real lows at least 30 minutes ahead at 0.61 alerts a day ([real_model.md](real_model.md)). That is the
+real-world baseline step 1 has to beat.
 
 ## 2. Data and consent
 

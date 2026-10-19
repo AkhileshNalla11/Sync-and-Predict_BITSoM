@@ -22,6 +22,7 @@ from src.config import load_config  # noqa: E402
 from src.twin.state import TwinContext  # noqa: E402
 
 BUNDLE = ROOT / "demo_bundle"
+REAL_MODEL = "lgbm_cgm_shanghai"
 PROCESSED = ("series.npz", "windows.csv.gz", "static_features.csv", "static_encoder.json", "splits.csv",
              "window_features.npz", "dataset_summary.json", "linkage_report.json", "patient_log.csv.gz",
              "twin_fits.csv")
@@ -38,6 +39,10 @@ def main() -> None:
     files += [(src_models / f, BUNDLE / "processed" / "models" / f)
               for f in (f"{model}_hyper.txt", f"{model}_hypo.txt", f"{model}_alert_thresholds.json",
                         "twin_intervals.json")]
+    # the real-patient-trained model (src/eval/real_model.py), if built: tree splits only, no patient data
+    files += [(src_models / f, BUNDLE / "processed" / "models" / f)
+              for f in (f"{REAL_MODEL}_hyper.txt", f"{REAL_MODEL}_hypo.txt", f"{REAL_MODEL}_alert_thresholds.json")
+              if (src_models / f).exists()]
 
     if BUNDLE.exists():
         shutil.rmtree(BUNDLE)
