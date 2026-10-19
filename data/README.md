@@ -1,6 +1,6 @@
 # Data
 
-**Everything in this folder is synthetic.** No real patient data is used anywhere in this project.
+**Everything generated in this folder is synthetic.** No real patient data is used for training. Two public, de-identified datasets (below) are used only for external checks, downloaded by the user to the git-ignored `external/` folder.
 Files are not committed: regenerate them with `bash scripts/run_pipeline.sh` (deterministic given
 `seed` in `config.yaml`).
 

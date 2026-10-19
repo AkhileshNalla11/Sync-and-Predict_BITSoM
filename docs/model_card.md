@@ -101,7 +101,7 @@ From [subgroups.md](subgroups.md) (synthetic test set):
 * **Automation bias.** Explanations describe what the model reacted to, not physiological causes.
 * **Equity.** The synthetic cohort is loosely modelled on Indian T2D patients but is not epidemiology. Region,
   diet, socioeconomic status and device type are absent, and real performance across them is unknown.
-* **Privacy.** No real patient data is used. A real deployment would process sensitive health data; see
+* **Privacy.** No real patient data is used for training; the two public, de-identified datasets used for checks stay in a git-ignored folder. A real deployment would process sensitive health data; see
   [deployment_path.md](deployment_path.md).
 
 ## Recommendations

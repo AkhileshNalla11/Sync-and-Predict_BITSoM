@@ -1,4 +1,4 @@
-"""Draw docs/architecture.png (same structure as docs/architecture.mmd) with matplotlib.
+"""Draw docs/architecture.png and docs/architecture.pdf (same structure as docs/architecture.mmd) with matplotlib.
 
     python scripts/make_architecture_diagram.py
 
@@ -15,12 +15,15 @@ import matplotlib.pyplot as plt                       # noqa: E402
 from matplotlib.patches import FancyBboxPatch          # noqa: E402
 
 OUT = Path(__file__).resolve().parents[1] / "docs" / "architecture.png"
+OUT_PDF = OUT.with_suffix(".pdf")
 INK, INK_2, INK_3, SURFACE = "#0b0b0b", "#52514e", "#8a8984", "#fcfcfb"
-STYLE = {"ehr": ("#fdebe3", "#eb6834"), "sensor": ("#e3eefb", "#2a78d6"), "neutral": ("#f3f2ee", "#a3a29c")}
+STYLE = {"ehr": ("#fdebe3", "#eb6834"), "sensor": ("#e3eefb", "#2a78d6"), "neutral": ("#f3f2ee", "#a3a29c"),
+         "real": ("#e6f4f2", "#0f766e")}
 
 W, H = 0.165, 0.135
 COLS = [0.025, 0.225, 0.425, 0.625, 0.815]
-LANES = ["1  Synthetic data", "2  Linking & features", "3  Models", "4  Evaluation", "5  Digital twin & dashboard"]
+LANES = ["1  Synthetic data", "2  Linking & features", "3  Models", "4  Evaluation & real data",
+         "5  Digital twin & dashboard"]
 ROWS = [0.72, 0.52, 0.32, 0.12]
 
 BOXES = {
@@ -34,13 +37,15 @@ BOXES = {
     "split": (1, ROWS[3], "neutral", "Patient-level split", "65 / 15 / 20 by drug class;\nleakage guard"),
     "pers": (2, ROWS[0], "neutral", "Persistence baseline", "extrapolate last value\nalong 30-min trend"),
     "lgb": (2, 0.42, "neutral", "LightGBM per target", "handcrafted features:\nCGM / + wearables / + EHR"),
-    "fus": (2, ROWS[3], "neutral", "Fusion net (PyTorch)", "static MLP + GRU (or 1D-CNN)\n-> shared -> 2 heads"),
-    "met": (3, 0.30, "neutral", "Metrics", "AUPRC (hypo headline), AUROC,\nsens @ FAR, lead time,\ncalibration, patient CIs"),
-    "abl": (3, 0.08, "neutral", "Ablation", "paired EHR-value test;\ntables + figures -> docs/"),
-    "state": (4, ROWS[0], "neutral", "PatientTwin", "profile, 6 h history, risks;\nalerts set on validation"),
+    "fus": (2, ROWS[3], "neutral", "Fusion net (PyTorch)", "static MLP + GRU; comparator,\ndid not beat LightGBM"),
+    "met": (3, ROWS[0], "neutral", "Metrics & ablation", "AUPRC, AUROC, calibration,\npaired EHR-value test,\npatient-bootstrap CIs"),
+    "alert": (3, ROWS[1], "neutral", "Alert policy & subgroups", "one alert per episode, set\non validation; audit by group"),
+    "band": (3, ROWS[2], "neutral", "Twin validation", "held-out week; conformal\n80% / 95% bands (79% / 94%)"),
+    "real": (3, ROWS[3], "real", "Real-data checks", "CGMacros (14, US) + recalib.;\nShanghaiT2DM (100, linked EHR)"),
+    "state": (4, ROWS[0], "neutral", "PatientTwin", "profile, 6 h history, risks,\nalert-policy state"),
     "exp": (4, ROWS[1], "neutral", "Explanations", "TreeSHAP drivers\nper prediction"),
-    "what": (4, ROWS[2], "neutral", "What-if engine", "replays the simulator with edits\n(synthetic only) + ML re-predict"),
-    "app": (4, ROWS[3], "neutral", "Streamlit dashboard", "timeline, drivers,\nwhat-if, overview"),
+    "what": (4, ROWS[2], "neutral", "Personalised what-if twin", "4 params fitted per patient,\nobserver, uncertainty band"),
+    "app": (4, ROWS[3], "neutral", "Streamlit dashboard", "live replay, timeline, drivers,\nwhat-if, overview"),
 }
 
 
@@ -89,7 +94,8 @@ def main() -> None:
     ax.text(0.025, 0.955, "Glycaemic digital twin for Type 2 diabetes: architecture", fontsize=17, color=INK,
             fontweight="bold", va="center")
     ax.text(0.025, 0.925, "Static EHR + dynamic wearable streams -> 2-hour risk of hyperglycaemia (> 180 mg/dL) and "
-            "hypoglycaemia (< 70 mg/dL)", fontsize=11, color=INK_2, va="center")
+            "hypoglycaemia (< 70 mg/dL); trained on synthetic data, checked on real CGM and real linked records",
+            fontsize=11, color=INK_2, va="center")
     for x, lane in zip(COLS, LANES):
         ax.text(x, 0.885, lane, fontsize=11, color=INK_2, fontweight="bold", va="center")
 
@@ -117,12 +123,12 @@ def main() -> None:
         path(ax, [(COLS[2] + W, cy(k)), (bus3, cy(k))], arrow=False)
     path(ax, [(bus3, cy("pers")), (bus3, cy("fus"))], arrow=False)
     path(ax, [(bus3, cy("met")), (COLS[3], cy("met"))])
-    down(ax, "met", "abl")
-    # deployed model -> twin, routed above the metrics column
-    y_dep = box("lgb")[3] + 0.04
+    down(ax, "met", "alert")
+    # deployed model -> twin, routed through the gap between two evaluation boxes
+    y_dep = (box("band")[3] + box("alert")[1]) / 2
     x_dep = COLS[3] + W + 0.012
-    path(ax, [(cx("lgb"), box("lgb")[3]), (cx("lgb"), y_dep), (x_dep, y_dep), (x_dep, cy("state")), (COLS[4], cy("state"))])
-    label(ax, (COLS[3] + COLS[3] + W) / 2, y_dep + 0.022, "deployed model: LightGBM CGM + wearables + EHR", ha="center")
+    path(ax, [(COLS[2] + W, y_dep), (x_dep, y_dep), (x_dep, cy("state")), (COLS[4], cy("state"))])
+    label(ax, (COLS[3] + COLS[3] + W) / 2 + 0.006, y_dep, "deployed: LightGBM CGM + wearables + EHR", ha="center")
     # column 5 chain
     for a, b in (("state", "exp"), ("exp", "what"), ("what", "app")):
         down(ax, a, b)
@@ -136,15 +142,16 @@ def main() -> None:
         ax.text(x + 0.01, y + H - 0.056, body, fontsize=9, color=INK_2, va="top", zorder=3, linespacing=1.35)
 
     for i, (style, text) in enumerate((("ehr", "static / EHR stream"), ("sensor", "dynamic / sensor stream"),
-                                       ("neutral", "processing"))):
+                                       ("neutral", "processing"), ("real", "real external data (checks only)"))):
         fill, edge = STYLE[style]
-        x = 0.025 + i * 0.16
+        x = 0.025 + i * 0.135
         ax.add_patch(FancyBboxPatch((x, 0.025), 0.018, 0.022, boxstyle="round,pad=0.002", facecolor=fill, edgecolor=edge, lw=1.4))
         ax.text(x + 0.026, 0.036, text, fontsize=9, color=INK_2, va="center")
-    ax.text(0.975, 0.036, "ALL DATA SYNTHETIC. Research prototype, not for clinical use.", fontsize=9.5, color=INK_2,
-            ha="right", va="center", fontweight="bold")
+    ax.text(0.975, 0.036, "Training data synthetic. Research prototype, not for clinical use.", fontsize=9.5,
+            color=INK_2, ha="right", va="center", fontweight="bold")
     fig.savefig(OUT, dpi=130, facecolor=SURFACE)
-    print(f"wrote {OUT}")
+    fig.savefig(OUT_PDF, facecolor=SURFACE)
+    print(f"wrote {OUT} and {OUT_PDF}")
 
 
 if __name__ == "__main__":

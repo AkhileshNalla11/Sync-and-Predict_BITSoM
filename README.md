@@ -1,8 +1,10 @@
 # Glycaemic Digital Twin: predicting post-meal spikes and dangerous lows in Type 2 diabetes
 
-> **Synthetic data only. Not a medical device. Not for clinical use.** A proof of concept for the
-> Happiest Health *Digital Twin Challenge 2026*. No real patient data was used anywhere, and the link
-> between the EHR and wearable streams is synthetic by design.
+> **Trained on synthetic data only. Not a medical device. Not for clinical use.** A proof of concept for
+> the Happiest Health *Digital Twin Challenge 2026*. No real patient data is used for training, and the
+> link between the EHR and wearable streams is synthetic by design. Two public, de-identified real datasets
+> (CGMacros, ShanghaiT2DM) are used only to check the models; you download them yourself, and they are
+> never committed to this repository.
 
 ![Architecture](docs/architecture.png)
 
@@ -13,6 +15,17 @@
 | Members | _TODO: names, roles_ |
 | Institution | _TODO_ |
 | Contact | _TODO_ |
+
+## Submission materials
+
+| | |
+|---|---|
+| Presentation | [docs/presentation.pdf](docs/presentation.pdf) · editable [docs/presentation.pptx](docs/presentation.pptx) (20 slides, speaker notes included) |
+| Architecture diagram | [docs/architecture.pdf](docs/architecture.pdf) · [PNG](docs/architecture.png) · [Mermaid source](docs/architecture.mmd) |
+| Video (at least 20 min) | _TODO: unlisted YouTube link_ · script: [docs/video_script.md](docs/video_script.md) |
+| Live dashboard | _TODO: Streamlit Community Cloud link_ |
+| Model card | [docs/model_card.md](docs/model_card.md) |
+| Licence | MIT ([LICENSE](LICENSE)) |
 
 ## Problem statement and healthcare use case
 

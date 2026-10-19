@@ -1,5 +1,5 @@
 %% Glycaemic digital twin: architecture. Render with any Mermaid viewer (e.g. GitHub, mermaid.live).
-%% docs/architecture.png is drawn from the same structure by scripts/make_architecture_diagram.py.
+%% docs/architecture.png and docs/architecture.pdf are drawn from the same structure by scripts/make_architecture_diagram.py.
 flowchart LR
     subgraph DATA["1. Synthetic data (simulated, not real patients)"]
         EHR["Synthetic EHR cohort<br/>300 patients: age, BMI, HbA1c, eGFR,<br/>medications, comorbidities, ICD-10"]
@@ -20,19 +20,21 @@ flowchart LR
     subgraph MOD["3. Models"]
         PERS["Persistence<br/>trend extrapolation"]
         LGB["LightGBM per target<br/>CGM / + wearables / + EHR"]
-        FUS["Fusion net (PyTorch)<br/>static MLP + GRU or 1D-CNN<br/>shared layer, hyper & hypo heads"]
+        FUS["Fusion net (PyTorch)<br/>static MLP + GRU or 1D-CNN<br/>comparator; did not beat LightGBM"]
     end
 
-    subgraph EVAL["4. Evaluation"]
-        MET["metrics.py<br/>AUPRC (headline for hypo), AUROC,<br/>sens @ FAR, lead time, calibration,<br/>patient-bootstrap CIs"]
-        ABL["ablation.py<br/>paired EHR-value test, tables, figures"]
+    subgraph EVAL["4. Evaluation & real data"]
+        MET["metrics.py + ablation.py<br/>AUPRC, AUROC, calibration,<br/>paired EHR-value test, patient-bootstrap CIs"]
+        ALERT["alert_policy.py + subgroups.py<br/>one alert per episode, chosen on validation;<br/>audit by sex, age, eGFR, drug class"]
+        BAND["twin_validation.py + twin_intervals.py<br/>held-out week; conformal 80% / 95% bands"]
+        REAL["Real-data checks (never used for training)<br/>CGMacros 14 US: zero-shot + recalibration<br/>ShanghaiT2DM 100: real linked EHR + CGM"]
     end
 
     subgraph TWIN["5. Digital twin & dashboard"]
-        STATE["PatientTwin (state.py)<br/>profile, 6 h history, both risks,<br/>alerts set on validation patients"]
+        STATE["PatientTwin (state.py)<br/>profile, 6 h history, both risks,<br/>alert-policy state"]
         EXP["explain.py<br/>TreeSHAP drivers"]
-        WHAT["whatif.py<br/>exact simulator replay + edits,<br/>ML re-prediction"]
-        APP["Streamlit dashboard<br/>timeline, drivers, what-if, overview"]
+        WHAT["whatif.py + personalise.py<br/>4 parameters fitted per patient, observer,<br/>uncertainty band, ML re-prediction"]
+        APP["Streamlit dashboard<br/>live replay, timeline, drivers, what-if, overview"]
     end
 
     EHR --> LINK
@@ -48,10 +50,12 @@ flowchart LR
     PERS --> MET
     LGB --> MET
     FUS --> MET
-    MET --> ABL
+    MET --> ALERT
+    ALERT -. "thresholds" .-> STATE
+    BAND -. "band" .-> WHAT
     LGB -- "deployed: CGM + wearables + EHR" --> STATE
     STATE --> EXP
-    SIM -. "replay" .-> WHAT
+    SIM -. "equations" .-> WHAT
     STATE --> WHAT
     STATE --> APP
     EXP --> APP
@@ -62,4 +66,6 @@ flowchart LR
     classDef neutral fill:#f3f2ee,stroke:#8a8984,color:#0b0b0b
     class EHR,STAT ehr
     class WEAR,WIN sensor
-    class SIM,ENR,LINK,SPLIT,PERS,LGB,FUS,MET,ABL,STATE,EXP,WHAT,APP neutral
+    classDef real fill:#e6f4f2,stroke:#0f766e,color:#0b0b0b
+    class SIM,ENR,LINK,SPLIT,PERS,LGB,FUS,MET,ALERT,BAND,STATE,EXP,WHAT,APP neutral
+    class REAL real
