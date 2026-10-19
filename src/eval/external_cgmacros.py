@@ -8,6 +8,11 @@ differences, T2D hyper) and external_validation_cohort.csv (aggregated cohort de
   * lgbm_cgm_zero_shot    the CGM-only LightGBM trained on SYNTHETIC patients, applied unchanged
   * lgbm_cgm_lopo         CGM-only LightGBM retrained on CGMacros T2D, leave-one-participant-out
                           (hyper only: there are too few real hypo windows to train on)
+  * lgbm_cgm_zero_shot_platt / _isotonic
+                          the zero-shot scores recalibrated on real data, leave-one-participant-out: each
+                          participant's probabilities are mapped by a calibrator fitted on the OTHER T2D
+                          participants' onset windows (Platt: logistic on the logit; isotonic regression).
+                          The model itself is unchanged; Platt keeps the ranking (AUROC) exactly.
 Only the "cgm" + "time" feature groups transfer; CGMacros has no EHR in our format and the Fitbit
 stream is not mapped onto our wearable features. See docs/external_validation.md.
 """
@@ -20,6 +25,8 @@ from typing import Any
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
+from sklearn.isotonic import IsotonicRegression
+from sklearn.linear_model import LogisticRegression
 
 from src.config import ROOT, load_config, resolve_path
 from src.data.cgmacros import DEFAULT_SENSOR, STATUSES, build_windows, cohort_table, load_cohort
@@ -58,6 +65,23 @@ def lopo_scores(windows: pd.DataFrame, X: pd.DataFrame, target: str, cfg: dict[s
     return out
 
 
+def lopo_recalibrate(windows: pd.DataFrame, p: np.ndarray, target: str, method: str) -> np.ndarray:
+    """Out-of-fold recalibration of fixed scores. For each participant, a calibrator is fitted on the other
+    participants' onset windows (the windows alerts are raised on) and applied to all of this participant's."""
+    y = windows[target].to_numpy(int)
+    onset = ~windows[f"in_event_{target}"].to_numpy(bool)
+    pids = windows.patient_id.to_numpy()
+    z = np.log(np.clip(p, 1e-6, 1 - 1e-6) / (1 - np.clip(p, 1e-6, 1 - 1e-6)))[:, None]
+    out = np.full(len(p), np.nan)
+    for pid in np.unique(pids):
+        fit, te = onset & (pids != pid), pids == pid
+        if method == "platt":
+            out[te] = LogisticRegression(C=1e4).fit(z[fit], y[fit]).predict_proba(z[te])[:, 1]
+        else:
+            out[te] = IsotonicRegression(y_min=0, y_max=1, out_of_bounds="clip").fit(p[fit], y[fit]).predict(p[te])
+    return out
+
+
 def calibration_cols(windows: pd.DataFrame, scores: dict[str, np.ndarray], target: str, subset: str) -> dict[str, float]:
     """Brier / ECE / mean predicted probability on the onset and all-window subsets."""
     if subset not in ("all", "onset"):
@@ -68,6 +92,7 @@ def calibration_cols(windows: pd.DataFrame, scores: dict[str, np.ndarray], targe
 
 
 PAIRS = (("lgbm_cgm_zero_shot", "persistence"), ("lgbm_cgm_lopo", "persistence"), ("lgbm_cgm_lopo", "lgbm_cgm_zero_shot"))
+RECAL = ("platt", "isotonic")
 
 
 def paired_rows(w: pd.DataFrame, models: dict[str, dict[str, np.ndarray]], target: str, cfg: dict[str, Any]) -> list[dict[str, Any]]:
@@ -119,14 +144,21 @@ def run(cfg: dict[str, Any], data_dir: Path, models_dir: Path, sensor: str,
         w = windows[m].reset_index(drop=True)
         models = {"persistence": persistence_scores(feats[m], horizon_min),
                   "lgbm_cgm_zero_shot": {t: b.predict(X[m]) for t, b in boosters.items()}}
+        if status == "t2d":
+            zs = models["lgbm_cgm_zero_shot"]
+            for method in RECAL:
+                models[f"lgbm_cgm_zero_shot_{method}"] = {
+                    t: lopo_recalibrate(w, zs[t], t, method) if w[t].sum() >= MIN_POSITIVE_WINDOWS else np.zeros(len(w))
+                    for t in TARGETS}
         if lopo and status == "t2d":
             models["lgbm_cgm_lopo"] = {t: (lopo_scores(w, X[m].reset_index(drop=True), t, cfg)
                                            if w[t].sum() >= MIN_POSITIVE_WINDOWS else np.zeros(len(w)))
                                        for t in TARGETS}
         for name, scores in models.items():
             for r in evaluate_targets(w, scores, cfg):
-                if name == "lgbm_cgm_lopo" and w[r["target"]].sum() < MIN_POSITIVE_WINDOWS:
-                    continue                               # not trained for this target
+                fitted_here = name == "lgbm_cgm_lopo" or name.startswith("lgbm_cgm_zero_shot_")
+                if fitted_here and w[r["target"]].sum() < MIN_POSITIVE_WINDOWS:
+                    continue                               # not trained / recalibrated for this target
                 extra = calibration_cols(w, scores, r["target"], r["subset"]) if name != "persistence" else {}
                 rows.append({"cohort": status, "model": name, **r, **extra})
             print(f"  [{status}] {name} done", flush=True)

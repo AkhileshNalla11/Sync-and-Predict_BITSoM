@@ -46,13 +46,14 @@ predicts whether, in the **next 2 hours**:
 2. **Hypoglycaemia**: any CGM reading < 70 mg/dL, also reported separately for **nocturnal** predictions (22:00-06:00)
 
 The deployed model, a per-target LightGBM on CGM + wearable + EHR features, feeds a patient twin with
-per-prediction explanations (TreeSHAP) and a what-if engine. A Streamlit clinician dashboard has four views:
+per-prediction explanations (TreeSHAP) and a what-if engine. A Streamlit clinician dashboard has five views:
 
 | View | What the clinician sees |
 |---|---|
+| Live replay | Plays a stretch of the patient's record forward as if it were happening now: glucose and both risks grow up to a moving line, and alerts pop up when the alert policy raised them, with their top two reasons. Below: every alert in the window with its lead time, any false alert, and any missed episode |
 | Glucose timeline | CGM with high (> 180) and low (< 70) bands shaded, both risk scores over time, alert markers (one per risk episode, from the alert policy), a "now" line, and the actual next 2 h (marked as not seen by the model) |
 | Alert drivers | Top reasons for each risk, e.g. *current glucose 70 mg/dL* or *sulfonylurea 3 mg/day*, grouped by data stream |
-| What-if | Presets (late dinner, poor sleep night, skipped meal, extra insulin dose) plus custom edits; model risk before/after and the simulated glucose, shown separately. The glucose projection comes from a **personalised twin** fitted to the patient's own first week of data (default) or, for comparison, an oracle replay of the hidden simulator |
+| What-if | Presets (late dinner, poor sleep night, skipped meal, extra insulin dose) plus custom edits; model risk before/after and the simulated glucose, shown separately. The glucose projection comes from a **personalised twin** fitted to the patient's own first week of data (default) or, for comparison, an oracle replay of the hidden simulator. The projection carries a **calibrated 80% uncertainty band** |
 | Patient overview | Demographics, labs, medications, comorbidities, ICD-10 codes, 14-day CGM metrics (TIR / TBR / TAR, GMI, CV) |
 
 ## Data sources and synthetic-linkage disclosure
@@ -96,7 +97,7 @@ Plotly, Matplotlib, PyYAML, pytest. CPU only.
 | Persistence baseline | Extrapolates the latest CGM along its 30-min trend over 2 h; scores = trajectory max (hyper) / minus min (hypo) |
 | LightGBM | One model per target on 37 handcrafted window features (mean, min, max, SD/CV, 30/60-min slopes, last value, time above/below range, minutes since last high/low, **meal-rise proxy**, time of day) plus wearable features (steps, HR, sleep) plus the static vector. Unweighted, early-stopped on validation-patient AUPRC. |
 | Fusion net (PyTorch) | Static MLP (24 -> 64 -> 32) and a GRU (13 per-step channels -> 64; a dilated 1D-CNN is a config swap), concatenated -> shared layer (64) -> **two heads** (hyper, hypo). Hypo rarity: weighted BCE with `pos_weight = sqrt(neg/pos)` (~4.8); focal loss available. AdamW, early stopping on validation onset AUPRC. A sequence-only twin (no EHR branch) isolates the EHR effect. |
-| Twin layer | `PatientTwin` snapshot; an **alert policy** per target (threshold + refractory period; hysteresis, escalation and a daily budget available) chosen on **validation** patients ([docs/alert_policy.md](docs/alert_policy.md)); TreeSHAP via LightGBM `pred_contrib` (tested to match `shap.TreeExplainer`); what-if on a **personalised twin**: 4 simulator parameters (basal glucose, carb gain, clearance, drug sensitivity) fitted per patient to the first 7 days of CGM + the meal/dose log with `scipy.optimize.least_squares` (~3 s per patient, cached), a state observer up to *now*, then free-running; oracle replay of the hidden simulation kept for comparison ([docs/twin_personalisation.md](docs/twin_personalisation.md)) |
+| Twin layer | `PatientTwin` snapshot; an **alert policy** per target (threshold + refractory period; hysteresis, escalation and a daily budget available) chosen on **validation** patients ([docs/alert_policy.md](docs/alert_policy.md)); TreeSHAP via LightGBM `pred_contrib` (tested to match `shap.TreeExplainer`); what-if on a **personalised twin**: 4 simulator parameters (basal glucose, carb gain, clearance, drug sensitivity) fitted per patient to the first 7 days of CGM + the meal/dose log with `scipy.optimize.least_squares` (~3 s per patient, cached), a state observer up to *now*, then free-running; oracle replay of the hidden simulation kept for comparison ([docs/twin_personalisation.md](docs/twin_personalisation.md)); split-conformal **uncertainty bands** for the projection, calibrated on validation patients' held-out days ([docs/twin_intervals.md](docs/twin_intervals.md)) |
 | Evaluation | AUROC, **AUPRC (headline for hypo)**, sensitivity / PPV / alert burden at fixed false-alert rates, lead time before event onset, calibration (Brier, ECE), all with **patient-level bootstrap** 95% CIs; paired bootstrap for model differences |
 
 ## Results
@@ -164,6 +165,13 @@ risk stays high and a hysteresis policy stays silent when the low finally arrive
 easy to anticipate in this simulator; expect real-world numbers to be worse. Method, sweep, trade-off figure
 and caveats: [docs/alert_policy.md](docs/alert_policy.md).
 
+**How sure is the twin?** The what-if projection carries a split-conformal uncertainty band, calibrated on
+46 validation patients' held-out days and checked on the 60 test patients. The **80% band contained the real
+CGM 79.0% of the time** (95% CI 77.8-79.9%) and the 95% band 94.3%. The bands are narrow (about +-9 mg/dL)
+because the twin shares the simulator's structure and the meal / dose log is exact; real-world bands would be
+much wider. They cover the projection as logged, not the extra error of a what-if change. Details:
+[docs/twin_intervals.md](docs/twin_intervals.md).
+
 **External sanity check on real CGM (CGMacros).** The synthetic-trained CGM-only LightGBM was run unchanged
 on 14 real T2D participants from [CGMacros](https://physionet.org/content/cgmacros/) (US cohort, Dexcom G6,
 about 10 days each).
@@ -172,6 +180,9 @@ about 10 days each).
   * It beats persistence on AUROC (+0.04), but its AUPRC gain (+0.03) is not significant.
   * A model with the same features retrained leave-one-participant-out on the real cohort reaches
     0.537 (0.474-0.614).
+  * **Recalibration fixes the probabilities without retraining.** The zero-shot model underpredicts
+    (calibration error 0.136). Platt scaling fitted on the other 13 participants brings it to **0.024**,
+    as good as the retrained model, with AUROC almost unchanged (0.690).
 * **The synthetic numbers clearly overstate real-world performance.**
 * **Hypoglycaemia cannot be checked:** there are only 31 hypo windows, from 3 T2D participants, and no
   medication-driven lows.
@@ -247,9 +258,10 @@ data/                 generated data (git-ignored) + data/README.md
 src/data/             synthetic_gen, ehr_features, wearable_features, linker, build_dataset
 src/models/           baselines (persistence, LightGBM), fusion_model, train
 src/eval/             metrics, ablation, external_cgmacros (real-CGM sanity check; loader in src/data/cgmacros.py),
-                      twin_validation (held-out check of the personalised twin)
+                      twin_validation (held-out check of the personalised twin), twin_intervals (its uncertainty
+                      bands), alert_policy, subgroups, transfer_cgmacros
 src/twin/             state (PatientTwin), explain (TreeSHAP), whatif (scenarios), personalise (parameter fitting)
-src/app/dashboard.py  Streamlit clinician dashboard
+src/app/              dashboard.py (Streamlit clinician dashboard), replay.py (live replay), theme.py
 docs/                 ablation results + figures, data report, architecture diagram, video script
 scripts/              run_pipeline.{sh,cmd}, demo.{sh,cmd}, make_architecture_diagram.py, make_demo_bundle.py
 demo_bundle/          precomputed synthetic data + deployed model for cloud hosting (see MANIFEST.md)

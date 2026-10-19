@@ -10,7 +10,7 @@ the regulator.
 | Step | What | Done when |
 |---|---|---|
 | 1a | **Retrospective validation** on real, linked EHR + CGM records from Indian T2D clinics (insulin and sulfonylurea users included), with ethics committee approval following ICMR's AI guidelines | Discrimination and calibration reported overall and per subgroup, with patient-level CIs |
-| 1b | **Recalibration** on that population (our zero-shot model was miscalibrated on real US CGM: ECE 0.14) | Calibration error within an agreed bound |
+| 1b | **Recalibration** on that population. Our zero-shot model was miscalibrated on real US CGM (ECE 0.14); leave-one-participant-out Platt scaling brought it to 0.024 without retraining ([external_validation.md](external_validation.md)) | Calibration error within an agreed bound |
 | 1c | **Silent prospective pilot**: the model scores in the background and clinicians never see the alerts; outcomes are compared afterwards | Episode-level sensitivity, false alerts per patient-day and lead time measured prospectively |
 | 1d | **Clinician-in-the-loop pilot** with diabetologists, judged on alert usefulness, workload and safety events | Agreed safety and usefulness thresholds met |
 

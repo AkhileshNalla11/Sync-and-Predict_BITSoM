@@ -66,6 +66,10 @@ median age of 52.5 and a median BMI of 30.6. `bio.csv` has no medication data.
     features reach when trained on real data. Same hyperparameters. Each held-out participant is scored by
     a model trained on the other 13: 10 for training, 3 for early stopping. Out-of-fold scores are pooled.
     Hyper only: 31 hypo windows are too few to train on.
+  * **Zero-shot, recalibrated (LOPO), T2D hyper only:** the zero-shot model unchanged, with its
+    probabilities mapped by a calibrator fitted on the *other* 13 participants' onset windows. **Platt**
+    fits a logistic curve to the logit (2 parameters); **isotonic** fits a monotone step function. This is
+    step 1b of the [deployment path](deployment_path.md): what recalibrating on the target population buys.
 * **Metrics:** the unchanged [`src/eval/metrics.py`](../src/eval/metrics.py): AUPRC (chance = prevalence),
   AUROC, and sensitivity / PPV at a 10 % false-alert rate.
   * The threshold is set on these same windows, so the operating-point numbers are optimistic.
@@ -101,7 +105,16 @@ Calibration, onset windows:
 | Model | Mean predicted | Observed | ECE |
 |---|---|---|---|
 | Zero-shot | 0.225 | 0.276 | 0.136 |
-| LOPO | 0.291 | 0.276 | 0.023 |
+| **Zero-shot, Platt-recalibrated (LOPO)** | 0.279 | 0.276 | **0.024** |
+| Zero-shot, isotonic-recalibrated (LOPO) | 0.279 | 0.276 | 0.028 |
+| LOPO-retrained | 0.291 | 0.276 | 0.023 |
+
+Recalibration fixes the probabilities without retraining the model. Platt scaling, fitted on 13
+participants and applied to the 14th, cuts the onset calibration error from 0.136 to 0.024, as low as a
+model retrained on real data. On all windows it falls from 0.095 to 0.051 (isotonic 0.016). Discrimination
+barely moves: onset AUROC 0.690 against 0.698. A monotone recalibration cannot change the ranking within
+one participant, and pooling 14 slightly different calibrators costs a little ranking across participants.
+Recalibration makes the probabilities honest; it does not make the model better at telling windows apart.
 
 **Reading this honestly**
 * **Something transfers, but not much.**
@@ -116,7 +129,8 @@ Calibration, onset windows:
   participants, beat the zero-shot model by +0.07 AUPRC. That still falls well short of the synthetic numbers.
   The simulator's meal responses and daily rhythm are not a good enough stand-in for real ones.
 * **Zero-shot probabilities are miscalibrated** on this cohort: they underpredict onset risk (ECE 0.14).
-  The deployed alert thresholds would need recalibrating before any use on real CGM.
+  **Recalibration on other real participants fixes that** (ECE 0.024 with Platt scaling) without
+  retraining. The alert thresholds would still need re-tuning on real episodes.
 
 ### Prediabetes and healthy (zero-shot, hyper onset)
 

@@ -2,12 +2,13 @@
 
     streamlit run src/app/dashboard.py        # or: scripts\\demo.cmd / bash scripts/demo.sh
 
-Views: glucose timeline with both risks and alerts, alert drivers, what-if panel, patient overview.
+Views: live replay, glucose timeline with both risks and alerts, alert drivers, what-if panel, patient overview.
 Alerts follow the alert policy (src/twin/alerts.py, docs/alert_policy.md): one alert per risk episode.
 SYNTHETIC DATA. Research prototype, NOT FOR CLINICAL USE. Styling lives in src/app/theme.py.
 """
 from __future__ import annotations
 
+import json
 import os
 import sys
 from pathlib import Path
@@ -22,8 +23,10 @@ import plotly.graph_objects as go                   # noqa: E402
 import streamlit as st                              # noqa: E402
 from plotly.subplots import make_subplots           # noqa: E402
 
+from src.app import replay as R                     # noqa: E402
 from src.app import theme as T                      # noqa: E402
 from src.config import load_config                  # noqa: E402
+from src.eval.twin_intervals import band_for        # noqa: E402
 from src.twin.explain import driver_sentences, explain, group_contributions   # noqa: E402
 from src.twin.alerts import policy_far              # noqa: E402
 from src.twin.state import PatientTwin, TwinContext  # noqa: E402
@@ -83,6 +86,25 @@ def patient_table() -> pd.DataFrame:
     return pd.DataFrame({"patient_id": ids, "regimen": e.regimen.to_numpy(), "hba1c": e.hba1c.to_numpy(),
                          "age": e.age.to_numpy(), "sex": e.sex.to_numpy(),
                          "hypo_events": hypo_events.reindex(ids).fillna(0).astype(int).to_numpy()})
+
+
+@st.cache_data(show_spinner=False)
+def get_intervals() -> dict | None:
+    """Calibrated uncertainty bands for the twin's projection (src/eval/twin_intervals.py), if computed."""
+    path = ROOT / runtime_config()["paths"]["models_dir"] / "twin_intervals.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+
+
+@st.cache_data(show_spinner=False, max_entries=16)
+def alert_reasons(patient_id: str, start: pd.Timestamp, end: pd.Timestamp) -> dict[tuple[str, pd.Timestamp], str]:
+    """Top two risk-raising drivers of every alert in the window, for the live replay's status card."""
+    ctx, tl = get_context(), get_timeline(patient_id)
+    out = {}
+    for t in ("hypo", "hyper"):
+        for r in tl[tl[f"{t}_alert"] & tl.timestamp.between(start, end)].itertuples():
+            d = explain(ctx, ctx.build_twin(patient_id, int(r.anchor_idx)), t, top_k=8)
+            out[(t, r.timestamp)] = " · ".join(f"{x.label}: {x.value}" for x in d[d.contribution > 0].head(2).itertuples())
+    return out
 
 
 def cached_whatif(ctx: TwinContext, sim: PatientSimulator, patient_id: str, anchor_idx: int, mode: str,
@@ -221,10 +243,32 @@ def drivers_figure(drivers: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def projection_figure(res: WhatIfResult, thresholds_mgdl: dict[str, float]) -> go.Figure:
+def projection_band(res: WhatIfResult, intervals: dict | None, coverage: float = 0.8) -> pd.DataFrame | None:
+    """The scenario projection's calibrated band for the next 2 h (fitted twin only)."""
+    if intervals is None or res.mode != "fitted":
+        return None
+    p = res.projection
+    hist, fut = p[p.phase == "history"], p[p.phase != "history"]
+    start = hist.cgm_scenario.dropna()
+    if start.empty or fut.empty:
+        return None
+    lo, hi = band_for(intervals, coverage, float(start.iloc[-1]))
+    n = min(len(fut), len(lo))
+    f = fut.iloc[:n]
+    return pd.DataFrame({"timestamp": f.timestamp.to_numpy(), "lower": np.clip(f.sim_scenario.to_numpy() + lo[:n], 40, 400),
+                         "upper": np.clip(f.sim_scenario.to_numpy() + hi[:n], 40, 400)})
+
+
+def projection_figure(res: WhatIfResult, thresholds_mgdl: dict[str, float], band: pd.DataFrame | None = None) -> go.Figure:
     p = res.projection
     now = res.baseline.time
     fig = go.Figure()
+    if band is not None:
+        fig.add_trace(go.Scatter(x=band.timestamp, y=band.upper, mode="lines", line=dict(width=0), hoverinfo="skip",
+                                 showlegend=False))
+        fig.add_trace(go.Scatter(x=band.timestamp, y=band.lower, mode="lines", line=dict(width=0), fill="tonexty",
+                                 fillcolor="rgba(15,118,110,0.16)", name="80% band (twin's typical error)",
+                                 customdata=band.upper, hovertemplate="%{y:.0f}-%{customdata:.0f} mg/dL<extra>80% band</extra>"))
     fig.add_vrect(x0=now, x1=p.timestamp.iloc[-1], fillcolor="rgba(15,118,110,0.06)", line_width=0)
     fig.add_annotation(x=now, y=1, yref="paper", text="  next 2 h →", showarrow=False, xanchor="left", yanchor="bottom",
                        font=dict(size=11, color=T.BRAND, family=T.FONT))
@@ -317,6 +361,33 @@ def view_timeline(ctx: TwinContext, twin: PatientTwin, series: pd.DataFrame, tl:
                "new alert was raised. The dotted trace after NOW is what actually happened; the model had not seen it.")
     html(T.chips_html([("Alert policy ·", "chosen on validation patients, see docs/alert_policy.md")]
                       + [(f"{TARGET_NAME[t]} ·", ctx.policies[t].describe()) for t in ("hypo", "hyper")]))
+
+
+def view_replay(ctx: TwinContext, twin: PatientTwin, series: pd.DataFrame, tl: pd.DataFrame) -> None:
+    html(T.section_html("Live replay",
+                        "Plays this patient's record forward as if it were happening now. At each moment the model "
+                        "has seen only the data up to the moving line."))
+    c1, c2 = st.columns([3, 2])
+    with c1:
+        hours = st.select_slider("Start this many hours before the prediction time", options=[4, 6, 8, 12], value=6)
+    with c2:
+        speed = st.radio("Playback speed", ["Normal", "Fast"], horizontal=True)
+    start = max(twin.time - pd.Timedelta(hours=hours), series.timestamp.iloc[0])
+    end = min(twin.time + pd.Timedelta(hours=2), series.timestamp.iloc[-1])
+    with st.spinner("Preparing the replay…"):
+        eps = R.episodes(series, tl, start, end, ctx.cfg["thresholds"], alert_reasons(twin.patient_id, start, end))
+        fig = R.replay_figure(series, tl, start, end, ctx.thresholds, ctx.cfg["thresholds"], eps,
+                              frame_ms=350 if speed == "Normal" else 120)
+    st.plotly_chart(fig, use_container_width=True, config=T.PLOTLY_CONFIG)
+    if eps:
+        html(T.section_html("What happens in this replay",
+                            "Every alert raised in the window, and any episode (>= 15 min past the threshold) it missed"))
+        st.markdown("\n".join(f"- {e.sentence()}" for e in eps))
+    else:
+        st.caption("No alerts and no glucose episodes in this window. Pick another time in the sidebar, e.g. "
+                   "“Highest hypoglycaemia risk”.")
+    st.caption("Press Play, or drag the slider. Alerts appear when the alert policy raised them, with the two "
+               "drivers that pushed the risk up most. Glucose after the moving line is not shown until it happens.")
 
 
 def view_drivers(ctx: TwinContext, twin: PatientTwin, tl: pd.DataFrame) -> None:
@@ -466,14 +537,26 @@ def view_whatif(ctx: TwinContext, twin: PatientTwin) -> None:
     else:
         html(T.section_html("Simulated glucose · oracle replay",
                             "The simulator's hidden truth: as it happened vs with the scenario"))
-    st.plotly_chart(projection_figure(res, ctx.cfg["thresholds"]), use_container_width=True, config=T.PLOTLY_CONFIG)
+    intervals = get_intervals()
+    band = projection_band(res, intervals)
+    st.plotly_chart(projection_figure(res, ctx.cfg["thresholds"], band), use_container_width=True, config=T.PLOTLY_CONFIG)
     o = res.simulated_outcome
-    html(T.chips_html([
+    chips = [
         ("Lowest, next 2 h", f"{o['baseline']['sim_min']:.0f} → {o['scenario']['sim_min']:.0f} mg/dL"),
         ("Highest, next 2 h", f"{o['baseline']['sim_max']:.0f} → {o['scenario']['sim_max']:.0f} mg/dL"),
         ("CGM low", "yes" if o["scenario"]["hypo"] else "no"),
         ("CGM high", "yes" if o["scenario"]["hyper"] else "no"),
-    ]))
+    ]
+    if band is not None:
+        chips.insert(1, ("Lowest, 80% band", f"{band.lower.min():.0f}-{band.upper.min():.0f} mg/dL"))
+    html(T.chips_html(chips))
+    if band is not None:
+        cov = intervals.get("test_coverage", {}).get("0.8")
+        st.caption("Shaded: the 80% band, i.e. how far this twin's 2-hour projection usually misses, calibrated on "
+                   "validation patients' held-out days"
+                   + (f"; on test patients the real CGM fell inside it {cov:.0%} of the time" if cov else "")
+                   + " (docs/twin_intervals.md). It covers the projection as logged; how the twin responds to the "
+                     "scenario's change adds error the band does not include.")
     if mode == "fitted":
         html(T.chips_html(fit_chips(sim)))
         st.caption("Personalised twin: the simulator's equations with four parameters fitted per patient (see "
@@ -543,14 +626,16 @@ def main() -> None:
             html(T.risk_card_html(t, TARGET_NAME[t], TARGET_RULE[t], twin.risk[t], ctx.thresholds[t], state, status,
                                   far_label(ctx, t)))
 
-    tabs = st.tabs(["Glucose timeline", "Alert drivers", "What-if", "Patient overview"])
+    tabs = st.tabs(["Live replay", "Glucose timeline", "Alert drivers", "What-if", "Patient overview"])
     with tabs[0]:
-        view_timeline(ctx, twin, series, tl)
+        view_replay(ctx, twin, series, tl)
     with tabs[1]:
-        view_drivers(ctx, twin, tl)
+        view_timeline(ctx, twin, series, tl)
     with tabs[2]:
-        view_whatif(ctx, twin)
+        view_drivers(ctx, twin, tl)
     with tabs[3]:
+        view_whatif(ctx, twin)
+    with tabs[4]:
         view_overview(ctx, twin, series, tl)
 
 

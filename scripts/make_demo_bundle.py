@@ -36,7 +36,8 @@ def main() -> None:
     files = [(ROOT / cfg["paths"]["raw_dir"] / "ehr.csv", BUNDLE / "raw" / "ehr.csv")]
     files += [(src_proc / f, BUNDLE / "processed" / f) for f in PROCESSED]
     files += [(src_models / f, BUNDLE / "processed" / "models" / f)
-              for f in (f"{model}_hyper.txt", f"{model}_hypo.txt", f"{model}_alert_thresholds.json")]
+              for f in (f"{model}_hyper.txt", f"{model}_hypo.txt", f"{model}_alert_thresholds.json",
+                        "twin_intervals.json")]
 
     if BUNDLE.exists():
         shutil.rmtree(BUNDLE)

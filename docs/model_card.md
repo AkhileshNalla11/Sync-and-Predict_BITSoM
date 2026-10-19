@@ -52,7 +52,8 @@ Onset windows (the patient is not already past the threshold). 95% CIs resample 
   them easy to anticipate. Hypoglycaemia could not be checked on real data: only 3 CGMacros T2D
   participants go low.
 * **Calibration:** good on synthetic test data (hypo ECE 0.004), poor on real CGM (zero-shot ECE 0.14).
-  Thresholds and probabilities would need recalibrating on the target population.
+  Recalibrating on other real participants (leave-one-out Platt scaling, no retraining) brings it to 0.024
+  with AUROC almost unchanged (0.690). Alert thresholds would still need re-tuning on real episodes.
 * **EHR value:** +0.051 hypo AUPRC (95% CI +0.018 to +0.113) on synthetic data, partly by construction;
   untested on real data (CGMacros has no medication records).
 * **Alerting, episode level** (synthetic test, [alert_policy.md](alert_policy.md)): the policy warns of **76% of

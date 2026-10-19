@@ -37,13 +37,20 @@ def test_renders_all_views_with_banner(app) -> None:
     assert not app.exception, [e.value for e in app.exception]
     banner = [m.value for m in app.markdown if 'class="gt-banner"' in m.value]
     assert banner and "SYNTHETIC DATA" in banner[0] and "not for clinical use" in banner[0]
-    assert [t.label for t in app.tabs] == ["Glucose timeline", "Alert drivers", "What-if", "Patient overview"]
+    assert [t.label for t in app.tabs] == ["Live replay", "Glucose timeline", "Alert drivers", "What-if", "Patient overview"]
     assert any("Hypoglycaemia risk" in m.value for m in app.markdown)
 
 
 @pytest.mark.parametrize("preset", ["Poor sleep night", "Skipped meal", "Extra insulin dose", "Late dinner (+2 h)", "Custom"])
 def test_whatif_presets(app, preset: str) -> None:
     _radio(app, "Scenario").set_value(preset).run()
+    assert not app.exception, [e.value for e in app.exception]
+
+
+def test_live_replay_lists_the_alerts(app) -> None:
+    assert any("What happens in this replay" in m.value for m in app.markdown)
+    assert any("Hypoglycaemia alert at" in m.value for m in app.markdown)
+    _radio(app, "Playback speed").set_value("Fast").run()
     assert not app.exception, [e.value for e in app.exception]
 
 
