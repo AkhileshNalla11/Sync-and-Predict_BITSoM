@@ -64,7 +64,9 @@ Onset windows (the patient is not already past the threshold). 95% CIs resample 
 * **EHR value: synthetic only.** +0.051 hypo AUPRC (95% CI +0.018 to +0.113) on synthetic data, partly by
   construction. **On real linked data (ShanghaiT2DM) the EHR did not improve the 2-hour forecast**: hypo
   -0.014 (-0.048 to +0.010), hyper -0.030 (-0.052 to -0.008); logged doses and a richer record did not help
-  either, and a low-capacity model found no extra signal. The deployed model still uses EHR features
+  either, and a low-capacity model found no extra signal. With **no** CGM at all (a new patient) the EHR
+  does carry a weak real signal about lows (hypo AUROC about 0.54 vs chance); 30 minutes of CGM already
+  reaches 0.88. The deployed model still uses EHR features
   (it was trained on synthetic data), and its EHR drivers explain what it reacts to, not proven extra value.
 * **Alerting, episode level** (synthetic test, [alert_policy.md](alert_policy.md)): the policy warns of **76% of
   hypo episodes at least 30 min before onset** (83% with >= 15 min; nocturnal 71%) with **0.49 hypo alerts per

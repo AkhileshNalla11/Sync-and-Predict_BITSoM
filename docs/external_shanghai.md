@@ -5,11 +5,12 @@ the CGM are linked synthetically. ShanghaiT2DM is the first dataset here where b
 real patients**, so it tests the project's central claim: does adding the EHR to the CGM improve a 2-hour
 forecast of high and low glucose?
 
-**Short answer: no, not at this scale.** On 100 real patients, models trained on the CGM alone predict
+**Short answer: no, not once there is any CGM.** On 100 real patients, models trained on the CGM alone predict
 real highs and lows well (hypo onset AUROC 0.89, nocturnal 0.91). Adding the EHR, the logged doses or a
 richer clinical record does not improve them, and sometimes makes them slightly worse. The EHR gain on
 synthetic data (+0.051 hypo AUPRC) came largely from the simulator, which wires EHR traits into glucose
-by design.
+by design. Only for a new patient with **no** CGM yet does the EHR carry a small real signal about lows
+(hypo AUROC about 0.54 instead of chance): useful for deciding who to watch, too weak to raise alerts on.
 
 Numbers: [external_shanghai.csv](external_shanghai.csv) (all models and subsets),
 [external_shanghai_paired.csv](external_shanghai_paired.csv) (paired differences),
@@ -123,9 +124,9 @@ Insulin users, hypo onset (51 patients on insulin, 457 positive windows; 50 not 
 * **This replaces a synthetic result rather than confirming it.** On synthetic data the EHR raised hypo
   AUPRC by +0.051, but the simulator builds EHR traits into glucose by design. On real linked data that gain
   does not appear. The project's headline claim about the EHR has been changed accordingly.
-* **Where the EHR may still matter** (not tested here): with no or little CGM history (a new patient), over
-  longer horizons than 2 h, in much larger cohorts where patient-level effects can be learned without
-  memorising, and for explaining a risk to a clinician rather than predicting it.
+* **Where the EHR may still matter:** with no CGM at all it carries a small real signal about lows (next
+  section), and, not tested here, over longer horizons than 2 h, in much larger cohorts where patient-level
+  effects can be learned without memorising, and for explaining a risk to a clinician.
 * **The CGM-based approach works on real data**, including for lows: hypo onset AUROC 0.89 and nocturnal
   0.91, at about 12x the prevalence in AUPRC. These are real lows in a cohort where half the patients use
   insulin.
@@ -138,10 +139,48 @@ Insulin users, hypo onset (51 patients on insulin, 457 positive windows; 50 not 
   * The 15-min CGM was interpolated to 5 min, which smooths short dips.
   * Cross-validation was run once, on one fold split.
 
+## Cold start: a new patient with little or no CGM
+
+Does the EHR help when there is not yet 6 hours of CGM? For each history length, every window keeps only
+its last 0, 0.5, 1, 2 or 6 hours of CGM and the CGM features are recomputed from that. At 0 hours only the
+time of day is left. The windows, labels, folds and paired bootstrap are unchanged, so rows are comparable
+across history lengths. Reproduce: `python -m src.eval.external_shanghai_coldstart`; numbers in
+[external_shanghai_coldstart.csv](external_shanghai_coldstart.csv).
+
+Hypo onset (prevalence 0.027). "Low-capacity" is the logistic regression on the CGM model's logit, without
+and with 8 core EHR fields:
+
+| CGM history | AUPRC, CGM only | AUPRC, + EHR (LightGBM) | AUPRC, + EHR (low-capacity) | AUROC, CGM only -> + EHR (low-capacity) |
+|---|---|---|---|---|
+| **0 h** (time of day only) | 0.026 | **0.038** | **0.032** | 0.41 -> **0.54** |
+| 30 min | 0.309 | 0.210 | 0.296 | 0.88 -> 0.87 |
+| 1 h | 0.311 | 0.213 | 0.297 | 0.88 -> 0.88 |
+| 2 h | 0.324 | 0.254 | 0.311 | 0.90 -> 0.89 |
+| 6 h | 0.341 | 0.327 | 0.327 | 0.89 -> 0.89 |
+
+Paired EHR effect with **no CGM** (A - B, AUPRC): hypo onset +0.012 (0.000 to +0.029) in LightGBM and
++0.011 (+0.002 to +0.025) in the low-capacity model; nocturnal hypo +0.020 (+0.001 to +0.082) and +0.014
+(+0.002 to +0.039). Hyper: -0.002 (-0.044 to +0.044) and +0.026 (-0.010 to +0.065).
+
+* **The EHR carries a small, real signal about lows, visible only when there is no CGM.** With the sensor
+  not yet running, the EHR lifts hypo AUROC from chance to about 0.54 (nocturnal 0.58), and the CIs
+  exclude zero. That is too weak to raise 2-hour alerts on. It is risk stratification ("this patient is
+  somewhat more likely to go low"), not forecasting.
+* **30 minutes of CGM is already almost as good as 6 hours** (hypo AUROC 0.88 vs 0.89). Once any CGM
+  exists, the low-capacity model shows no EHR gain at any history length.
+* **Tree models with EHR features get clearly worse with short history** (hypo AUPRC -0.10 at 30 min, CI
+  excludes zero). With little CGM to go on, LightGBM leans on the static features and learns to recognise
+  the 100 training patients instead of general patterns. More patients, or a model that treats the EHR as
+  a weak prior, would be needed to use it safely.
+* **Hyperglycaemia without CGM is driven by time of day** (AUROC 0.70, meals), and the EHR adds nothing
+  significant.
+
 ## How it changes the project
 
 * The model card, README and deployment path now say that the EHR gain is **synthetic only**, and that on
-  real linked data the EHR did not improve the 2-hour forecast.
+  real linked data the EHR did not improve the 2-hour forecast once any CGM was available.
+* The EHR's realistic roles are now stated as: weak risk stratification before a sensor is placed, a prior
+  for personalising the twin, and context for explaining a risk.
 * The dashboard still shows EHR drivers, because they explain what the deployed (synthetic-trained) model
   reacts to. That is not evidence that the EHR improves prediction.
 * Validating on real Indian linked records (deployment path step 1a) matters even more now. It should test

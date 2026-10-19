@@ -127,3 +127,19 @@ def test_map_static_has_project_features_first(data_dir: Path) -> None:
     _, static, summary = load_cohort(data_dir)
     assert list(static.columns[:len(STATIC_FEATURES)]) == list(STATIC_FEATURES)
     assert map_static(summary).equals(static)
+
+
+def test_cold_start_features_forget_older_cgm(data_dir: Path) -> None:
+    from src.config import load_config
+    from src.eval.external_shanghai import CGM, build_windows
+    from src.eval.external_shanghai_coldstart import short_history_features
+    cfg = load_config()
+    periods, static, _ = load_cohort(data_dir)
+    w, full = build_windows(periods, static, cfg)
+    assert len(w) > 0 and set(w.patient_id) == {"2001", "2002"}
+    six = short_history_features(periods, w, 6.0, cfg)
+    assert np.allclose(six.to_numpy(float), full[list(CGM)].to_numpy(float), equal_nan=True)
+    one, zero = short_history_features(periods, w, 1.0, cfg), short_history_features(periods, w, 0.0, cfg)
+    assert np.allclose(one.cgm_last, full.cgm_last) and not np.allclose(one.cgm_min, full.cgm_min, equal_nan=True)
+    assert zero.cgm_last.isna().all() and zero.cgm_mean.isna().all()
+    assert np.allclose(zero.hour, full.hour)                      # time of day is all that is left

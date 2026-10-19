@@ -59,7 +59,8 @@ config, re-check them.
 - Does the EHR add value? On synthetic data, yes: **+0.05 for lows in LightGBM, CI clear of zero**, but the
   simulator builds that in. So we tested it on **real linked records** (ShanghaiT2DM, 100 patients): there
   the EHR added **nothing** to a 2-hour CGM forecast, while the CGM model predicted real lows well (AUROC
-  0.89). We changed our claim to match. Wearables added nothing measurable.
+  0.89). We changed our claim to match. The EHR only helps, weakly, before any CGM exists: it can flag
+  who to watch, but 30 minutes of CGM already beats it. Wearables added nothing measurable.
 - Operating point: at a 10% false-alert rate we catch 98% of upcoming lows, but only about 1 in 5 alerts
   is a true low. Alert fatigue is a real open problem.
 - We deploy LightGBM + EHR because it's the best for lows and its probabilities are well calibrated.

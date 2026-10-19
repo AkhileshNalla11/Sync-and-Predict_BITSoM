@@ -208,8 +208,11 @@ Models were trained with patient-grouped 10-fold cross-validation.
   which cannot memorise patients, also found no extra EHR signal on top of 6 h of CGM.
 * **So the synthetic EHR gain (+0.051) does not carry over to real patients.** The simulator wires EHR traits
   into glucose by design. On real data the last 6 h of CGM already show what the record says, at least for
-  a 2-hour forecast in 100 patients. The EHR may still matter for new patients with little CGM, for longer
-  horizons, in larger cohorts, and for explaining a risk to a clinician.
+  a 2-hour forecast in 100 patients.
+* **Cold start (a new patient):** with **no** CGM yet, the EHR does carry a small real signal about lows
+  (hypo AUROC about 0.54 instead of chance, CI excludes zero): enough to flag who to watch, far too weak to
+  alert on. With just **30 minutes** of CGM the CGM-only model reaches hypo AUROC 0.88 (vs 0.89 with 6 h),
+  and the EHR adds nothing. Tree models with EHR features overfit the 100 patients when CGM is short.
 
 Method, mapping, caveats (Chinese, partly hospitalised cohort; 15-min CGM interpolated to 5 min):
 [docs/external_shanghai.md](docs/external_shanghai.md).
@@ -283,7 +286,7 @@ data/                 generated data (git-ignored) + data/README.md
 src/data/             synthetic_gen, ehr_features, wearable_features, linker, build_dataset
 src/models/           baselines (persistence, LightGBM), fusion_model, train
 src/eval/             metrics, ablation, external_cgmacros (real-CGM sanity check; loader in src/data/cgmacros.py),
-                      external_shanghai (real linked EHR + CGM check; loader in src/data/shanghai.py),
+                      external_shanghai (+ _coldstart) (real linked EHR + CGM check; loader in src/data/shanghai.py),
                       twin_validation (held-out check of the personalised twin), twin_intervals (its uncertainty
                       bands), alert_policy, subgroups, transfer_cgmacros
 src/twin/             state (PatientTwin), explain (TreeSHAP), whatif (scenarios), personalise (parameter fitting)
