@@ -1,367 +1,385 @@
-# Video script (about 25 minutes)
+# Video script (about 25 minutes, one presenter)
 
 *Glycaemic Digital Twin: Happiest Health Digital Twin Challenge 2026*
 
-The challenge asks for a video of at least 20 minutes (a PowerPoint recording or an unlisted YouTube
-link). This script follows [presentation.pptx](presentation.pptx) slide by slide, with one live
-dashboard demo in the middle. Timings add up to about 25 minutes at a calm pace (about 130 words per
-minute), which leaves room to slow down without dropping under 20.
+The challenge needs a video of at least 20 minutes (a PowerPoint recording or an unlisted YouTube link).
+This script is for **one presenter** and follows the order of the final video:
 
-## Before recording
+1. **Cold open** (16 s): the live-replay clip `video_assets/live_replay_cold_open.mp4`, with your voice over it
+2. **Slides 1-8** recorded in PowerPoint: problem, solution, how it works, results, alerting
+3. **Live demo** (4:48): the recorded clip `video_assets/live_demo.mp4`, with your voice over it
+4. **Slides 12-20** recorded in PowerPoint: real patients, what we claim, path forward, close
 
-* **Slides:** `docs/presentation.pptx`. Fill in the team name and college on slides 1 and 20 first. The
-  speaker notes on each slide are a short version of the narration below.
-* **Dashboard:** start it with `scripts\demo.cmd` (Windows) or `bash scripts/demo.sh`, or use the live
-  Streamlit Cloud link. Browser at 1440 x 900, zoom 100%. Select patient **P0014** and prediction time
-  **Highest hypoglycaemia risk** before you start. Keep the "synthetic data" banner visible whenever the
-  dashboard is on screen.
-* **Recording:** PowerPoint's *Record* (Slide Show > Record) captures slides, voice and an optional camera,
-  and exports to MP4 (File > Export > Create a Video). For the demo, record the browser with the Windows
-  Game Bar (Win + Alt + R) or OBS, then join the clips. Upload as **unlisted** on YouTube and put the link in
-  the README.
-* **Numbers:** every figure below comes from the docs in this folder: [model_card.md](model_card.md),
-  [alert_policy.md](alert_policy.md), [twin_personalisation.md](twin_personalisation.md),
-  [twin_intervals.md](twin_intervals.md), [external_validation.md](external_validation.md) and
-  [external_shanghai.md](external_shanghai.md). If you re-run anything, re-check them.
-* **Two rules for the whole video:** say "synthetic" whenever a result comes from synthetic patients, and
-  never say or imply the system is clinically validated.
+Slides 9-11 (replay, drivers, what-if stills) are not used: the live demo covers them. Keep them as a backup.
+Every slide's narration below is also in that slide's **speaker notes** in `docs/presentation.pptx`, so it shows
+in PowerPoint's Record view while you read.
+
+**How to read the script.** *Do* lines are actions. **Say** lines are spoken. Speak at a calm pace (about 130
+words a minute); the times assume that pace. Every number here matches the slides, the README and the reports in
+`docs/`. Say "synthetic" whenever a result comes from synthetic patients, and never imply clinical validation.
 
 ---
 
-## 1. Opening (0:00-1:00) · slide 1
+## Part 1 · Cold open (0:00-0:16) · clip `live_replay_cold_open.mp4`
 
-**Narration**
+*Do:* record this voice separately and lay it over the clip. The alert appears at **3.7 s** and the low at **10.5 s**.
 
-Hello, we are *[team name]* from *[college or incubator]*. Our project for the Happiest Health Digital
-Twin Challenge is a glycaemic digital twin for people with Type 2 diabetes.
+**Say**
 
-In one sentence: we built a computer copy of a patient that combines their health record with their
-wearable data, predicts dangerous high and low glucose two hours before it happens, explains every
-warning, and lets a doctor test "what if" on the twin before trying it on the patient.
+(0.0 s) Watch this patient's morning, replayed as it happened.
+(3.7 s, as the alert appears) At 8:25, our digital twin warned that her glucose was heading dangerously low.
+(10.5 s, as the low begins) At 9:40, it did. Seventy-five minutes of warning.
+(13.5 s) Here's how I built it, and how I tested it on real patients.
 
-Then we did the part we think matters most. We checked every claim on real patient data, and when real
-data disagreed with us, we changed our claims. You will see exactly where that happened.
+---
 
-Everything you will see is a research prototype. It is trained on synthetic data and it is not for
-clinical use.
+## Part 2 · Slides 1-8 (0:16-11:06) · PowerPoint recording
 
-## 2. The problem (1:00-2:30) · slide 2
+### Slide 1 · Title (0:16-1:14)
 
-**Narration**
+*Do:* camera on. Look at the lens, not the notes, for the first sentence.
 
-India has about 101 million people with diabetes, according to the ICMR-INDIAB study published in 2023,
-and most of them have Type 2.
+**Say**
 
-Day to day, glucose control fails in two opposite directions. The first is the spike after a meal.
-Traditional Indian meals are rich in carbohydrates: rice, roti, idli, poha. With insulin resistance they
-turn into large, long spikes above 180 milligrams per decilitre, and those repeated spikes drive the
-long-term complications of diabetes.
+Hello, I'm *[your name]*, from team *[team name]* at *[college or incubator]*. My project for the Happiest Health
+Digital Twin Challenge is a glycaemic digital twin for people with Type 2 diabetes.
 
-The second is the low, below 70. Sulfonylureas are widely prescribed in India because they are cheap and
-work well, and together with insulin they can push glucose too low, especially after a skipped or late
-meal, extra activity, or an extra dose. The worst case is at night, when the patient is asleep and
-cannot react.
+In one sentence: it's a computer copy of a patient that combines their health record with their wearable data,
+warns of dangerous high and low glucose two hours before it happens, explains every warning, and lets a doctor
+test "what if" on the twin before trying it on the patient.
 
-The doctor sees an HbA1c every few months. These events happen within hours. The information to see
-them coming exists, but it lives in two places: the record, with diagnoses, labs and medicines, and the
-sensor, with a glucose reading every five minutes. Nobody combines them into an early warning a doctor
-can act on. That is the gap we set out to close.
+And then I did the part I think matters most: I checked every claim on real patient data, and where real data
+disagreed with me, I changed the claim. Everything you'll see is a research prototype, not for clinical use.
 
-## 3. Our answer (2:30-3:30) · slide 3
+### Slide 2 · The problem (1:14-2:41)
 
-**Narration**
+**Say**
 
-Our answer is a digital twin of each patient, with four capabilities.
+India has about 101 million people with diabetes, according to the ICMR-INDIAB study, most of them with Type 2.
 
-First, predict. Every 30 minutes, from the last six hours of wearable data plus the record, the twin
-estimates the chance of glucose going above 180 or below 70 in the next two hours.
+Day to day, glucose control fails in two opposite directions. The first is the spike after a meal. Traditional
+Indian meals are rich in carbohydrates: rice, roti, idli, poha. With insulin resistance they become large, long
+spikes above 180 milligrams per decilitre, and those repeated spikes drive the long-term complications.
 
-Second, alert. A risk score alone would fire constantly, so an alert policy raises one alert per risk
-episode. That works out to about one low-glucose alert every two days per patient.
+The second is the low, below 70. Sulfonylureas are widely prescribed in India because they're cheap and they
+work, and together with insulin they can push glucose too low, after a skipped meal, extra activity, or an extra
+dose. The worst case is at night, when the patient is asleep and can't react.
 
-Third, explain. Every risk comes with its main reasons, for example "glucose is falling" or "this
-patient takes a sulfonylurea".
+The doctor sees an HbA1c every three months. These events happen within hours. The information to see them
+coming exists, but in two places that are never combined: the health record, with diagnoses, labs and medicines,
+and the wearable sensor, with a glucose reading every five minutes. So nobody turns them into an early warning a
+doctor can act on. That's the gap.
 
-Fourth, simulate. The twin is fitted to the patient's own data, so a clinician can ask what happens with
-a late dinner, a skipped meal, a poor night's sleep or an extra insulin dose, and see the answer with an
-uncertainty band.
+### Slide 3 · Our answer (2:41-3:57)
 
-## 4. Architecture (3:30-5:30) · slide 4
+**Say**
 
-**Narration**
+My answer is a digital twin of each patient, with four capabilities.
 
-Here is how it fits together, in five layers from left to right.
+Predict: every 30 minutes, from the last six hours of wearable data plus the record, it estimates the risk of
+glucose going above 180 or below 70 in the next two hours.
 
-Layer one is the data. A synthetic EHR cohort of 300 patients feeds a physiology simulator, which
-produces the wearable stream: CGM every five minutes with realistic sensor lag, noise and dropouts, plus
-steps, heart rate and sleep. An enrollment log links each patient to a device, the way a real study
-would.
+Alert: a risk score alone would fire constantly, so an alert policy raises one alert per risk episode.
 
-Layer two links the streams and builds features. A linker joins records to devices and checks the join.
-Rolling windows take six hours of history and label the next two hours. The record becomes a static
-vector, scaled using training patients only. Then we split by patient, never by time.
+Explain: every risk comes with its main reasons, like "glucose is falling" or "this patient takes a sulfonylurea".
 
-Layer three is the models: a simple trend baseline, LightGBM with one model per event, and a deep fusion
-network with a GRU for comparison.
+Simulate: the twin is fitted to the patient's own data, so a clinician can ask what a late dinner, a skipped
+meal or an extra dose would do, and see the answer with an honest uncertainty band.
 
-Layer four is evaluation, and the teal box is the important one: real external data, used only to check
-us, never to train.
+That last part is what makes it a twin rather than just a predictor. A predictor tells you what will probably
+happen. A twin is a copy of this particular patient's body that you can experiment on, safely, before changing
+anything for the real person.
 
-Layer five is the twin itself: the patient state, the explanations, the personalised what-if twin, and
-the Streamlit dashboard a clinician uses.
+### Slide 4 · Architecture (3:57-5:18)
 
-*(Optional: switch to the GitHub repository for 30 seconds.)* In the repository, each layer is a folder.
-`src/data` holds the simulator, the linker and the feature builders. `src/models` holds the baselines and
-the fusion network. `src/eval` holds every evaluation, including the two real-data checks. `src/twin` holds
-the patient state, explanations, the what-if engine and the personalisation, and `src/app` is the dashboard.
-Every result in this video has a matching report in the `docs` folder, generated by the code rather than
-typed by hand.
+**Say**
 
-## 5. Data, honestly labelled (5:30-7:30) · slide 5
+Here's how it fits together, in five layers from left to right.
 
-**Narration**
+Layer one is the data. A synthetic health-record cohort of 300 patients drives a physiology simulator, which
+produces the wearable stream: CGM every five minutes with realistic sensor lag, noise and dropouts, plus steps,
+heart rate and sleep. An enrollment log links each patient to a device, the way a real study would.
 
-We need to be upfront about the data. No public dataset links hospital records and wearable data for
-the same Indian patients. So we built a physiology simulator: a Bergman-style glucose model with Indian
-meals, drug pharmacokinetics for metformin, sulfonylureas and three kinds of insulin, sleep, activity
-and the morning rise in glucose. It generates 300 patients, 14 days each.
+Layer two links the streams and builds features: six-hour windows of sensor data, and the record as a static
+vector. Patients are split into training, validation and test sets as whole people, never by time.
 
-A few details make it more than a toy. Doctors titrate doses, so patients with worse control are on
-stronger drugs, as in real clinics. The CGM is not the true glucose: it lags blood glucose by about ten
-minutes, has correlated noise, and drops out for stretches, like a real sensor. Wearables come with a
-device ID, not a patient ID, so the data has to be linked through an enrollment log, and the linker audits
-that join and reports any device it cannot match. Lows are rare, about 4% of prediction windows, and
-metformin-only patients almost never go low, which is what you would expect clinically.
+Layer three is the models: a simple trend baseline, LightGBM, and a deep fusion network for comparison.
 
-The link between record and sensor is therefore synthetic, by design, and we say so in the code, in
-every document and on the dashboard banner. There is a subtle consequence: our simulator makes the
-record drive glucose. A higher HbA1c gives bigger spikes, and sulfonylureas and weak kidneys give more
-lows. So any benefit we measure from the record on this data is partly built in. Keep that in mind,
-because it comes back later in the video.
+Layer four is evaluation. The teal box is the important one: real external data, used to check the models and
+to train a real-patient model.
 
-## 6. Built to be trusted (7:30-8:30) · slide 6
+Layer five is the twin itself: the patient state, the explanations, the personalised what-if twin, a dashboard
+for clinicians, and a FHIR API so other hospital systems can use it.
 
-**Narration**
+### Slide 5 · Data (5:18-6:40)
 
-Five habits make our numbers trustworthy.
+**Say**
 
-One: we split by patient. No patient appears in both training and test, and the code raises an error
-if one does. Splitting by time instead leaks a person's own patterns into the test.
+I need to be upfront about the data. No public dataset links hospital records and wearable data for the same
+Indian patients. So I built a physiology simulator: a Bergman-style glucose model with Indian meals, drug
+pharmacokinetics for metformin, sulfonylureas and insulin, sleep, activity and the morning rise in glucose. It
+generates 300 patients, 14 days each.
 
-Two: we score onset windows, meaning predictions made before glucose crosses the line. Predicting a low
-once the patient is already low is trivial and inflates every metric.
+A few details make it more than a toy. Doctors titrate doses, so patients with worse control take stronger drugs,
+as in real clinics. The CGM isn't the true glucose: it lags by about ten minutes, it's noisy and it drops out,
+like a real sensor. And lows are rare, about 4% of prediction windows, which is realistic.
 
-Three: every comparison comes with a 95% confidence interval from a patient-level bootstrap, and model
-comparisons are paired.
+The link between record and sensor is therefore synthetic by design, and I say so in the code, the documents and
+on the dashboard. There's a subtle consequence: my simulator makes the record drive glucose. So any benefit I
+measure from the record on this data is partly built in. Keep that in mind, because it comes back later.
 
-Four: every choice, such as alert thresholds and the alert policy, was made on validation patients. The
-test patients were touched once.
+### Slide 6 · Rigour (6:40-7:29)
 
-Five: everything is reproducible. Fixed seeds, one command rebuilds the data, the models and every
-report, and 140 automated tests check it on every push.
+**Say**
 
-## 7. Results on synthetic patients (8:30-10:10) · slide 7
+Five habits make these numbers trustworthy.
 
-**Narration**
+One: I split by patient. No patient is in both training and test, and the code raises an error if one is.
 
-On 60 synthetic test patients, both events are predictable. For lows we report AUPRC, because lows are
-rare and plain accuracy would mislead. Chance is about 0.02. Extrapolating the trend scores 0.19,
-LightGBM on CGM 0.65, and with the record 0.71. For highs: 0.38, 0.72 and 0.74. AUROC is 0.93 for highs
-and 0.99 for lows.
+Two: I score onset windows, predictions made before glucose crosses the line. Predicting a low once the patient
+is already low is trivial, and it inflates every metric.
 
-Two results we did not expect. The deep GRU fusion model did not beat LightGBM, and steps, heart rate
-and sleep added nothing measurable on top of glucose. So we deploy LightGBM: it is the best for lows,
-it is fast, it explains itself exactly, and its probabilities are well calibrated.
+Three: every comparison has a 95% confidence interval from a patient-level bootstrap.
 
-And a warning we give ourselves: these synthetic numbers are optimistic, because simulated lows drift in
-slowly and are easy to see coming.
+Four: every choice, like the alert thresholds, was made on validation patients. The test patients were touched
+once.
 
-We also audited the model by subgroup: sex, age, kidney function, drug class, HbA1c and BMI. For highs,
-AUROC stays between 0.92 and 0.95 in every group. For lows, one group stands out. Insulin users' lows are
-the hardest to predict, with an AUPRC of 0.22 against 0.72 for sulfonylurea users, although that group is
-small. And one group cannot be audited at all: only one test patient has reduced kidney function, even
-though weak kidneys raise the risk of lows. We report both, because an audit that only shows good news is
-not an audit.
+Five: it's reproducible. Fixed seeds, one command rebuilds everything, and 140 automated tests run on every push.
 
-## 8. Alerts a clinic can live with (10:10-12:10) · slide 8
+### Slide 7 · Results on synthetic patients (7:29-8:58)
 
-**Narration**
+**Say**
 
-Accuracy is not enough. Alarm fatigue is what kills alerting systems in hospitals. If we raised an alert
-every time the risk crossed a threshold, a patient would generate about three alerting windows a day,
-and only 18% of low alerts would be real.
+On 60 synthetic test patients, both events are predictable. A quick word on the metrics. AUROC asks how well the
+model separates "trouble coming" from "fine": 0.5 is a coin flip and 1.0 is perfect. AUPRC asks how many of its
+warnings are right while still catching the events, which is the fairer measure when events are rare. For lows I
+report AUPRC, because lows are rare and accuracy would mislead: chance is about 0.02. Extrapolating the trend scores 0.19. LightGBM on CGM scores 0.65,
+and with wearables and the record, 0.71. For highs: 0.38, 0.72 and 0.74. AUROC is 0.93 for highs and 0.99 for lows.
 
-So we built an alert policy: one alert when risk first crosses the threshold, then silence for 90
-minutes while the risk stays high, and never an alert while the CGM already reads low, because the
-sensor's own alarm covers that. The thresholds were chosen on validation patients.
+Two results I didn't expect. A deep GRU fusion network didn't beat LightGBM, and steps, heart rate and sleep added
+nothing measurable on top of glucose. So I deploy LightGBM: it's the best for lows, it's fast, it explains itself
+exactly, and its probabilities are well calibrated.
 
-On the test patients, the policy warns of 76% of low-glucose episodes at least 30 minutes ahead, with a
-median warning of 65 minutes. That is about one low alert every two days per patient, and two out of
-three alerts are followed by a real low. The trade-off is explicit: scoring every window would catch 98%,
-at six times the alerts. Where to sit on that curve is a clinical decision, and our tooling shows the
-whole curve.
+And a warning I give myself: these synthetic numbers are optimistic, because simulated lows drift in slowly and
+are easy to see coming. I measured exactly how slowly, and I'll show you that in the real-data part.
 
-Those are synthetic patients, so later in the video we will run the same policy on real ones.
+### Slide 8 · Alerting, synthetic and real (8:58-11:06)
 
-At night, 71% of lows are warned at least 30 minutes ahead, with about one alert every eleven nights.
-For highs, 68% of episodes are warned 30 minutes ahead, at about two and a half alerts a day. We also
-tested more elaborate policies, such as re-arming only after the risk falls. On validation patients it
-made things worse, because a slowly drifting low keeps the risk high and the alert never re-arms, so we
-kept the simple policy.
+**Say**
 
-## 9. Live dashboard demo (12:10-17:20) · switch to the browser
+Accuracy isn't enough. Alarm fatigue is what kills alerting systems in hospitals. So the alert policy fires once
+when risk crosses the threshold, then stays quiet for 90 minutes while the risk stays high, and never fires while
+the CGM already reads low, because the sensor's own alarm covers that.
 
-**On screen:** the dashboard, patient P0014, "Highest hypoglycaemia risk". If the live demo fails while
-recording, show slides 9-11 instead: they hold stills of the same three moments (replay, drivers, what-if).
+The teal bars are 60 synthetic test patients. The policy warns of 76% of lows at least 30 minutes ahead, with a
+median warning of 65 minutes, about one alert every two days, and two out of three alerts followed by a real low.
 
-**Narration and actions**
+The coral bars are what matters more: the same policy on 100 real patients from ShanghaiT2DM, with a model
+trained on real data and thresholds set on other patients. It warns of 35% of real lows at least 30 minutes ahead,
+and 53% at 15 minutes, at about 0.6 alerts a day, with 44% of alerts followed by a real low.
 
-*(Hero card and risk cards visible.)* This is the clinician dashboard. At the top is the patient: a
-66-year-old woman on metformin and a sulfonylurea, HbA1c 7.1%. The two cards show her risks for the next
-two hours. Hypoglycaemia risk is 95%, well above the threshold, and the alert policy has raised an alert.
-Hyperglycaemia risk is zero.
+The policy is a trade-off, and the tooling shows the whole curve. Raising an alert in every high-risk window
+would catch 98% of synthetic lows 30 minutes ahead, but at about three alerting windows a day, and only about one
+in five would be real. One alert per episode gives six times fewer alerts for some loss of sensitivity. Where to sit
+on that curve is a clinical decision, not mine.
 
-*(Live replay tab, press Play.)* The first tab is live replay. It plays her morning forward as if it were
-happening now, and the model only ever sees data up to the moving line. Watch the glucose fall after
-eight o'clock. *(Wait for 08:25.)* At 08:25 the hypo risk crosses the threshold and the alert appears,
-with its two main reasons: her sulfonylurea dose, and glucose falling about one milligram per decilitre
-per minute. *(Let it run to about 09:45.)* Her glucose goes below 70 at 09:40, 75 minutes after the
-alert. *(Scroll down.)* Below the chart, the dashboard lists every alert in this window with its lead
-time, and it would list a missed episode or a false alert in exactly the same way.
+As for the real-patient numbers: that's a big drop, and I'm showing it on purpose. Real lows arrive faster than simulated ones, so the synthetic
+figure is an upper bound, and the real one is the honest baseline to improve. Now let me show you the product.
 
-*(Glucose timeline tab.)* The timeline shows the bigger picture: glucose with the high and low bands,
-both risks over time, every alert, and the next two hours after "now", drawn dotted because the model
-has not seen them.
+---
 
-*(Alert drivers tab.)* Here is why the model raised this risk. Each bar is that input's exact
-contribution: current glucose, the sulfonylurea dose, time of day, the lowest reading in the last hour.
-They are also grouped by data stream. These explain the model, not her physiology, and the page says so.
+## Part 3 · Live demo (11:06-15:54) · clip `live_demo.mp4`
 
-*(What-if tab, press "Start the what-if twin", choose "Extra insulin dose".)* Now the twin. It was fitted
-to her own first week of data. Four physiology parameters were estimated from her glucose and her logged
-meals and doses. I ask what happens with an extra 8-unit insulin dose an hour ago. The risk model's
-answer is on the cards, and the simulated glucose is in the chart: her projected low drops from about
-64 to 55. The shaded area is the 80% uncertainty band. On patients the band never saw, the real CGM
-fell inside it 79% of the time. *(Point at the caption.)* The band covers the projection as logged; how
-the twin responds to a change adds error the band does not include, and the page says that too.
+*Do:* lay your voice over the clip. Times are **clip time** (0:00 = start of the demo clip); start each block when
+its moment appears. The clip uses synthetic patient P0014.
 
-*(Switch the scenario to "Skipped meal".)* A skipped meal works the same way: the twin removes the meal
-from her day and re-simulates, and the risk model is re-run on what it would have seen. *(Switch "Twin
-physiology" to Oracle for a moment.)* For comparison we keep an oracle mode that replays the simulator's
-hidden truth. No real system could do this, and the page says so. It shows how close the personalised twin
-gets. *(Switch back to Personalised.)*
+**(0:00-0:24) Hero and risk cards**
+This is the clinician dashboard. At the top is the patient: a 66-year-old woman on metformin and a sulfonylurea,
+HbA1c 7.1%. The two cards show her risk for the next two hours. Hypoglycaemia risk is 95%, well above the
+threshold, so an alert is raised. Hyperglycaemia risk is zero.
 
-*(Sidebar: "Choose a time", pick an evening, e.g. 20:00.)* A clinician can pick any moment in the record.
-In the evening, the "Late dinner" preset moves her dinner two hours later with her medicine at the usual
-time, which is a very common real-life pattern.
+**(0:24-0:46) Live replay, press Play**
+The first tab is live replay. It plays her morning forward as if it were happening now, and the model only ever
+sees data up to the moving line. I'll press play. Watch the glucose start to fall after eight o'clock.
 
-*(Patient overview tab.)* Finally, the overview: her record, latest labs, and 14-day CGM metrics against
-the international consensus targets.
+**(0:46-1:01) Paused at the 08:25 alert**
+I'll pause here. At 8:25 the risk crosses the threshold and the alert appears, with its two reasons: her
+sulfonylurea dose, and glucose falling almost one milligram per decilitre a minute.
 
-## 10. Then we tested it on real people (17:20-19:00) · slides 12-13
+**(1:01-1:14) Paused at 09:40**
+And at 9:40 her glucose goes below 70. That's 75 minutes after the alert: time to eat something, or to call her.
 
-**Narration**
+**(1:14-1:29) Replay summary**
+Below the chart, the dashboard lists every alert in this window with its lead time. A missed low or a false
+alert would be listed the same way.
 
-Synthetic results are only as good as the simulator, so we tested on real data. Two public datasets,
-never used for training.
+**(1:29-1:55) Glucose timeline**
+The timeline tab shows the bigger picture: glucose with the high and low bands, both risks over time, and every
+alert. After "now", the next two hours are drawn dotted, because the model hasn't seen them. This is what a
+clinician would scan in a review.
 
-The first is CGMacros from PhysioNet: 14 adults with Type 2 diabetes in the US. We applied our model
-unchanged. It still ranks risk better than chance and beats trend extrapolation, but AUROC for highs
-drops from 0.93 on synthetic patients to 0.70 on real ones. We show that gap rather than hide it, and we
-measured where it comes from. Comparing our simulator with both real cohorts, the level of glucose, time in
-range and the rate of highs and lows are realistic. But real glucose makes bigger swings, real lows arrive
-about twice as fast (falling roughly half a milligram per decilitre per minute, against a quarter in the
-simulator), and real patients peak after breakfast while our simulator peaks late in the evening. That is a
-concrete to-do list for the simulator, and it explains why synthetic lows were so easy to predict.
+**(1:55-2:27) Alert drivers**
+Here's why the model raised this risk. Each bar is that input's exact contribution: current glucose at 70, the
+sulfonylurea dose, the time of day, and the lowest reading in the last hour. The contributions are also grouped
+by data stream. They explain the model, not her physiology, and the page says so.
 
-The probabilities were also off: the model underpredicted. Recalibrating on the other real
-participants, without retraining, cuts the calibration error from 0.136 to 0.024. That is the first step
-of any real deployment, and we have shown it works.
+**(2:27-2:39) What-if: start the twin**
+Now the twin. It was fitted to her own first week of data: four physiology parameters, from her glucose and
+her logged meals and doses.
 
-We then asked a follow-up question: when only a handful of real patients are available, is our synthetic
-data still worth having? We trained on 2, 4, 7 or 10 real participants, with and without the synthetic
-data, as pretraining or mixed in. The answer is: not reliably. With two real participants, mixing in
-synthetic data helps a little. From four upwards it adds nothing, and its one consistent benefit is
-steadier results between random draws. Real data overtakes the simulator after four to seven participants.
-That tells us where the value is: the simulator is for building and testing the system, and real data is
-for the final model.
+**(2:39-3:12) Extra insulin dose, band and caption**
+What if she took an extra 8 units of insulin an hour ago? The risk model's answer is on the cards, and the
+twin's projection is in the chart: her low drops from about 64 to 55. The shaded area is the 80% uncertainty
+band: on patients it never saw, glucose fell inside it 79% of the time. The caption states its limit: it
+doesn't cover the extra error of the change itself.
 
-## 11. Real linked records, and what the EHR is really for (19:00-21:50) · slides 14-16
+**(3:12-3:28) Skipped meal**
+A skipped meal works the same way. The twin removes the meal from her day, re-simulates, and the risk model is
+re-run on what it would have seen.
 
-**Narration**
+**(3:28-3:40) Oracle mode**
+For comparison, an oracle mode replays the simulator's hidden truth. No real system could do this, and the
+page says so. It shows how close the twin gets.
 
-The second dataset is the one that tests our central idea. ShanghaiT2DM, published in Scientific Data
-in 2023, has 100 real patients with Type 2 diabetes, and for each one the CGM comes with their own
-clinical record and a log of their insulin and tablets. Real linked data, the thing we could not get
-for India.
+**(3:40-3:51) Back to personalised, poor sleep**
+Back to the personalised twin. Or a poor night's sleep, which raises insulin resistance the next day.
 
-We trained on it with patient-grouped cross-validation, so every patient is scored by a model that never
-saw them. The CGM model predicts real lows well: AUROC 0.89, and 0.91 at night, with good calibration.
-And our synthetic-trained model, applied unchanged, beats trend extrapolation on these real lows, by 0.07
-AUPRC. So the simulator taught something real.
+**(3:51-4:28) Choose a time, late dinner**
+A clinician can pick any moment in the record. Here's an evening earlier in her fortnight. The late-dinner preset
+moves her dinner two hours later while her medicine stays at the usual time, a very common pattern in real life.
+The cards show what the model would predict, and the chart shows what the twin expects her glucose to do. Notice
+the warning: the model can't see a meal that hasn't happened yet, and the dashboard says so.
 
-Then the key question: does adding the record help? We tried our 24 EHR fields, then the logged doses,
-then the full clinical record with C-peptide and other labs. None of them improved the forecast. We even
-tried a simple model that cannot memorise patients, in case the trees were overfitting. Still nothing.
+**(4:28-4:48) Patient overview**
+Finally, the overview: her record, her latest labs, and her 14-day CGM metrics. Seventeen percent of her time is
+below 70, against a consensus target under four percent. That's exactly the patient this twin is built for.
 
-So we asked where the record should matter most: a new patient, with little or no CGM yet. With no CGM at
-all, the record does carry a real signal. AUROC goes from chance to 0.54, which is enough to decide who
-to watch, but far too weak to raise alerts on. With just 30 minutes of CGM, the CGM model already reaches
+---
+
+## Part 4 · Slides 12-20 (15:54-24:55) · PowerPoint recording
+
+### Slide 12 · Part two: real people (15:54-16:27)
+
+**Say**
+
+That's the product. But synthetic results are only as good as the simulator, so I tested on real people: two
+public, de-identified datasets. Neither is ever committed to the repository: they're downloaded separately, under their own licences. CGMacros, with 14 US adults with Type 2 diabetes. And ShanghaiT2DM, with 100 patients whose CGM
+comes with their own clinical records, which is exactly what I couldn't get for India.
+
+### Slide 13 · Real CGM (16:27-17:52)
+
+**Say**
+
+First, CGMacros. I applied my synthetic-trained model unchanged. It still ranks risk better than chance and beats
+trend extrapolation, but AUROC for highs drops from 0.93 on synthetic patients to 0.70 on real ones. Retrained on
+the real participants, it reaches 0.77.
+
+I didn't stop at the gap; I measured where it comes from. Comparing the simulator with both real cohorts, the
+level of glucose, time in range and the rate of highs and lows are realistic. But real lows fall about twice as
+fast, roughly half a milligram per decilitre per minute against a quarter in the simulator, real swings are
+bigger, and real patients peak after breakfast. That's a concrete to-do list for the simulator.
+
+The probabilities were also off: the model underpredicted. So I recalibrated it the way a hospital would. For
+each participant, a small correction curve is fitted on all the other participants and applied to that one, so no
+one is corrected using their own data. Without any retraining, that cuts the calibration error from 0.136 to 0.024.
+That's step one of any real deployment.
+
+### Slide 14 · Real linked records (17:52-18:59)
+
+**Say**
+
+ShanghaiT2DM tests the central idea. A hundred real patients, with CGM, their clinical records, and a log of
+their insulin and tablets.
+
+I trained on it with patient-grouped cross-validation: the patients are split into ten groups, and each group is
+scored by a model trained on the other nine, so every patient is scored by a model that never saw them.
+The CGM model predicts real lows well: AUROC 0.89, and 0.91 at night, with good calibration. My synthetic-trained
+model, applied unchanged, still beats trend extrapolation on these real lows, so the simulator taught something
+real.
+
+Then the key question: does adding the record help? I tried the 24 record fields, then the logged doses, then the
+full clinical record with C-peptide and other labs. None of them improved the forecast. I even tried a simple model
+that can't memorise patients. Still nothing.
+
+### Slide 15 · What the record is for (18:59-20:14)
+
+**Say**
+
+So I asked where the record should matter most: a new patient, with little or no CGM yet. To test it, I took the
+same windows and hid all but the last few hours of glucose: none at all, 30 minutes, one hour, two hours, or the full
+six. Then I compared CGM alone with CGM plus the record at each step.
+
+With no CGM at all, the record does carry a real signal: AUROC goes from chance to 0.54. That's enough to decide
+who to watch, but far too weak to raise alerts on. With just 30 minutes of CGM, the CGM model already reaches
 0.88, almost as good as six hours, and from then on the record adds nothing.
 
-We also ran the alert policy on these real patients, with a model trained on real data and thresholds set on
-other patients in each fold. It warns of 35% of real lows at least 30 minutes ahead, and 53% at 15 minutes,
-at about 0.6 alerts a day, with 44% of alerts followed by a real low. That is far below the 76% on synthetic
-patients, because real lows arrive faster and less predictably, and we put that number in the README rather
-than hide it. The real-trained model is now in the dashboard as a selectable risk model, so the product uses
-what we learned.
+So the record is a prior, not a forecaster. It helps decide who needs a sensor, it personalises the twin, and it
+gives the clinician context. It doesn't improve a two-hour forecast once glucose is being measured.
 
-So the record is a prior, not a forecaster. It helps decide who needs a sensor, it personalises the
-twin, and it gives the clinician context. It does not improve a two-hour forecast once glucose is being
-measured.
+### Slide 16 · What I claim, and no longer claim (20:14-21:20)
 
-*(Slide 16.)* This changed our project. We had a result on synthetic data saying the record improves the
-forecast. Real data said otherwise, so we changed the claim in our README, our model card and this
-video. What we claim now is on the left. What we no longer claim is on the right. We think this is the
-most important slide in the deck, because it is what a clinical team needs to see before trusting any
-model.
+**Say**
 
-## 12. Path to real use in India (21:50-23:40) · slides 17-18
+This changed my project. On synthetic data, adding the record improved the forecast. Real data said otherwise,
+so I changed the claim, in the README, the model card and this video.
 
-**Narration**
+On the left is what I claim: real lows predicted two hours ahead on 100 real patients, an honest real-world
+alerting baseline, recalibration that works, a twin with honest uncertainty, and a product that ships a model
+trained on real patients.
 
-Nothing here is ready for patients, and we have written down what would make it ready. There are four
-evidence steps. First, a retrospective study on real linked records from Indian clinics, with ethics
-approval under ICMR's guidelines for AI in healthcare, which must test the record's value directly rather
-than assume it. Then recalibration to the local population. Then a silent pilot, where the model scores in
-the background and outcomes are compared afterwards. Finally a pilot with diabetologists in the loop.
+On the right is what I no longer claim. That adding the record improves the two-hour forecast: that was true on
+synthetic data only. That the synthetic accuracy of 0.93 is what real patients would see. And any clinical validity
+at all: this is a research prototype.
 
-Around that is the compliance frame: consent and security under the DPDP Act and its 2025 Rules, ABDM and
-ABHA consent flows to link a patient's record to their device, and CDSCO's rules for medical device
-software. The CGM's own alarms always stay on. The twin supplements them and never replaces them.
+I think this is the most important slide, because it's what a clinical team needs to see before trusting any model.
 
-Once running, it would need the operations any clinical model needs: monitoring of data quality and sensor
-changes, checks that the scores and their calibration do not drift, versioned models with the evidence for
-each version recorded, a route for reporting missed lows and harmful alerts, and a subgroup audit at every
-release, adding region, diet and device type, which our synthetic data does not have.
+### Slide 17 · Path to real use in India (21:20-22:28)
 
-*(Slide 18.)* And it is built to be checked, not just demoed: 140 automated tests that run on every push, one command to rebuild
-everything, two public real datasets checked, a live dashboard, an MIT licence, and a model card in the
-repository.
+**Say**
 
-It can also plug into a hospital system. A FHIR API takes a patient's record and their CGM readings in FHIR, the standard behind India's ABDM health records, and returns the two risks as standard FHIR RiskAssessment resources, with their reasons. We tested that a patient exported to FHIR and sent through the API gets exactly the same risk as the dashboard. What is not built yet is the ABDM consent flow, authentication and audit logging around it.
+Nothing here is ready for patients, and I've written down what would make it ready. Four steps: a study on real
+linked records from Indian clinics, with ethics approval under ICMR's AI guidelines, which must test the record's
+value rather than assume it. Then recalibration to the local population. Then a silent pilot, where the model scores
+in the background and nobody acts on it, so we learn how it behaves on live data without any risk to patients.
+Then a pilot with diabetologists in the loop, judged on usefulness, workload and safety.
 
-## 13. Limitations and close (23:40-24:40) · slides 19-20
+Around that is the compliance frame: consent and security under the DPDP Act and its 2025 Rules, ABDM and ABHA
+consent flows to link a record to a device, and CDSCO's rules for medical device software. And the CGM's own
+alarms always stay on: the twin supplements them and never replaces them.
 
-**Narration**
+### Slide 18 · Engineering (22:28-23:28)
 
-We know the limits. The deployed model has never been trained on real patients. Our real checks are small,
-14 US and 100 Chinese patients, not Indian outpatients. Insulin users' lows are the hardest to predict, on
-synthetic and real data alike. And a real twin needs meals and doses logged when they happen, because the
-model cannot see a planned dinner or a fresh dose until glucose moves.
+**Say**
 
-*(Slide 20.)* To close: a twin that warns early, explains itself, and is honest about what it knows. Our next
-step is validation on real linked records from Indian clinics, with clinicians in the loop. If you can
-help with access to such data or a diabetologist partner, we would love to talk.
+It's built to be checked, not just demoed: 140 automated tests that run on every push, one command to rebuild the
+data, models and reports, two public real datasets checked, and a live dashboard.
 
-Thank you.
+It can also plug into hospital systems. A FHIR API takes a patient's record and CGM readings in FHIR, the standard
+behind India's ABDM health records, and returns standard risk assessments with their reasons. I tested that a
+patient sent through the API gets exactly the dashboard's risk.
+
+And it's open: an MIT licence, a model card that states what the model is for and what it isn't, a written
+deployment path, and every result table in the repository. The real datasets stay out of it, downloaded separately
+under their own licences.
+
+### Slide 19 · Limitations (23:28-24:17)
+
+**Say**
+
+I know the limits, and each one points to the next piece of work. The default model is trained on synthetic
+data, and the real-trained one has seen only 100 patients: the fix is more real data. Those patients are Chinese and
+American, not Indian outpatients: the fix is the Indian clinic study. Insulin users' lows are the hardest to predict,
+on synthetic and real data alike: that needs more insulin users and better dose logging. And a real twin needs meals
+and doses logged as they happen, because the model can't see a planned dinner or a fresh dose until glucose moves.
+
+### Slide 20 · Close (24:17-24:55)
+
+*Do:* camera on.
+
+**Say**
+
+To close. I set out to build a digital twin that warns early, explains itself, and is honest about what it
+knows. It predicts real lows, it explains every alert, it lets a clinician test a change safely, and it says
+clearly where the evidence stops. The next step is
+validation on real linked records from Indian clinics, with clinicians in the loop. If you can help with that
+data, or a diabetologist partner, I'd love to talk. Thank you.
