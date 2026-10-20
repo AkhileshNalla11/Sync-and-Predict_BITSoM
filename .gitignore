@@ -34,3 +34,4 @@ Thumbs.db
 
 # Video production assets (rendered clips; regenerate rather than commit)
 video_assets/
+recordings/
