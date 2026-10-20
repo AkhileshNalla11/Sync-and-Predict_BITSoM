@@ -67,7 +67,7 @@ Pause for a full second between the lines: the animation is timed to them.
 
 ### V02 · Hello, and the whole story in 90 seconds (you, full screen)
 
-> Hello, I'm *[your name]*, from team *[team name]* at *[college or incubator]*. I built a glycaemic digital twin for
+> Hello, I'm Akhilesh Nalla, from team Sync and Predict at BITSoM. I built a glycaemic digital twin for
 > people with Type 2 diabetes. If you only have ninety seconds, here's the whole story.
 >
 > The twin combines a patient's health record with their wearable data. Every thirty minutes it estimates the risk
