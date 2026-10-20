@@ -31,3 +31,6 @@ Thumbs.db
 
 # Local tool config
 .claude/
+
+# Video production assets (rendered clips; regenerate rather than commit)
+video_assets/
