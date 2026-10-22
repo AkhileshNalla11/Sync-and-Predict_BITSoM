@@ -36,6 +36,18 @@ camera, and look up at the start of each sentence. Wear the same clothes for eve
 **Voice-only takes.** `V01` and all the demo takes (`D01`-`D15`) are used for their sound only: still record
 them on camera (it keeps the sound identical to the other takes), but you can read them straight from the screen.
 
+**Say the words as written.** The on-screen captions and the timing of the animations (the stamps, the cards, the
+charts) are made from this script. Small slips are fine, but don't rephrase sentences or add new ones: the captions
+would then show different words from the ones you say.
+
+**Saying the names.** ShanghaiT2DM: "Shanghai T-two-D-M". CGMacros: "C-G-Macros". CGM: "C-G-M". AUROC: "A-U-R-O-C"
+(or "area under the curve"). AUPRC: "A-U-P-R-C". HbA1c: "H-B-A-one-C". FHIR: "fire". eGFR: "e-G-F-R". DPDP, ABDM,
+ABHA, CDSCO, ICMR: letter by letter. BITSoM: "bits-om". Decimals as digits: 0.89 is "point eight nine".
+
+**Before the full build.** Once the takes are in `recordings/`, a quick check runs first (about a minute). It lists
+any missing take, a take recorded in portrait, sound that is too quiet or clipped, and a take whose length doesn't
+fit its script (a wrong or cut-off take), so you can redo just those.
+
 ### Take list
 
 | Take | Part | On screen in the video | About |
@@ -44,7 +56,7 @@ them on camera (it keeps the sound identical to the other takes), but you can re
 | V02 | Opening | You, full screen, with the key numbers appearing beside you | 1:45 |
 | V03-V08 | Act 1 | Slides 2-7, with you in a card beside them | 7:15 |
 | V09 | Act 1 | Animated alerting chart, synthetic patients | 1:15 |
-| D01-D15 | Act 1 | The recorded dashboard demo (your voice only) | 4:48 |
+| D01-D15 | Act 1 | The recorded dashboard demo (your voice only) | 4:46 |
 | V10 | Act 1 | Three claims appear, waiting to be tested | 0:30 |
 | V11-V15 | Act 2 | Slide 12, animated real-vs-synthetic chart, a real missed low, slides 13 and 14, with stamps | 4:50 |
 | V16-V21 | Act 3 | Slide 15, the claims with stamps, slides 17-19, then you full screen to close | 5:55 |
@@ -198,8 +210,9 @@ Pause for a full second between the lines: the animation is timed to them.
 > 65 minutes. That's about one alert every two days, and two out of three alerts are followed by a real low.
 >
 > It's a trade-off, and the tooling shows the whole curve. Raising an alert in every high-risk window would catch
-> 98% of lows, but at about three alerting windows a day, and only one in five would be real. One alert per
-> episode gives six times fewer alerts. Where to sit on that curve is a clinical decision, not mine.
+> 98% of lows, but at about three alerting windows a day, and only about half would be real. One alert per
+> episode gives six times fewer alerts, and two out of three are real. Where to sit on that curve is a clinical
+> decision, not mine.
 >
 > Now let me show you the product.
 
@@ -218,57 +231,57 @@ patient is synthetic patient P0014.
 > The first tab is live replay. It plays her morning forward as if it were happening now, and the model only ever
 > sees data up to the moving line. I'll press play. Watch the glucose start to fall after eight o'clock.
 
-**D03 (0:46) Paused at the 08:25 alert**
+**D03 (0:45) Paused at the 08:25 alert**
 > I'll pause here. At 8:25 the risk crosses the threshold and the alert appears, with its two reasons: her
 > sulfonylurea dose, and glucose falling almost one milligram per decilitre a minute.
 
 **D04 (1:01) Paused at 09:40**
 > And at 9:40 her glucose goes below 70. That's 75 minutes after the alert: time to eat something, or to call her.
 
-**D05 (1:14) Replay summary**
+**D05 (1:13) Replay summary**
 > Below the chart, the dashboard lists every alert in this window with its lead time. A missed low or a false
 > alert would be listed the same way.
 
-**D06 (1:29) Glucose timeline**
+**D06 (1:28) Glucose timeline**
 > The timeline tab shows the bigger picture: glucose with the high and low bands, both risks over time, and every
 > alert. After "now", the next two hours are drawn dotted, because the model hasn't seen them. This is what a
 > clinician would scan in a review.
 
-**D07 (1:55) Alert drivers**
+**D07 (1:54) Alert drivers**
 > Here's why the model raised this risk. Each bar is that input's exact contribution: current glucose at 70, the
 > sulfonylurea dose, the time of day, and the lowest reading in the last hour. The contributions are also grouped
 > by data stream. They explain the model, not her physiology, and the page says so.
 
-**D08 (2:27) What-if: start the twin**
+**D08 (2:25) What-if: start the twin**
 > Now the twin. It was fitted to her own first week of data: four physiology parameters, from her glucose and
 > her logged meals and doses.
 
-**D09 (2:39) Extra insulin dose, band and caption**
+**D09 (2:36) Extra insulin dose, band and caption**
 > What if she took an extra 8 units of insulin an hour ago? The risk model's answer is on the cards, and the
 > twin's projection is in the chart: her low drops from about 64 to 55. The shaded area is the 80% uncertainty
 > band: on patients it never saw, glucose fell inside it 79% of the time. The caption states its limit: it
 > doesn't cover the extra error of the change itself.
 
-**D10 (3:12) Skipped meal**
+**D10 (3:09) Skipped meal**
 > A skipped meal works the same way. The twin removes the meal from her day, re-simulates, and the risk model is
 > re-run on what it would have seen.
 
-**D11 (3:28) Oracle mode**
+**D11 (3:25) Oracle mode**
 > For comparison, an oracle mode replays the simulator's hidden truth. No real system could do this, and the
 > page says so. It shows how close the twin gets.
 
-**D12 (3:40) Back to personalised, poor sleep**
+**D12 (3:37) Back to personalised, poor sleep**
 > Back to the personalised twin. Or a poor night's sleep, which raises insulin resistance the next day.
 
-**D13 (3:51) Choose a time, late dinner**
+**D13 (3:48) Choose a time, late dinner**
 > A clinician can pick any moment in the record. Here's an evening earlier in her fortnight. The late-dinner preset
 > moves her dinner two hours later while her medicine stays at the usual time, a very common pattern in real life.
 > The cards show what the model would predict, and the chart shows what the twin expects her glucose to do.
 
-**D14 (4:16) The meal it can't see**
+**D14 (4:12) The meal it can't see**
 > Notice the warning: the model can't see a meal that hasn't happened yet, and the dashboard says so.
 
-**D15 (4:28) Patient overview**
+**D15 (4:26) Patient overview**
 > Finally, the overview: her record, her latest labs, and her 14-day CGM metrics. Seventeen percent of her time is
 > below 70, against a consensus target under four percent. That's exactly the patient this twin is built for.
 
@@ -312,7 +325,7 @@ patient is synthetic patient P0014.
 >
 > Across all the real lows, glucose falls almost twice as fast in the hour before, about half a milligram per
 > decilitre per minute, against a quarter in my simulator. Faster lows leave less warning. And this case points to
-> the first fix I'd try: the model checks every 30 minutes, and a fall this fast needs a check every five.
+> the first fix I'd test: the model checks every 30 minutes, and a fall this fast may need a check every five.
 
 ### V14 · Claim three: is the simulator realistic? (slide 13)
 
@@ -354,8 +367,8 @@ patient is synthetic patient P0014.
 > same windows and hid all but the last few hours of glucose: none at all, 30 minutes, one hour, two hours, or the
 > full six. Then I compared CGM alone with CGM plus the record at each step.
 >
-> With no CGM at all, the record does carry a real signal: AUROC goes from chance to 0.54. That's enough to decide
-> who to watch, but far too weak to raise alerts on. With just 30 minutes of CGM, the CGM model already reaches
+> With no CGM at all, the record does carry a real signal: AUROC rises from 0.41, no better than chance, to 0.54.
+> That's enough to decide who to watch, but far too weak to raise alerts on. With just 30 minutes of CGM, the CGM model already reaches
 > 0.88, almost as good as six hours, and from then on the record adds nothing.
 >
 > So the record is a prior, not a forecaster. It helps decide who needs a sensor, it personalises the twin, and it

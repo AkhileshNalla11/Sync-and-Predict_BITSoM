@@ -29,7 +29,8 @@ HEAD_FONT = "'Plus Jakarta Sans', Geist, system-ui, sans-serif"
 
 def _one_line(html: str) -> str:
     """Markdown treats indented lines as code blocks, so emit HTML on a single line."""
-    return "".join(part.strip() for part in html.splitlines())
+    # join with a space so wrapped prose keeps its word breaks, then drop the spaces between tags
+    return " ".join(p for p in (part.strip() for part in html.splitlines()) if p).replace("> <", "><")
 
 
 # --------------------------------------------------------------------------- global CSS
@@ -81,13 +82,20 @@ section[data-testid="stSidebar"] hr {{ border-color: var(--line); }}
 .stTabs [data-baseweb="tab-border"] {{ display: none; }}
 
 /* metrics: elevation without an outline; sentence-case labels */
+.gt-tiles {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 12px; margin: 4px 0 14px; }}
+.gt-tile {{ background: {CARD}; border-radius: 14px; padding: 12px 14px 11px; box-shadow: {SHADOW_SM}; min-width: 0; }}
+.gt-tile .l {{ font-size: 0.8rem; font-weight: 600; color: var(--ink2); }}
+.gt-tile .v {{ font-family: {HEAD_FONT}; font-weight: 700; font-size: 1.55rem; color: var(--ink); font-variant-numeric: tabular-nums;
+  line-height: 1.2; margin-top: 2px; overflow-wrap: anywhere; }}
+.gt-tile .h {{ font-size: 0.72rem; color: var(--ink3); margin-top: 3px; line-height: 1.3; }}
 [data-testid="stMetric"] {{ background: {CARD}; border-radius: 14px; padding: 14px 16px 12px; box-shadow: {SHADOW_SM}; }}
 [data-testid="stMetricLabel"] p {{ font-size: 0.8rem !important; font-weight: 600; color: var(--ink2) !important; }}
 [data-testid="stMetricValue"] {{ font-weight: 700; font-size: 1.65rem; color: var(--ink); font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em; }}
 
 /* charts as cards */
-[data-testid="stPlotlyChart"] {{ background: {CARD}; border-radius: 18px; padding: 12px 14px 6px; box-shadow: {SHADOW_MD}; }}
+[data-testid="stPlotlyChart"] {{ background: {CARD}; border-radius: 18px; padding: 12px 14px 6px; box-shadow: {SHADOW_MD};
+  box-sizing: border-box; overflow: hidden; }}
 
 /* radios as segmented options: hover, pressed, checked, keyboard focus */
 div[role="radiogroup"] {{ gap: 6px; }}
@@ -170,7 +178,7 @@ div[role="radiogroup"] label[data-baseweb="radio"] p {{ font-weight: 600; font-s
 .gt-table td {{ padding: 10px 4px; border: none !important; border-bottom: 1px solid {GRID} !important; vertical-align: top;
   font-size: 0.9rem; color: {INK}; overflow-wrap: anywhere; }}
 .gt-table tr:last-child td {{ border-bottom: none !important; }}
-.gt-table td.k {{ color: {INK_2}; font-weight: 600; width: 38%; font-size: 0.84rem; }}
+.gt-table td.k {{ color: {INK_2}; font-weight: 600; width: 38%; font-size: 0.84rem; hyphens: auto; word-break: normal; overflow-wrap: normal; }}
 
 .gt-tir {{ display: flex; height: 14px; border-radius: 99px; overflow: hidden; gap: 2px; background: {CARD}; }}
 .gt-tir div {{ height: 100%; }}
@@ -298,6 +306,13 @@ def tir_bar_html(tbr: float, tir: float, tar: float) -> str:
     bar = "".join(f'<div style="width:{max(v, 0) * 100:.2f}%;background:{c}" title="{n}: {v:.1%}"></div>' for v, c, n in segs if v > 0)
     legend = "".join(f'<span><i style="background:{c}"></i>{n} <b style="color:{INK}">{v:.1%}</b></span>' for v, c, n in segs)
     return f'<div class="gt-card" style="padding:14px 18px"><div class="gt-tir">{bar}</div><div class="gt-tir-legend">{legend}</div></div>'
+
+
+def tiles_html(items: list[tuple[str, str, str]]) -> str:
+    """Number tiles (label, value, hint) in a grid that wraps instead of truncating on narrow screens."""
+    return ('<div class="gt-tiles">' + "".join(
+        f'<div class="gt-tile" title="{escape(h)}"><div class="l">{escape(k)}</div><div class="v">{escape(v)}</div>'
+        + (f'<div class="h">{escape(h)}</div>' if h else "") + "</div>" for k, v, h in items) + "</div>")
 
 
 def chips_html(items: list[tuple[str, str]]) -> str:

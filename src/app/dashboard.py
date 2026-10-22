@@ -234,14 +234,15 @@ def drivers_figure(drivers: pd.DataFrame) -> go.Figure:
     fig = go.Figure(go.Bar(
         x=d.contribution, y=[f"{r.label}: <b>{r.value}</b>" for r in d.itertuples()], orientation="h",
         marker=dict(color=[T.HIGH if c > 0 else T.LOW for c in d.contribution], cornerradius=4),
-        text=[f"{c:+.2f}" for c in d.contribution], textposition="outside", cliponaxis=False,
-        textfont=dict(color=T.INK, size=11), hovertemplate="%{y}<br>%{x:+.2f} log-odds<extra></extra>"))
+        text=[f"{c:+.2f}" for c in d.contribution], textposition="auto", cliponaxis=False,  # inside long bars, so labels
+        insidetextanchor="end", insidetextfont=dict(color="#ffffff", size=11),           # never collide with the row names
+        outsidetextfont=dict(color=T.INK, size=11), hovertemplate="%{y}<br>%{x:+.2f} log-odds<extra></extra>"))
     fig.add_vline(x=0, line=dict(color=T.INK_3, width=1))
     T.style_figure(fig, height=330, legend=False)
-    fig.update_layout(hovermode="closest", margin=dict(l=8, r=12, t=14, b=8))
+    fig.update_layout(hovermode="closest", margin=dict(l=8, r=24, t=14, b=8))
     lo, hi = min(0.0, float(d.contribution.min())), max(0.0, float(d.contribution.max()))
     pad = 0.25 * max(hi - lo, 0.5)                   # room for the outside value labels
-    fig.update_xaxes(title_text="← lowers risk · log-odds · raises risk →", title_font=dict(size=11, color=T.INK_2),
+    fig.update_xaxes(title_text="← lowers · log-odds · raises →", title_font=dict(size=11, color=T.INK_2),
                      range=[lo - (pad if lo < 0 else 0.05), hi + (pad if hi > 0 else 0.05)])
     fig.update_yaxes(showgrid=False, tickfont=dict(color=T.INK, size=11.5))
     return fig
@@ -274,7 +275,7 @@ def projection_figure(res: WhatIfResult, thresholds_mgdl: dict[str, float], band
                                  fillcolor="rgba(15,118,110,0.16)", name="80% band (twin's typical error)",
                                  customdata=band.upper, hovertemplate="%{y:.0f}-%{customdata:.0f} mg/dL<extra>80% band</extra>"))
     fig.add_vrect(x0=now, x1=p.timestamp.iloc[-1], fillcolor="rgba(15,118,110,0.06)", line_width=0)
-    fig.add_annotation(x=now, y=1, yref="paper", text="  next 2 h →", showarrow=False, xanchor="left", yanchor="bottom",
+    fig.add_annotation(x=now, y=0.995, yref="paper", text="  next 2 h →", showarrow=False, xanchor="left", yanchor="top",
                        font=dict(size=11, color=T.BRAND, family=T.FONT))
     fig.add_hline(y=thresholds_mgdl["hyper_mgdl"], line=dict(color=T.HIGH, width=1.2, dash="dash"))
     fig.add_hline(y=thresholds_mgdl["hypo_mgdl"], line=dict(color=T.LOW, width=1.2, dash="dash"))
@@ -323,31 +324,27 @@ def view_overview(ctx: TwinContext, twin: PatientTwin, series: pd.DataFrame, tl:
             ("ICD-10 codes", str(e["diagnoses_icd10"]).replace(";", ", ")),
         ]))
         html(T.section_html("Latest labs"))
-        labs = st.columns(4)
-        labs[0].metric("HbA1c", f"{e['hba1c']}%")
-        labs[1].metric("eGFR", f"{e['egfr']:.0f}", help="mL/min/1.73m²; < 60 suggests reduced kidney function")
-        labs[2].metric("LDL", f"{e['ldl_mgdl']:.0f}", help="mg/dL")
-        labs[3].metric("TG", f"{e['triglycerides_mgdl']:.0f}", help="Triglycerides, mg/dL")
+        html(T.tiles_html([("HbA1c", f"{e['hba1c']}%", ""),
+                           ("eGFR", f"{e['egfr']:.0f}", "mL/min/1.73m²; < 60 is reduced"),
+                           ("LDL", f"{e['ldl_mgdl']:.0f}", "mg/dL"),
+                           ("Triglycerides", f"{e['triglycerides_mgdl']:.0f}", "mg/dL")]))
     with right:
         s = cgm_summary(series)
-        html(T.section_html("CGM summary, 14 days", f"Data coverage {s['coverage']:.0%} · consensus targets in tooltips"))
+        html(T.section_html("CGM summary, 14 days", f"Data coverage {s['coverage']:.0%} · targets from the international CGM consensus"))
         html(T.tir_bar_html(s["tbr"], s["tir"], s["tar"]))
-        st.write("")
-        c = st.columns(3)
-        c[0].metric("In range", f"{s['tir']:.0%}", help="Time in range 70-180 mg/dL. Consensus target: > 70%")
-        c[1].metric("Below 70", f"{s['tbr']:.1%}", help="Time below 70 mg/dL. Consensus target: < 4%")
-        c[2].metric("Above 180", f"{s['tar']:.0%}", help="Time above 180 mg/dL. Consensus target: < 25%")
-        c = st.columns(3)
-        c[0].metric("Mean", f"{s['mean']:.0f}", help="Mean CGM glucose, mg/dL")
-        c[1].metric("GMI", f"{s['gmi']:.1f}%", help="Glucose management indicator: CGM-estimated HbA1c")
-        c[2].metric("Variability", f"{s['cv']:.0%}", help="Coefficient of variation. Stable: <= 36%")
+        html(T.tiles_html([("In range 70-180", f"{s['tir']:.0%}", "target > 70%"),
+                           ("Below 70", f"{s['tbr']:.1%}", "target < 4%"),
+                           ("Above 180", f"{s['tar']:.0%}", "target < 25%"),
+                           ("Mean glucose", f"{s['mean']:.0f}", "mg/dL"),
+                           ("GMI", f"{s['gmi']:.1f}%", "CGM-estimated HbA1c"),
+                           ("Variability (CV)", f"{s['cv']:.0%}", "stable if ≤ 36%")]))
         days = len(tl) * ctx.cfg["windows"]["stride_minutes"] / (60 * 24)
         html(T.section_html("Alerts over the record", "Raised by the alert policy: one per risk episode, repeats suppressed"))
-        c = st.columns(2)
-        for col, t, name in ((c[0], "hypo", "Hypo alerts"), (c[1], "hyper", "Hyper alerts")):
+        tiles = []
+        for t, name in (("hypo", "Hypo alerts"), ("hyper", "Hyper alerts")):
             n, above = int(tl[f"{t}_alert"].sum()), int(tl[f"{t}_above"].sum())
-            col.metric(name, n, help=f"{n / max(days, 1e-9):.1f} per day over {days:.0f} monitored days. Without the policy, "
-                                    f"{above} prediction windows were above the threshold.")
+            tiles.append((name, str(n), f"{n / max(days, 1e-9):.1f} a day over {days:.0f} days; {above} windows above threshold"))
+        html(T.tiles_html(tiles))
 
 
 def view_timeline(ctx: TwinContext, twin: PatientTwin, series: pd.DataFrame, tl: pd.DataFrame) -> None:
@@ -397,9 +394,8 @@ def view_replay(ctx: TwinContext, twin: PatientTwin, series: pd.DataFrame, tl: p
 def view_drivers(ctx: TwinContext, twin: PatientTwin, tl: pd.DataFrame) -> None:
     html(T.section_html("Why the model raised (or did not raise) each risk",
                         "TreeSHAP contributions in log-odds. They explain the model, not the physiology."))
-    cols = st.columns(2, gap="large")
-    for col, target in zip(cols, ("hypo", "hyper")):
-        with col:
+    for target in ("hypo", "hyper"):                  # stacked, full width: long labels stay readable on any screen
+        with st.container():
             state, _ = alert_state(tl, twin.anchor_idx, target)
             label, kind = T.ALERT_STATES[state]
             pill = T.pill_html(label, kind, ("▼" if target == "hypo" else "▲") if state != "ok" else "✓")
