@@ -24,7 +24,7 @@ Every item the challenge requires, and where it is.
 | Healthcare use case | [Healthcare use case](#healthcare-use-case) |
 | Technical stack | [Technical stack](#technical-stack) |
 | AI/ML model and framework details | [AI/ML model and framework details](#aiml-model-and-framework-details) |
-| Demo video (unlisted YouTube) | [Watch the video](VIDEO_LINK) (20 min 37 s) |
+| Demo video (unlisted YouTube) | [Watch the video](https://youtu.be/8gUCp5MM7gI) (20 min 37 s) |
 | Open-source licence | [Open-source licence](#open-source-licence): MIT, [LICENSE](LICENSE) |
 | Architecture diagram (PDF) | [docs/architecture.pdf](docs/architecture.pdf) |
 | Presentation (PDF / PPT) with project details and outcomes | [docs/presentation.pdf](docs/presentation.pdf) · [docs/presentation.pptx](docs/presentation.pptx) |
@@ -53,8 +53,8 @@ Every item the challenge requires, and where it is.
 
 | | |
 |---|---|
-| Video | [Unlisted YouTube video](VIDEO_LINK) (20 min 37 s) · script: [docs/video_script.md](docs/video_script.md) |
-| Live dashboard | [Open the dashboard](DASHBOARD_LINK) (Streamlit Community Cloud, no sign-in) |
+| Video | [Unlisted YouTube video](https://youtu.be/8gUCp5MM7gI) (20 min 37 s) · script: [docs/video_script.md](docs/video_script.md) |
+| Live dashboard | [Open the dashboard](https://glycaemic-digital-twin-ae67p4ujdajd8e7advtez8.streamlit.app/) (Streamlit Community Cloud, no sign-in) |
 | Presentation | [docs/presentation.pdf](docs/presentation.pdf) · editable [docs/presentation.pptx](docs/presentation.pptx) (20 slides, speaker notes included) |
 | Architecture diagram | [docs/architecture.pdf](docs/architecture.pdf) · [PNG](docs/architecture.png) · [Mermaid source](docs/architecture.mmd) |
 | Model card | [docs/model_card.md](docs/model_card.md) |
