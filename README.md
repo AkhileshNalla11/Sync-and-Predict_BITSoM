@@ -2,34 +2,65 @@
 
 [![tests](https://github.com/AkhileshNalla11/glycaemic-digital-twin/actions/workflows/tests.yml/badge.svg)](https://github.com/AkhileshNalla11/glycaemic-digital-twin/actions/workflows/tests.yml)
 
-> **Trained on synthetic data only. Not a medical device. Not for clinical use.** A proof of concept for
-> the Happiest Health *Digital Twin Challenge 2026*. No real patient data is used for training, and the
-> link between the EHR and wearable streams is synthetic by design. Two public, de-identified real datasets
-> (CGMacros, ShanghaiT2DM) are used only to check the models; you download them yourself, and they are
-> never committed to this repository.
+> **Research prototype. Not a medical device. Not for clinical use.** A proof of concept for the Happiest
+> Health *Digital Twin Challenge 2026*. Only synthetic data and public, de-identified open datasets are used,
+> as the challenge requires: the default model is trained on synthetic patients, and a second model is trained
+> on the public ShanghaiT2DM dataset (CC BY 4.0). The link between the EHR and wearable streams in the
+> synthetic data is synthetic by design. The real datasets (CGMacros, ShanghaiT2DM) are downloaded from their
+> public sources and never committed to this repository.
 
 ![Architecture](docs/architecture.png)
 
-## Team
+## Submission checklist
+
+Every item the challenge requires, and where it is.
+
+| Required item | Where |
+|---|---|
+| Team details | [Team details](#team-details) |
+| College / incubator information | [College / incubator](#college--incubator) |
+| Project title | [Project title](#project-title) |
+| Problem statement | [Problem statement](#problem-statement) |
+| Healthcare use case | [Healthcare use case](#healthcare-use-case) |
+| Technical stack | [Technical stack](#technical-stack) |
+| AI/ML model and framework details | [AI/ML model and framework details](#aiml-model-and-framework-details) |
+| Demo video (unlisted YouTube) | [Watch the video](VIDEO_LINK) (20 min 37 s) |
+| Open-source licence | [Open-source licence](#open-source-licence): MIT, [LICENSE](LICENSE) |
+| Architecture diagram (PDF) | [docs/architecture.pdf](docs/architecture.pdf) |
+| Presentation (PDF / PPT) with project details and outcomes | [docs/presentation.pdf](docs/presentation.pdf) · [docs/presentation.pptx](docs/presentation.pptx) |
+| All files and links public | This repository is public; the video is unlisted (anyone with the link can watch); the dashboard is public; every document above is in the repository. |
+
+## Team details
+
 | | |
 |---|---|
-| Team name | _TODO_ |
-| Members | _TODO: names, roles_ |
-| Institution | _TODO_ |
-| Contact | _TODO_ |
+| Team name | Sync & Predict |
+| Team leader | Akhilesh Nalla |
+| Team members | Akhilesh Nalla (team leader), B Shruti Chandra, Anish Banerjee |
+
+## College / incubator
+
+| | |
+|---|---|
+| College | BITSoM (BITS School of Management) |
+| Challenge | Happiest Health Digital Twin Challenge 2026, Reimagining and Reforming Healthcare in India Summit, Bengaluru |
+
+## Project title
+
+**Glycaemic Digital Twin: predicting post-meal spikes and dangerous lows in Type 2 diabetes, two hours ahead**
 
 ## Submission materials
 
 | | |
 |---|---|
+| Video | [Unlisted YouTube video](VIDEO_LINK) (20 min 37 s) · script: [docs/video_script.md](docs/video_script.md) |
+| Live dashboard | [Open the dashboard](DASHBOARD_LINK) (Streamlit Community Cloud, no sign-in) |
 | Presentation | [docs/presentation.pdf](docs/presentation.pdf) · editable [docs/presentation.pptx](docs/presentation.pptx) (20 slides, speaker notes included) |
 | Architecture diagram | [docs/architecture.pdf](docs/architecture.pdf) · [PNG](docs/architecture.png) · [Mermaid source](docs/architecture.mmd) |
-| Video (at least 20 min) | _TODO: unlisted YouTube link_ · script: [docs/video_script.md](docs/video_script.md) |
-| Live dashboard | _TODO: Streamlit Community Cloud link_ |
 | Model card | [docs/model_card.md](docs/model_card.md) |
 | Licence | MIT ([LICENSE](LICENSE)) |
 
-## Problem statement and healthcare use case
+## Problem statement
 
 India has one of the world's largest diabetes populations. The ICMR-INDIAB study (Lancet Diabetes &
 Endocrinology, 2023) estimated about 101 million people with diabetes (11.4% prevalence), most of it
@@ -44,8 +75,12 @@ glucose control in T2D fails in two opposite directions:
   an extra dose, and **at night**, when the patient is asleep and cannot respond. Lows are acutely
   dangerous, and fear of them is a major barrier to tightening control.
 
-A clinician sees an HbA1c every few months, but these events happen within hours. **The use case:** a
-digital twin of each patient combines the static EHR profile (diagnoses, labs, medications) with
+A clinician sees an HbA1c every few months, but these events happen within hours, and the information to
+see them coming sits in two places that are never combined: the health record and the wearable sensor.
+
+## Healthcare use case
+
+A digital twin of each patient combines the static EHR profile (diagnoses, labs, medications) with
 continuous wearable data (CGM, sleep, steps, heart rate) to give a **2-hour early warning** of both
 events. It explains why each alert fired and lets the clinician ask *what if* (a late dinner, a poor
 night's sleep, a skipped meal, an extra insulin dose). The aim is earlier counselling and safer
@@ -98,17 +133,25 @@ per-prediction explanations (TreeSHAP) and a what-if engine. A Streamlit clinici
   [CGMacros](https://physionet.org/content/cgmacros/) (PhysioNet, open access, CC BY-NC-SA 4.0, not
   redistributed here). It has only 14 T2D participants and no medication-driven lows. See
   [docs/external_validation.md](docs/external_validation.md).
-* **External real linked EHR + CGM, used only for a check:** ShanghaiT2DM (Zhao et al., *Scientific Data*
+* **External real linked EHR + CGM, used for checks and for the second (real-trained) model:** ShanghaiT2DM (Zhao et al., *Scientific Data*
   2023, [figshare](https://doi.org/10.6084/m9.figshare.c.6310860), CC BY 4.0, not redistributed here):
   100 real T2D patients with CGM, clinical records and logged doses for the same people. See
   [docs/external_shanghai.md](docs/external_shanghai.md).
 * **Checked and not used:** [Synthea](https://github.com/synthetichealth/synthea) (Apache 2.0) produces US-centric EHR without CGM
   and needs Java. See [data/README.md](data/README.md).
 
-## Technical stack and model details
+## Technical stack
 
-Python 3.12, all free and open source: NumPy, pandas, scikit-learn, LightGBM, PyTorch, SHAP, Streamlit,
-Plotly, Matplotlib, PyYAML, pytest. CPU only.
+| Layer | Tools (all free and open source) |
+|---|---|
+| Language | Python 3.12, CPU only |
+| Data and simulation | NumPy, pandas, SciPy, PyYAML |
+| Machine learning | LightGBM (deployed), PyTorch (GRU / 1D-CNN fusion comparison), scikit-learn (calibration, metrics), SHAP |
+| Dashboard | Streamlit, Plotly (deployed on Streamlit Community Cloud) |
+| Interoperability API | FastAPI, Uvicorn, Pydantic; HL7 FHIR R4 (Bundle in, RiskAssessment out) |
+| Quality | pytest (140 tests), GitHub Actions CI, Matplotlib reports |
+
+## AI/ML model and framework details
 
 | Component | Details |
 |---|---|
@@ -358,8 +401,9 @@ tests/                pytest suite
 
 ## Limitations
 
-* **Trained on synthetic data only.** No real patients are used for training. The model has not been
-  clinically validated on real CGM or EHR data and must not inform care.
+* **Trained on synthetic and public de-identified data only.** The default model is trained on synthetic
+  patients; the second model on 100 public, de-identified ShanghaiT2DM patients. Neither has been clinically
+  validated, and neither must inform care.
 * **The real-data checks are small and only partly reassuring.**
   * On 14 real T2D participants from CGMacros, hyperglycaemia onset AUROC drops from 0.93 (synthetic) to
     0.70, with uncalibrated probabilities (recalibration fixes the probabilities, not the ranking).
@@ -391,5 +435,6 @@ tests/                pytest suite
   epidemiology. Fairness and subgroup performance were not assessed.
 * **Not a medical device.** Not reviewed by any regulator or clinical team.
 
-## License
-MIT. See [LICENSE](LICENSE).
+## Open-source licence
+MIT licence. See [LICENSE](LICENSE). The external datasets keep their own licences (ShanghaiT2DM CC BY 4.0,
+CGMacros CC BY-NC-SA 4.0) and are not redistributed here.
