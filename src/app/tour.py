@@ -13,8 +13,7 @@ from pathlib import Path
 
 import streamlit.components.v1 as components
 
-TOUR_JS = (Path(__file__).with_name("tour.js")).read_text(encoding="utf-8")
-VERSION = hashlib.sha1(TOUR_JS.encode("utf-8")).hexdigest()[:10]
+TOUR_FILE = Path(__file__).with_name("tour.js")
 
 # Runs inside the component's (same-origin) iframe and copies the tour into the parent page, so the tour keeps
 # running while Streamlit re-renders the app. Re-installs only when tour.js changes.
@@ -34,5 +33,11 @@ _LOADER = """<script>
 
 
 def render() -> None:
-    """Install the guided tour in the page (idempotent; renders a zero-height component)."""
-    components.html(_LOADER % {"version": json.dumps(VERSION), "source": json.dumps(TOUR_JS)}, height=0)
+    """Install the guided tour in the page (idempotent; renders a zero-height component).
+
+    tour.js is read on every run, not at import: Streamlit only reloads changed .py modules, so a cached copy
+    would keep serving an old tour after tour.js alone is updated on the server.
+    """
+    source = TOUR_FILE.read_text(encoding="utf-8")
+    version = hashlib.sha1(source.encode("utf-8")).hexdigest()[:10]
+    components.html(_LOADER % {"version": json.dumps(version), "source": json.dumps(source)}, height=0)
