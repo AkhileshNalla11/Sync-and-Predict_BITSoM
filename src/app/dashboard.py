@@ -24,6 +24,7 @@ from plotly.subplots import make_subplots           # noqa: E402
 
 from src.app import replay as R                     # noqa: E402
 from src.app import theme as T                      # noqa: E402
+from src.app import tour                            # noqa: E402
 from src.config import runtime_config               # noqa: E402
 from src.eval.twin_intervals import band_for        # noqa: E402
 from src.twin.explain import driver_sentences, explain, group_contributions   # noqa: E402
@@ -629,6 +630,10 @@ def main() -> None:
                               f"({a['alerts_per_day']:.2f} alerts a day, {a['ppv']:.0%} followed by a real low)." if a else ""))
     if str(ctx.cfg["paths"]["raw_dir"]).startswith("demo_bundle"):
         st.sidebar.caption("Running from the committed demo bundle (precomputed synthetic data and model).")
+    st.sidebar.caption("New here? Press **Guided tour** (bottom right) for an automatic walkthrough. "
+                       "Space pauses, the arrow keys step, Esc exits.")
+    with st.sidebar:
+        tour.render()
 
     e = twin.profile
     html(T.hero_html(pid, [f"{e['age']} y · {'Male' if e['sex'] == 'M' else 'Female'}", regimen_label(e["regimen"]),
