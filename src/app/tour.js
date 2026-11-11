@@ -57,24 +57,24 @@
   // ------------------------------------------------------------------ the tour
   // dur: seconds on screen before moving on. target: element(s) to spotlight (null = no spotlight).
   var STEPS = [
-    { title: "Glycaemic Digital Twin · guided tour", dur: 10, target: null,
-      text: "A 2-hour early warning for highs and lows in Type 2 diabetes. The tour plays by itself. Space pauses, the arrow keys step, Esc exits." },
-    { title: "Pick a patient and a risk model", dur: 22,
+    { title: "Guided tour", dur: 10, target: null,
+      text: "A 2-hour warning for highs and lows in Type 2 diabetes" },
+    { title: "Patient and model", dur: 22,
       before: async function () { openSidebar(); await sleep(300); },
       target: function () { return D.querySelector('[data-testid="stSidebar"]'); },
-      text: "Every virtual patient here is from the held-out test set: none was used for training, model selection or alert thresholds. The prediction time starts at this patient's highest-risk moment." },
-    { title: "The patient, at the prediction time", dur: 20,
+      text: "Held-out test patients · starts at the highest-risk moment" },
+    { title: "Patient snapshot", dur: 20,
       before: async function () { await openTab("Live replay"); },
       target: function () { return all(".gt-hero")[0]; },
-      text: "Profile from the synthetic health record: age, medicines, HbA1c, kidney function. The model sees only the data before this moment." },
-    { title: "Two risks, refreshed every 30 minutes", dur: 30,
+      text: "Health record and the time of the prediction" },
+    { title: "Two risks", dur: 30,
       target: function () { return all(".gt-risk"); },
-      text: "The chance of a low (below 70 mg/dL) and a high (above 180 mg/dL) in the next 2 hours. The marker is the alert threshold, set on validation patients for a fixed false-alert rate: 1% for lows." },
+      text: "Low and high in the next 2 h · marker = alert threshold" },
     { title: "Live replay", dur: 12,
       before: async function () { await openTab("Live replay"); await waitFor(function () { return chart(); }); },
       target: function () { return box(chart()); },
-      text: "The patient's record plays forward as if it were happening now. At every moment the model has seen only the data up to the moving line." },
-    { title: "Watch for the alert", dur: 30,
+      text: "The record plays forward; the model sees only the past" },
+    { title: "The alert fires", dur: 30,
       before: async function () {
         var b = await waitFor(function () { var c = chart(); return c && c.querySelector(".updatemenu-button"); }, 8000);
         click(b);
@@ -84,22 +84,22 @@
         return !s || s.active >= s.steps.length - 1;
       },
       target: function () { return box(chart()); },
-      text: "Risk climbs and the alert fires while glucose still looks normal. The status card names the top reasons. Then the low arrives, and the card shows how many minutes of warning there were." },
-    { title: "Every alert is checked against what happened", dur: 20,
+      text: "Before the low, with its top reasons" },
+    { title: "Every alert checked", dur: 20,
       target: function () { var s = section("What happens in this replay"); return s ? next(s, 1) : null; },
-      text: "For each alert: how far ahead it warned, or whether it was a false alarm. Lows with no alert are listed as missed. Nothing is hidden." },
+      text: "Warning time, false alarms and missed lows" },
     { title: "Glucose timeline", dur: 35,
       before: async function () { await openTab("Glucose timeline"); await waitFor(function () { return chart(); }); },
       target: function () { return box(chart()); },
-      text: "Shaded bands mark highs and lows. Filled triangles are alerts; open ones are repeats the policy held back, so there is no alarm flood. The dotted trace after NOW is what really happened; the model never saw it." },
+      text: "Highs, lows, alerts, and what really happened" },
     { title: "Why the alert fired", dur: 35,
       before: async function () { await openTab("Alert drivers"); await waitFor(function () { return chart(); }); },
       target: function () { return box(chart()); },
-      text: "SHAP splits the risk into each input's contribution. It explains the model's reasoning, not the body's physiology." },
-    { title: "In plain words, and by data stream", dur: 25,
+      text: "SHAP: how much each input pushed the risk" },
+    { title: "Reasons in plain words", dur: 25,
       target: function () { var c = box(chart()); return c ? next(c, 2) : null; },
-      text: "The top reasons as sentences a clinician can read, and how much the glucose sensor, the wearable and the health record each added." },
-    { title: "Ask the twin “what if?”", dur: 20,
+      text: "Top reasons, and each data stream's share" },
+    { title: "What-if twin", dur: 20,
       before: async function () {
         await openTab("What-if");
         var start = await waitFor(function () { return byText("button", /^Start the what-if twin/, panel()); }, 3000);
@@ -109,33 +109,33 @@
         await waitFor(function () { return all(".gt-compare", panel()); }, 30000);
       },
       target: function () { var l = byText('label[data-baseweb="radio"]', /Extra insulin dose/, panel()); return l ? next(l.closest('[data-testid="stRadio"]') || l, 1) : null; },
-      text: "A physiology model fitted to this patient's own first week of data. Here we try an extra insulin dose taken an hour ago." },
-    { title: "Risk before and after the change", dur: 25,
+      text: "Trying an extra insulin dose" },
+    { title: "Risk before → after", dur: 25,
       before: async function () { await openTab("What-if"); },
       target: function () { return all(".gt-compare", panel()); },
-      text: "What the risk model predicts from the data it would see, before and after the change, for a low and for a high." },
-    { title: "The next 2 hours, simulated", dur: 40,
+      text: "The risk model's view of the change" },
+    { title: "Next 2 hours, simulated", dur: 40,
       target: function () { var c = chart(); return c ? next(c, 1) : null; },
-      text: "Dotted: the twin's estimate as things were logged. Solid: with the extra dose. The shaded 80% band is how far the twin usually misses; on test patients real glucose fell inside it 79% of the time." },
+      text: "As logged vs with the dose · 80% band" },
     { title: "Fitted to this patient", dur: 20,
       target: function () { var t = byText(".gt-chiprow", /Fit error/, panel()); return t ? next(t, 1) : null; },
-      text: "Four parameters fitted to this patient's first week of glucose, meals and doses, with the fit error shown. No hidden simulator information is used." },
+      text: "Parameters from the first week of data" },
     { title: "Patient overview", dur: 20,
       before: async function () { await openTab("Patient overview"); await waitFor(function () { return section("Profile"); }); },
       target: function () { var s = section("Profile"); return s ? next(s, 3) : null; },
-      text: "The health record the twin is built on: medicines, other conditions and the latest labs." },
-    { title: "14 days of glucose against international targets", dur: 30,
+      text: "Medicines, conditions and latest labs" },
+    { title: "14-day glucose summary", dur: 30,
       target: function () { var s = section("CGM summary"); return s ? next(s, 2) : null; },
-      text: "Time in range, time below 70, time above 180, variability and GMI, each shown next to its consensus target." },
-    { title: "How many alerts?", dur: 20,
+      text: "Against international CGM targets" },
+    { title: "Alerts over the record", dur: 20,
       target: function () { var s = section("Alerts over the record"); return s ? next(s, 1) : null; },
-      text: "Alerts per day for this patient over the whole record: one per risk episode, repeats suppressed." },
-    { title: "A second model, trained on real patients", dur: 25,
+      text: "Alerts per day, one per risk episode" },
+    { title: "Real-patient model", dur: 25,
       before: async function () { openSidebar(); await sleep(300); },
       target: function () { return sidebarWidget("Risk model"); },
-      text: "Switch here to the model trained on 100 real patients (ShanghaiT2DM). On real data it warned of 35% of lows at least 30 minutes ahead, at about 0.6 alerts a day." },
+      text: "Trained on 100 real patients (ShanghaiT2DM)" },
     { title: "That's the twin", dur: 12, target: null,
-      text: "Warns early. Explains itself. Honest about what it knows. Research prototype on synthetic and public data, not for clinical use." },
+      text: "Warns early · explains itself · honest about what it knows" },
   ];
 
   // ------------------------------------------------------------------ overlay
@@ -148,20 +148,18 @@
     ".gdt-spot{position:fixed;z-index:999991;border-radius:16px;pointer-events:none;",
     "box-shadow:0 0 0 3px " + C.brandSoft + ",0 0 0 9999px rgba(10,22,36,.58);transition:all .45s cubic-bezier(.2,.8,.2,1)}",
     ".gdt-dim{position:fixed;inset:0;z-index:999991;background:rgba(10,22,36,.58);pointer-events:none}",
-    ".gdt-card{position:fixed;left:50%;transform:translateX(-50%);z-index:999992;width:min(760px,calc(100vw - 32px));",
-    "background:" + C.ink + ";color:#fff;border-radius:18px;padding:18px 20px 14px;font-family:" + FONT + ";",
-    "box-shadow:0 18px 50px -12px rgba(0,0,0,.55);transition:top .35s ease,bottom .35s ease}",
-    ".gdt-card .gdt-k{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:" + C.brandSoft + "}",
-    ".gdt-card .gdt-t{font-size:22px;font-weight:700;margin:4px 0 6px;letter-spacing:-.01em}",
-    ".gdt-card .gdt-x{font-size:16px;line-height:1.5;color:#dbe6ee}",
-    ".gdt-card .gdt-bar{height:4px;border-radius:4px;background:rgba(255,255,255,.14);margin:14px 0 10px;overflow:hidden}",
+    ".gdt-card{position:fixed;left:50%;transform:translateX(-50%);z-index:999992;width:max-content;max-width:calc(100vw - 32px);",
+    "background:" + C.ink + ";color:#fff;border-radius:14px;padding:9px 10px 9px 16px;font-family:" + FONT + ";overflow:hidden;",
+    "display:flex;align-items:center;gap:16px;box-shadow:0 12px 32px -10px rgba(0,0,0,.55);transition:top .35s ease,bottom .35s ease}",
+    ".gdt-card .gdt-txt{min-width:0}",
+    ".gdt-card .gdt-t{font-size:15px;font-weight:700;letter-spacing:-.005em;white-space:nowrap}",
+    ".gdt-card .gdt-x{font-size:13px;line-height:1.35;color:#c9d6e0;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+    ".gdt-card .gdt-k{font-size:11px;font-weight:600;color:" + C.brandSoft + ";font-variant-numeric:tabular-nums;white-space:nowrap}",
+    ".gdt-card .gdt-ctl{display:flex;align-items:center;gap:4px;flex:none}",
+    ".gdt-card .gdt-bar{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.12)}",
     ".gdt-card .gdt-fill{height:100%;width:0;background:" + C.brandSoft + "}",
-    ".gdt-card .gdt-row{display:flex;align-items:center;justify-content:space-between;gap:10px}",
-    ".gdt-card .gdt-dots{display:flex;gap:5px;flex-wrap:wrap}",
-    ".gdt-card .gdt-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.22)}",
-    ".gdt-card .gdt-dot.on{background:" + C.brandSoft + "}",
-    ".gdt-card button{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:10px;",
-    "padding:6px 11px;font:600 13px/1 " + FONT + ";cursor:pointer;margin-left:6px}",
+    ".gdt-card button{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.16);border-radius:8px;",
+    "width:28px;height:26px;padding:0;font:600 11px/1 " + FONT + ";cursor:pointer}",
     ".gdt-card button:hover{background:rgba(255,255,255,.2)}",
   ].join("");
   D.head.appendChild(css);
@@ -180,15 +178,13 @@
   function buildCard() {
     card = el("div", "gdt-card");
     card.innerHTML =
-      '<div class="gdt-k"></div><div class="gdt-t"></div><div class="gdt-x"></div>' +
-      '<div class="gdt-bar"><div class="gdt-fill"></div></div>' +
-      '<div class="gdt-row"><div class="gdt-dots"></div><div>' +
+      '<div class="gdt-txt"><div class="gdt-t"></div><div class="gdt-x"></div></div>' +
+      '<div class="gdt-ctl"><span class="gdt-k"></span>' +
       '<button data-a="prev" title="Previous (←)">&#9664;</button>' +
       '<button data-a="pause" title="Pause / resume (Space)">&#10073;&#10073;</button>' +
       '<button data-a="next" title="Next (→)">&#9654;</button>' +
-      '<button data-a="stop" title="Exit (Esc)">&#10005;</button></div></div>';
-    var dots = card.querySelector(".gdt-dots");
-    STEPS.forEach(function () { dots.appendChild(el("span", "gdt-dot")); });
+      '<button data-a="stop" title="Exit (Esc)">&#10005;</button></div>' +
+      '<div class="gdt-bar"><div class="gdt-fill"></div></div>';
     card.addEventListener("click", function (e) {
       var a = e.target.closest("button") && e.target.closest("button").getAttribute("data-a");
       if (a === "prev") go(S.i - 1); else if (a === "next") go(S.i + 1);
@@ -253,10 +249,9 @@
     clearTimeout(timer);
     S.i = i;
     var step = STEPS[i];
-    card.querySelector(".gdt-k").textContent = "Step " + (i + 1) + " of " + STEPS.length;
+    card.querySelector(".gdt-k").textContent = (i + 1) + " / " + STEPS.length;
     card.querySelector(".gdt-t").textContent = step.title;
     card.querySelector(".gdt-x").textContent = step.text;
-    Array.prototype.forEach.call(card.querySelectorAll(".gdt-dot"), function (d, k) { d.classList.toggle("on", k <= i); });
     if (step.before) { try { await step.before(); } catch (e) { /* keep going: a missing control must not stop the tour */ } }
     if (token !== S.token || !S.running) return;
     await waitFor(function () { return !step.target || targets(step).length; }, 6000);
@@ -283,10 +278,10 @@
     var b = card.querySelector('[data-a="pause"]');
     if (!S.paused) {
       S.paused = true; clearTimeout(timer); S.left = Math.max(0, S.left - (Date.now() - S.started));
-      b.innerHTML = "&#9654;"; card.querySelector(".gdt-k").textContent = "Paused · Step " + (S.i + 1) + " of " + STEPS.length;
+      b.innerHTML = "&#9654;"; card.querySelector(".gdt-k").textContent = "Paused · " + (S.i + 1) + " / " + STEPS.length;
     } else {
       S.paused = false; S.started = Date.now(); b.innerHTML = "&#10073;&#10073;";
-      card.querySelector(".gdt-k").textContent = "Step " + (S.i + 1) + " of " + STEPS.length;
+      card.querySelector(".gdt-k").textContent = (S.i + 1) + " / " + STEPS.length;
       S.deadline = Date.now() + S.left + 60000;
       schedule(S.token);
     }
