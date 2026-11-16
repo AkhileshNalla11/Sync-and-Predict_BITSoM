@@ -238,6 +238,14 @@ model with its synthetic thresholds does worse (29%, 31% of alerts real). Real l
 predictably than simulated ones, so the synthetic 76% should be read as an upper bound. This real-trained model
 ships in the dashboard as a selectable risk model. Details: [docs/real_model.md](docs/real_model.md).
 
+**Against CGM-style trend alarms.** CGM makers already sell predictive low alerts that extrapolate the recent
+trend. On the same 100 real patients, with everything checked every 5 minutes and the trend alarms' level tuned
+to give the same number of alerts per day, our model's alerts were followed by a real low more often (39% vs 36%,
+a significant paired difference) and warned of more lows at least 30 minutes ahead (54% vs 48%, not yet
+significant), with a 35-minute median warning against 25. At 15 minutes a tuned trend alarm is just as good. The
+same run shows that checking every 5 minutes instead of every 30 raises our 30-minute warning rate from 35% to
+54%. Details: [docs/trend_comparison.md](docs/trend_comparison.md).
+
 **How sure is the twin?** The what-if projection carries a split-conformal uncertainty band, calibrated on
 46 validation patients' held-out days and checked on the 60 test patients. The **80% band contained the real
 CGM 79.0% of the time** (95% CI 77.8-79.9%) and the 95% band 94.3%. The bands are narrow (about +-9 mg/dL)

@@ -82,6 +82,10 @@ Onset windows (the patient is not already past the threshold). 95% CIs resample 
   episodes >= 30 min ahead** (53% at 15 min), 0.61 alerts per patient-day, 44% of alerts real, median lead 25 min.
   The synthetic-trained CGM model with synthetic thresholds: 29%, 31% of alerts real. The synthetic 76% is an
   upper bound, not an expected real-world figure.
+* **Against CGM-style trend alarms** ([trend_comparison.md](trend_comparison.md)): checked every 5 min at the same
+  alert burden (about 1 per patient-day), the real-trained model's alerts were real more often than a tuned
+  20-minute trend alarm's (39% vs 36%, significant) and warned of more lows >= 30 min ahead (54% vs 48%, not yet
+  significant); at 15 min the two are equal. A modest edge, not a decisive one.
 * **Does synthetic data help real-world training?** Mostly no ([transfer_experiment.md](transfer_experiment.md)).
   On CGMacros T2D, adding synthetic data (pretraining or pooling) gives a small AUROC-only gain with 2 real
   participants, nothing from 4, and slightly hurts from 7 up. Its one consistent benefit is lower
