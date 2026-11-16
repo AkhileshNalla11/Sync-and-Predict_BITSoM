@@ -67,9 +67,12 @@ has CGM (the training minimum), the API returns **422** rather than guess. A Bun
     "hypo": {
       "probability": 0.204, "alert_threshold": 0.293, "above_alert_threshold": false,
       "drivers": [
-        {"factor": "Current glucose", "value": "70 mg/dL", "effect": "raises risk", "log_odds": 2.2452},
-        {"factor": "Lowest glucose, 6 h", "value": "64 mg/dL", "effect": "raises risk", "log_odds": 0.7011},
-        {"factor": "Change over last 15 min", "value": "+6 mg/dL", "effect": "lowers risk", "log_odds": -0.6885}
+        {"factor": "Current glucose", "value": "70 mg/dL", "effect": "raises risk", "log_odds": 2.2452,
+         "mechanism": "The closer glucose is to 70, the less room there is before a low."},
+        {"factor": "Lowest glucose, 6 h", "value": "64 mg/dL", "effect": "raises risk", "log_odds": 0.7011,
+         "mechanism": "The closer glucose is to 70, the less room there is before a low."},
+        {"factor": "Change over last 15 min", "value": "+6 mg/dL", "effect": "lowers risk", "log_odds": -0.6885,
+         "mechanism": "A falling trend means insulin is removing glucose faster than the liver and meals add it; a rising one, the reverse."}
       ]
     },
     "hyper": {"probability": 0.222, "alert_threshold": 0.520, "above_alert_threshold": false, "drivers": ["..."]}
@@ -79,6 +82,9 @@ has CGM (the training minimum), the API returns **422** rather than guess. A Bun
   "disclaimer": "Research prototype. Not a medical device and not for clinical use. ..."
 }
 ```
+
+Each driver's `mechanism` is the known physiology linking that input to the risk (empty when there is none to
+state); it describes the biology, not proof of the cause. See [plausibility.md](plausibility.md).
 
 `/v1/risk/fhir` returns the same as two `RiskAssessment` resources, ready to be written back to a FHIR server:
 * the outcome is coded in SNOMED CT (302866003 hypoglycaemia, 80394007 hyperglycaemia);

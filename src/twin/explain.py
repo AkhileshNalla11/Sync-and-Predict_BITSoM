@@ -101,6 +101,61 @@ DISPLAY: dict[str, tuple[str, str, Fmt]] = {
 GROUPS = ("CGM", "Time", "Activity & sleep", "EHR")
 TIME_PARTS = ("hour", "tod_sin", "tod_cos")
 
+# --------------------------------------------------------------------------- biology behind each driver
+# One plain line per driver: the known physiological mechanism that makes this input relevant to the risk.
+# It is the mechanism the literature links to the input, not proof that it caused this patient's excursion
+# (sources: docs/plausibility.md). Keys: feature group -> {"hypo": line, "hyper": line}; "" = no line shown.
+_LEVEL = {"hypo": "The closer glucose is to 70, the less room there is before a low.",
+          "hyper": "The closer glucose is to 180, the more likely it is to cross it."}
+_TREND = {"hypo": "A falling trend means insulin is removing glucose faster than the liver and meals add it; a rising one, the reverse.",
+          "hyper": "A rising trend usually means a meal is still being absorbed; a falling one, that insulin is winning."}
+_RECENT_LOW = {"hypo": "A recent low weakens the body's glucagon and adrenaline defence for a while, so another is more likely.",
+               "hyper": "After a low, the body's rebound and the snack taken can push glucose up."}
+_MEAL = {"hypo": "Some hours after a meal the food is absorbed, but the medicine is still working.",
+         "hyper": "A recent meal is still being absorbed into the blood."}
+_ACTIVITY = {"hypo": "Working muscle takes up glucose without insulin, and insulin sensitivity stays higher for hours.",
+             "hyper": "Activity pulls glucose into muscle, which usually lowers the chance of a high."}
+_SLEEP = {"hypo": "During sleep, warning symptoms of a low go unnoticed and the early night has the lowest insulin needs.",
+          "hyper": "Short or broken sleep raises insulin resistance the next day."}
+_SULFONYLUREA = {"hypo": "Sulfonylureas make the pancreas release insulin even when glucose is already low.",
+                 "hyper": "Sulfonylureas push insulin release, which lowers glucose."}
+_INSULIN = {"hypo": "Injected insulin keeps lowering glucose whether or not food arrives; premixed insulin peaks hours after the dose.",
+            "hyper": "Injected insulin lowers glucose; a missed or delayed dose lets it rise."}
+_DEFENCE = {"hypo": "Long diabetes and past severe lows weaken the glucagon and adrenaline defence, so lows go deeper.",
+            "hyper": ""}
+MECHANISM: dict[str, dict[str, str]] = {
+    **{f: _LEVEL for f in ("cgm_last", "cgm_mean", "cgm_min", "cgm_max", "cgm_mean_1h", "cgm_min_1h", "cgm_max_1h")},
+    **{f: _TREND for f in ("cgm_slope_30m", "cgm_slope_60m", "cgm_accel", "cgm_delta_15m")},
+    **{f: _RECENT_LOW for f in ("min_since_below_70", "cgm_frac_below_70")},
+    "min_since_above_180": {"hypo": "", "hyper": "Recent highs show glucose is running high today."},
+    "cgm_frac_above_180": {"hypo": "", "hyper": "Recent highs show glucose is running high today."},
+    "min_since_meal_rise": _MEAL,
+    "max_rise_3h": {"hypo": "A large recent rise often brings a large insulin response afterwards.",
+                    "hyper": "A large recent rise signals a carbohydrate-heavy meal."},
+    "time_of_day": {"hypo": "Time of day sets the meal, dose and sleep pattern; overnight, a long fast and sleep make lows likelier and harder to notice.",
+                    "hyper": "Meals and the early-morning dawn phenomenon raise glucose at set times of day."},
+    **{f: _ACTIVITY for f in ("steps_30m", "steps_1h", "steps_3h", "steps_max_1h", "min_since_active")},
+    **{f: _SLEEP for f in ("asleep_now", "asleep_minutes", "awake_in_bed_minutes", "deep_frac")},
+    **{f: _SULFONYLUREA for f in ("sulfonylurea_dose_mg", "on_sulfonylurea", "sulfonylurea_bd")},
+    **{f: _INSULIN for f in ("insulin_total_daily_units", "insulin_units_per_kg", "on_insulin", "insulin_premix", "insulin_basal")},
+    **{f: _DEFENCE for f in ("diabetes_duration_years", "prior_severe_hypo_12m")},
+    "egfr": {"hypo": "Weaker kidneys clear sulfonylureas and insulin more slowly, so they act for longer.", "hyper": ""},
+    "hba1c": {"hypo": "On glucose-lowering drugs, a lower HbA1c means glucose runs closer to the low line.",
+              "hyper": "A higher HbA1c means glucose runs higher on average."},
+    "age": {"hypo": "With age, warning symptoms of a low weaken and drugs are cleared more slowly.", "hyper": ""},
+    **{f: {"hypo": "", "hyper": "More body fat goes with more insulin resistance, so meals raise glucose more."}
+       for f in ("bmi", "weight_kg")},
+    "on_metformin": {"hypo": "Metformin alone rarely causes lows; it mainly reduces glucose output from the liver.",
+                     "hyper": "Metformin reduces glucose output from the liver."},
+    **{f: {"hypo": "Heart rate mostly tracks activity, which pulls glucose into muscle.", "hyper": ""}
+       for f in ("hr_last", "hr_mean_30m", "hr_minus_6h_mean")},
+}
+
+
+def mechanism(feature: str, target: str) -> str:
+    """Plain-language physiological reason an input matters for this target ('' when there is none to state)."""
+    return MECHANISM.get(feature, {}).get(target, "")
+
 
 def contributions(ctx: TwinContext, X: pd.DataFrame, target: str) -> tuple[np.ndarray, float]:
     """TreeSHAP values (n_rows, n_features) in log-odds, plus the base value."""
@@ -130,6 +185,7 @@ def explain(ctx: TwinContext, twin: PatientTwin, target: str, top_k: int = 6) ->
     df = pd.DataFrame(rows)
     df = df.reindex(df.contribution.abs().sort_values(ascending=False).index)
     df["direction"] = np.where(df.contribution > 0, "raises risk", "lowers risk")
+    df["mechanism"] = [mechanism(f, target) for f in df.feature]
     return df.head(top_k).reset_index(drop=True)
 
 
@@ -145,6 +201,14 @@ def driver_sentences(drivers: pd.DataFrame, target: str) -> list[str]:
     """Short plain-language lines, e.g. 'Current glucose 82 mg/dL raises hypo risk'."""
     name = "hyperglycaemia" if target == "hyper" else "hypoglycaemia"
     return [f"{r.label}: {r.value} ({r.direction.replace('risk', name + ' risk')})" for r in drivers.itertuples()]
+
+
+def driver_explanations(drivers: pd.DataFrame, target: str) -> list[tuple[str, str]]:
+    """(statistical line, biological line) per driver, e.g. ('Sulfonylurea dose: 3 mg/day (raises hypoglycaemia
+    risk)', 'Sulfonylureas make the pancreas release insulin even when glucose is already low.')."""
+    lines = driver_sentences(drivers, target)
+    mech = drivers["mechanism"] if "mechanism" in drivers else [mechanism(f, target) for f in drivers.feature]
+    return list(zip(lines, mech))
 
 
 def explain_payload(ctx: TwinContext, twin: PatientTwin, top_k: int = 6) -> dict[str, Any]:

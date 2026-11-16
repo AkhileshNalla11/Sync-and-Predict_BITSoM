@@ -123,8 +123,8 @@ class RiskService:
             p = float(b.predict(X, num_iteration=b.best_iteration)[0])
             d = explain(self, snapshot, t, top_k=3)
             risks[t] = {"probability": p, "alert_threshold": self.thresholds[t], "above_alert_threshold": p >= self.thresholds[t],
-                        "drivers": [{"factor": r.label, "value": r.value, "effect": r.direction, "log_odds": round(r.contribution, 4)}
-                                    for r in d.itertuples()]}
+                        "drivers": [{"factor": r.label, "value": r.value, "effect": r.direction, "log_odds": round(r.contribution, 4),
+                                     "mechanism": r.mechanism} for r in d.itertuples()]}
         warnings = list(rec.warnings)
         if self.uses_static and missing:
             warnings.append(f"EHR fields missing from the bundle (scored as unknown): {', '.join(missing)}")

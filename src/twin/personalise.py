@@ -44,8 +44,11 @@ from src.data.synthetic_gen import MEAL_CATALOGUE, _Schedule, derive_patient_par
 FIT_VERSION = "1"
 FIT_PARAMS = ("g_basal", "meal_gain", "tau_clear_min", "drug_sens")
 # Prior SD (log scale) of each parameter around its EHR default, and search bounds (log scale).
-PRIOR_SD = {"g_basal": 0.25, "meal_gain": 0.35, "tau_clear_min": 0.35, "drug_sens": 0.5}
-BOUNDS = {"g_basal": (-0.7, 0.7), "meal_gain": (-1.2, 1.2), "tau_clear_min": (-1.2, 1.2), "drug_sens": (-1.2, 1.2)}
+PRIOR_SD = {"g_basal": 0.25, "meal_gain": 0.35, "tau_clear_min": 0.35, "drug_sens": 0.5,
+            "cr_strength": 0.35}           # counter-regulation: experimental fifth dial (src/eval/twin_fifth_dial.py)
+BOUNDS = {"g_basal": (-0.7, 0.7), "meal_gain": (-1.2, 1.2), "tau_clear_min": (-1.2, 1.2), "drug_sens": (-1.2, 1.2),
+          "cr_strength": (-1.2, 1.2)}
+DRUG_ONLY = ("drug_sens", "cr_strength")   # only identifiable in patients whose drugs can push glucose low
 LOGGED_EVENTS = ("meal", "sulfonylurea_dose", "insulin_dose", "extra_insulin_dose")
 SENSOR_LAG_MIN = 10            # CGM interstitial lag (same first-order lag as the simulator's sensor model)
 SHORT_SLEEP_H = 5.5            # wearable-detected night shorter than this ...
@@ -217,13 +220,15 @@ def settings(cfg: dict[str, Any], n_days: int) -> dict[str, Any]:
 
 
 def fit_parameters(s: _Schedule, cgm: np.ndarray, default: pd.DataFrame, cal: dict[str, float], dt: int, warm: int,
-                   fit_steps: int, fit_drug: bool, prior_weight: float, seed: int = 0) -> FitResult:
+                   fit_steps: int, fit_drug: bool, prior_weight: float, seed: int = 0,
+                   params: tuple[str, ...] = FIT_PARAMS) -> FitResult:
     """Penalised least squares of noise-free simulated CGM vs observed CGM over the first `fit_steps`.
 
     Objective: mean squared CGM error + prior_weight * sum((log(theta / theta_ehr) / PRIOR_SD)^2).
+    `params` = the dials to fit (default: the four deployed ones); drug-dependent dials are fitted only on drugs.
     """
     t_start = time.time()
-    names = [n for n in FIT_PARAMS if fit_drug or n != "drug_sens"]
+    names = [n for n in params if fit_drug or n not in DRUG_ONLY]
     sd = np.array([PRIOR_SD[n] for n in names])
     lo, hi = np.array([BOUNDS[n][0] for n in names]), np.array([BOUNDS[n][1] for n in names])
     base = default.iloc[0]

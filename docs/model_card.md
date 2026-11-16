@@ -12,7 +12,7 @@
 | Inputs | Last 6 h of 5-min CGM, steps, heart rate and sleep stage (37 summary features) + 24 encoded EHR features (demographics, HbA1c, eGFR, lipids, comorbidities, medication class and dose, prior severe hypo). |
 | Outputs | Probability of any CGM > 180 mg/dL (hyper) and any CGM < 70 mg/dL (hypo) in the next 2 h, every 30 min. Alerts come from an **alert policy** ([alert_policy.md](alert_policy.md)): one alert per risk episode (threshold + refractory period), with operating points chosen on validation patients (hypo at a 1%, hyper at a 3% window-level false-alert rate). |
 | Interfaces | Streamlit dashboard; FHIR R4 API (`POST` a Bundle, get JSON or FHIR `RiskAssessment` back), see [fhir_api.md](fhir_api.md) |
-| Explanations | Per-prediction TreeSHAP drivers (LightGBM `pred_contrib`, verified against `shap.TreeExplainer`). |
+| Explanations | Per-prediction TreeSHAP drivers (LightGBM `pred_contrib`, verified against `shap.TreeExplainer`), each with a plain-language line on the known physiology behind it. A plausibility check ([plausibility.md](plausibility.md)) confirms the inputs carrying 90-99% of each model's attention push the risk the way physiology predicts. |
 | Training | `src/models/baselines.py`, seed 42, early stopping on validation patients. Hyperparameters in `config.yaml`. |
 | Licence | MIT |
 | Contact | Team details in the README |

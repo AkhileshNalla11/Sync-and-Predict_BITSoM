@@ -403,6 +403,12 @@ tests/                pytest suite
 * [Subgroup performance](docs/subgroups.md): the deployed model by sex, age, kidney function, drug class,
   HbA1c and BMI. Insulin users' lows are the hardest to predict (hypo AUPRC 0.22 vs 0.72 for sulfonylurea
   users), and reduced kidney function cannot be audited (1 test patient).
+* [Biological plausibility](docs/plausibility.md): does each driver push the risk the way physiology says? The
+  inputs carrying 90-99% of each model's attention agree (higher sulfonylurea dose, faster fall and lower glucose
+  raise the risk of a low; better kidney function lowers it); the few that disagree are small inputs, explained by
+  overlapping features and confounding by indication. The dashboard and API show the physiology behind each alert reason.
+* [Is four twin dials enough?](docs/twin_fifth_dial.md): fitting counter-regulation as a fifth dial did not lower
+  held-out error and could not be identified from a week of CGM, so the twin keeps four dials.
 * [Path to real-world deployment in India](docs/deployment_path.md): real-patient validation stages, DPDP Act
   2023 / Rules 2025 consent and security duties, ABDM / FHIR integration, CDSCO medical-device-software
   classification and ICMR AI ethics guidelines.

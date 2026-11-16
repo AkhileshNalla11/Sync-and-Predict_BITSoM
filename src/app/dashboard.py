@@ -27,7 +27,7 @@ from src.app import theme as T                      # noqa: E402
 from src.app import tour                            # noqa: E402
 from src.config import runtime_config               # noqa: E402
 from src.eval.twin_intervals import band_for        # noqa: E402
-from src.twin.explain import driver_sentences, explain, group_contributions   # noqa: E402
+from src.twin.explain import driver_explanations, explain, group_contributions   # noqa: E402
 from src.twin.alerts import policy_far              # noqa: E402
 from src.twin.state import PatientTwin, TwinContext  # noqa: E402
 from src.twin.personalise import FIT_PARAMS        # noqa: E402
@@ -394,7 +394,8 @@ def view_replay(ctx: TwinContext, twin: PatientTwin, series: pd.DataFrame, tl: p
 
 def view_drivers(ctx: TwinContext, twin: PatientTwin, tl: pd.DataFrame) -> None:
     html(T.section_html("Why the model raised (or did not raise) each risk",
-                        "TreeSHAP contributions in log-odds. They explain the model, not the physiology."))
+                        "TreeSHAP contributions in log-odds: what the model relied on. Each “Why” line gives the known "
+                        "biology that links that input to the risk (docs/plausibility.md); it is not proof of the cause."))
     for target in ("hypo", "hyper"):                  # stacked, full width: long labels stay readable on any screen
         with st.container():
             state, _ = alert_state(tl, twin.anchor_idx, target)
@@ -405,8 +406,9 @@ def view_drivers(ctx: TwinContext, twin: PatientTwin, tl: pd.DataFrame) -> None:
                  f'{TARGET_NAME[target]} · {twin.risk[target]:.0%}</span>{pill}</div>')
             d = explain(ctx, twin, target, top_k=7)
             st.plotly_chart(drivers_figure(d), use_container_width=True, config=T.PLOTLY_CONFIG)
-            for line in driver_sentences(d.head(3), target):
-                st.markdown(f"- {line}")
+            for line, why in driver_explanations(d.head(3), target):
+                st.markdown(f"- {line}" + (f"  \n  <span style='color:{T.INK_2}'>Why: {why}</span>" if why else ""),
+                            unsafe_allow_html=True)
             g = group_contributions(ctx, twin, target)
             html(T.chips_html([("By data stream ·", "log-odds")] + [(k, f"{v:+.2f}") for k, v in g.items()]))
 
@@ -444,6 +446,25 @@ def preset_scenarios(name: str, ev: pd.DataFrame, now: pd.Timestamp, on_insulin:
             note += " This patient is not on insulin, so it shows the effect of an accidental dose."
         return [ExtraDose("premix", 8.0, -1.0)], note
     return [], ""
+
+
+def data_quality_chips(twin: PatientTwin) -> list[tuple[str, str]]:
+    """Sensor data behind this prediction: how much of the last 6 h the CGM covered and how fresh it is.
+
+    The API refuses to score below 50% CGM coverage; here we flag anything under 80% or a reading older than
+    15 minutes so a clinician knows to check the sensor before acting.
+    """
+    f = twin.features.iloc[0]
+    cov, age = float(f.get("cgm_coverage", np.nan)), float(f.get("cgm_minutes_since_obs", np.nan))
+    ok = (not np.isfinite(cov) or cov >= 0.8) and (not np.isfinite(age) or age <= 15)
+    chips = [("Sensor data ·", "good" if ok else "check the sensor before acting")]
+    if np.isfinite(cov):
+        chips.append(("CGM readings, last 6 h ·", f"{cov:.0%} present"))
+    if np.isfinite(age):
+        chips.append(("Latest reading ·", "at the prediction time" if age < 1 else f"{age:.0f} min before"))
+    if "wear_coverage" in f.index and np.isfinite(float(f["wear_coverage"])):
+        chips.append(("Fitness band worn, last 6 h ·", f"{float(f['wear_coverage']):.0%}"))
+    return chips
 
 
 def fit_chips(sim: PatientSimulator) -> list[tuple[str, str]]:
@@ -646,6 +667,7 @@ def main() -> None:
             state, status = alert_state(tl, twin.anchor_idx, t)
             html(T.risk_card_html(t, TARGET_NAME[t], TARGET_RULE[t], twin.risk[t], ctx.thresholds[t], state, status,
                                   far_label(ctx, t)))
+    html(T.chips_html(data_quality_chips(twin)))
 
     tabs = st.tabs(["Live replay", "Glucose timeline", "Alert drivers", "What-if", "Patient overview"])
     with tabs[0]:

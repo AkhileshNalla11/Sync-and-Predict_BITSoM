@@ -112,6 +112,15 @@ def test_explanations_are_additive_and_sorted(ctx: TwinContext) -> None:
         assert group_contributions(ctx, tw, t).sum() == pytest.approx(sv.sum())
 
 
+def test_mechanism_lines_cover_the_main_drivers() -> None:
+    from src.twin.explain import DISPLAY, MECHANISM, mechanism
+    for f in ("cgm_last", "cgm_slope_30m", "sulfonylurea_dose_mg", "steps_1h", "egfr", "time_of_day"):
+        assert mechanism(f, "hypo"), f                        # every key hypo driver has a biological line
+    assert "regardless" in mechanism("sulfonylurea_dose_mg", "hypo") or "even when" in mechanism("sulfonylurea_dose_mg", "hypo")
+    assert mechanism("ldl_mgdl", "hypo") == ""                # no invented mechanism for unrelated inputs
+    assert set(MECHANISM) <= set(DISPLAY) | {"time_of_day"}   # only real model inputs are described
+
+
 # ------------------------------------------------------------------ simulator replay + scenarios
 def test_replay_reproduces_stored_series_exactly(ctx: TwinContext) -> None:
     for pid in ctx.patient_ids[:3]:

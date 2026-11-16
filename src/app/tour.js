@@ -98,7 +98,7 @@
       text: "SHAP: how much each input pushed the risk" },
     { title: "Reasons in plain words", dur: 25,
       target: function () { var c = box(chart()); return c ? next(c, 2) : null; },
-      text: "Top reasons, and each data stream's share" },
+      text: "Top reasons, the biology behind each, and each stream's share" },
     { title: "What-if twin", dur: 20,
       before: async function () {
         await openTab("What-if");
