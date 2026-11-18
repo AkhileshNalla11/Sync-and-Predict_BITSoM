@@ -1,9 +1,10 @@
-"""Guided tour: injects src/app/tour.js into the dashboard page once.
+"""Stage demo: injects src/app/tour.js into the dashboard page once.
 
-The script adds a "Guided tour" button (bottom right). Pressed, it walks through the dashboard by itself:
-switches tabs, plays the replay, starts the what-if twin, spotlights one feature at a time and captions it.
-Space pauses, the arrow keys step, Esc exits. It runs entirely in the browser, so it costs no server reruns
-except the ones the what-if twin itself needs.
+The script adds a "Start demo" button (bottom right). One click plays the finals demo script by itself, about
+3 min 15 s: switches tabs, plays the replay and pauses it at the alert and at the low, starts the what-if twin,
+and spotlights one feature at a time. There is no caption bar, so the presenter talks over it. Space pauses,
+Right / Page Down skips ahead, Left / Page Up goes back, Esc stops. It runs entirely in the browser, so it
+costs no server reruns except the ones the what-if twin and the model switch need.
 """
 from __future__ import annotations
 

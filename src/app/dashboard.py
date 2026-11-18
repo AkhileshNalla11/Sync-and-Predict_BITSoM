@@ -651,8 +651,8 @@ def main() -> None:
                               f"({a['alerts_per_day']:.2f} alerts a day, {a['ppv']:.0%} followed by a real low)." if a else ""))
     if str(ctx.cfg["paths"]["raw_dir"]).startswith("demo_bundle"):
         st.sidebar.caption("Running from the committed demo bundle (precomputed synthetic data and model).")
-    st.sidebar.caption("New here? Press **Guided tour** (bottom right) for an automatic walkthrough. "
-                       "Space pauses, the arrow keys step, Esc exits.")
+    st.sidebar.caption("New here? Press **Start demo** (bottom right) for a 3-minute automatic walkthrough. "
+                       "Space pauses, the arrow keys skip, Esc stops.")
     with st.sidebar:
         tour.render()
 
